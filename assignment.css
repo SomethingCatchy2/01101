@@ -1,0 +1,15 @@
+html {
+  background-color: black;
+  color: #00FF00;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h3 {
+  color: red;
+}
+
+button {
+  padding: 5px;
+  color: blue;
+  background-color: lightblue;
+}

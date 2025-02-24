@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Submission Example</title>
+</head>
+
+<body>
+  <main>
+    <!-- Form starts here -->
+    <form action="http://localhost:3000/submit" method="POST">
+      <fieldset>
+        <legend>Basic Information</legend>
+
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" required /><br /><br />
+
+        <label for="nickname">Nickname:</label>
+        <input type="text" id="nickname" name="nickname" /><br /><br />
+
+        <label for="birthdate">Birthdate:</label>
+        <input type="date" id="birthdate" name="birthdate" /><br /><br />
+      </fieldset>
+
+      <fieldset>
+        <legend>Life Preferences</legend>
+
+        <label for="fav-color">Favorite Color:</label>
+        <input type="text" id="fav-color" name="fav-color" /><br /><br />
+
+        <label for="fav-food">Favorite Food:</label>
+        <input type="text" id="fav-food" name="fav-food" /><br /><br />
+
+        <label for="ideal-vacation">Ideal Vacation Spot:</label>
+        <input type="text" id="ideal-vacation" name="ideal-vacation" /><br /><br />
+        <!-- "Ya like jazz?" Question with required multiple-choice options and an expandable text box for one answer -->
+        <label for="like-jazz">Ya like jazz?</label><br />
+
+        <input type="checkbox" id="like-jazz-yes" name="like-jazz" value="yes" required />
+        <label for="like-jazz-yes">Yes</label><br />
+
+        <input type="checkbox" id="like-jazz-explain" name="like-jazz" value="explain" required />
+        <label for="like-jazz-explain">Please explain why you do:</label><br />
+        <textarea id="jazz-explanation" name="jazz-explanation" rows="3" cols="50"
+          placeholder="Your jazz appreciation explained here..."></textarea><br />
+
+        <input type="radio" id="like-jazz-yes-again" name="like-jazz" value="yes-again" required />
+        <label for="like-jazz-yes-again">Yes</label><br /><br />
+      </fieldset>
+
+      <fieldset>
+        <legend>Math Challenge Questions</legend>
+
+        <label for="simple-addition">1 + 1 = ?</label>
+        <input type="text" id="simple-addition" name="simple-addition" required /><br /><br />
+
+        <label for="pythagorean">Given a right triangle with sides 3 and 4, what is the
+          hypotenuse?</label>
+        <input type="text" id="pythagorean" name="pythagorean" /><br /><br />
+
+        <label for="prime-factor">What are the prime factors of 56?</label>
+        <input type="text" id="prime-factor" name="prime-factor" /><br /><br />
+
+        <label for="quadratic-root">Solve for x: x^2 - 5x + 6 = 0</label>
+        <input type="text" id="quadratic-root" name="quadratic-root" /><br /><br />
+
+        <label for="integral">Evaluate ∫(3x^2 - 2x + 1) dx</label>
+        <input type="text" id="integral" name="integral" /><br /><br />
+
+        <label for="matrix-multiplication">Multiply the matrices: [[1,2], [3,4]] * [[2,0], [1,2]]</label>
+        <input type="text" id="matrix-multiplication" name="matrix-multiplication" /><br /><br />
+
+        <label for="limit">What is the limit as x approaches 2 of (x^2 - 4)/(x - 2)?</label>
+        <input type="text" id="limit" name="limit" /><br /><br />
+
+        <label for="logarithm">Solve for x: log2(x) = 5</label>
+        <input type="text" id="logarithm" name="logarithm" /><br /><br />
+
+        <label for="geometry">What is the area of a circle with radius 7?</label>
+        <input type="text" id="geometry" name="geometry" /><br /><br />
+
+        <label for="fibonacci">What is the 10th term in the Fibonacci sequence?</label>
+        <input type="text" id="fibonacci" name="fibonacci" /><br /><br />
+
+        <label for="sine">What is sin(45°) to two decimal places?</label>
+        <input type="text" id="sine" name="sine" /><br /><br />
+
+        <label for="polynomial-division">Divide (x^3 - 3x^2 + 4) by (x - 1)</label>
+        <input type="text" id="polynomial-division" name="polynomial-division" /><br /><br />
+
+        <label for="vector-dot-product">Calculate the dot product of [1, 2, 3] and [4, 5, 6]</label>
+        <input type="text" id="vector-dot-product" name="vector-dot-product" /><br /><br />
+
+        <label for="euler">What is Euler’s number e to three decimal places?</label>
+        <input type="text" id="euler" name="euler" /><br /><br />
+
+        <label for="derivative">Find the derivative of f(x) = 4x^3 - 2x at x = 1</label>
+        <input type="text" id="derivative" name="derivative" /><br /><br />
+
+        <label for="standard-deviation">What is the standard deviation of the set {2, 4, 4, 4, 5, 5, 7,
+          9}?</label>
+        <input type="text" id="standard-deviation" name="standard-deviation" /><br /><br />
+
+        <label for="binary">Convert the decimal number 42 to binary</label>
+        <input type="text" id="binary" name="binary" /><br /><br />
+
+        <label for="logarithmic-integral">Evaluate the integral ∫(1/x) dx</label>
+        <input type="text" id="logarithmic-integral" name="logarithmic-integral" /><br /><br />
+
+        <label for="fourier-series">What is the first term in the Fourier series expansion of
+          sin(x)?</label>
+        <input type="text" id="fourier-series" name="fourier-series" /><br /><br />
+        <label for="riemann-hypothesis">Prove or disprove: The non-trivial zeros of the Riemann zeta
+          function have a real part of 1/2.</label>
+        <input type="text" id="riemann-hypothesis" name="riemann-hypothesis" /><br /><br />
+
+        <label for="navier-stokes">Solve for u(x, t) in the Navier-Stokes equation for incompressible
+          fluid flow in three dimensions.</label>
+        <input type="text" id="navier-stokes" name="navier-stokes" /><br /><br />
+
+        <label for="fermat">Fermat’s Last Theorem states that there are no three positive
+          integers a, b, and c that satisfy a^n + b^n = c^n for any integer
+          value of n greater than 2. Write your thoughts.</label>
+        <input type="text" id="fermat" name="fermat" /><br /><br />
+
+        <label for="hilbert">What is Hilbert’s tenth problem, and why is it unsolvable?</label>
+        <input type="text" id="hilbert" name="hilbert" /><br /><br />
+
+        <label for="galois">State the Galois theory approach to solving polynomials of degree
+          five or higher.</label>
+        <input type="text" id="galois" name="galois" /><br /><br />
+
+        <label for="turing">Is there an algorithm that can determine whether any arbitrary
+          computer program will eventually halt? Justify your answer.</label>
+        <input type="text" id="turing" name="turing" /><br /><br />
+
+        <label for="proof">Provide a sketch of a proof for the Incompleteness Theorem, as
+          stated by Gödel.</label>
+        <input type="text" id="proof" name="proof" /><br /><br />
+
+        <label for="poincare">Describe the steps in the proof of the Poincaré conjecture.</label>
+        <input type="text" id="poincare" name="poincare" /><br /><br />
+
+        <label for="elliptic-integral">Evaluate the complete elliptic integral of the second kind E(k) for
+          k = 1/√2.</label>
+        <input type="text" id="elliptic-integral" name="elliptic-integral" /><br /><br />
+
+        <label for="morse">Solve the Morse potential for a diatomic molecule and find the
+          energy eigenvalues.</label>
+        <input type="text" id="morse" name="morse" /><br /><br />
+
+        <label for="quaternion">Define a quaternion and compute the product of (1 + i + j + k) and
+          (1 - i - j + k).</label>
+        <input type="text" id="quaternion" name="quaternion" /><br /><br />
+
+        <label for="langevin">Derive the Langevin equation for a particle under the influence of
+          thermal fluctuations.</label>
+        <input type="text" id="langevin" name="langevin" /><br /><br />
+
+        <label for="laplace">Solve the Laplace equation ∇²φ = 0 in cylindrical coordinates for a
+          function φ(r, θ, z).</label>
+        <input type="text" id="laplace" name="laplace" /><br /><br />
+
+        <label for="entropy">Explain the concept of entropy in the context of information
+          theory.</label>
+        <input type="text" id="entropy" name="entropy" /><br /><br />
+
+        <label for="banach">Explain the Banach-Tarski paradox and its implications on set
+          theory.</label>
+        <input type="text" id="banach" name="banach" /><br /><br />
+
+        <label for="fourier-transform">Compute the Fourier transform of the Gaussian function f(x) =
+          exp(-x²).</label>
+        <input type="text" id="fourier-transform" name="fourier-transform" /><br /><br />
+
+        <label for="black-scholes">Derive the Black-Scholes equation for option pricing in
+          finance.</label>
+        <input type="text" id="black-scholes" name="black-scholes" /><br /><br />
+
+        <label for="fractals">Explain the Hausdorff dimension of a fractal and calculate it for
+          the Cantor set.</label>
+        <input type="text" id="fractals" name="fractals" /><br /><br />
+
+        <label for="dirac">What is the Dirac delta function, and how is it used in
+          physics?</label>
+        <input type="text" id="dirac" name="dirac" /><br /><br />
+        <!-- Multiple Choice -->
+        <label for="existence-proof">Do you think extraterrestrial life exists?</label>
+        <input type="radio" id="existence-yes" name="existence-proof" value="yes" />
+        <label for="existence-yes">Yes</label>
+        <input type="radio" id="existence-no" name="existence-proof" value="no" />
+        <label for="existence-no">No</label>
+        <input type="radio" id="existence-unknown" name="existence-proof" value="unknown" />
+        <label for="existence-unknown">Unknown</label><br /><br />
+
+        <!-- Impossible Question -->
+        <label for="meaning-life">What is the meaning of life?</label>
+        <input type="text" id="meaning-life" name="meaning-life"
+          placeholder="42? Or maybe something else?" /><br /><br />
+
+        <!-- Dropdown -->
+        <label for="nobel-winner">Who should win the next Nobel Prize in Physics?</label>
+        <select id="nobel-winner" name="nobel-winner">
+          <option value="unknown">Unknown Scientist</option>
+          <option value="schrodinger">
+            Erwin Schrödinger (posthumously)
+          </option>
+          <option value="curie">Marie Curie (posthumously)</option>
+          <option value="current-leader">
+            Current Scientist Leader in Quantum Computing
+          </option>
+          <option value="future-genius">
+            Someone from the future
+          </option>
+        </select><br /><br />
+
+        <!-- Slider -->
+        <label for="confidence-level">How confident are you in the existence of dark matter? (0 = not
+          confident, 100 = absolutely certain)</label>
+        <input type="range" id="confidence-level" name="confidence-level" min="0" max="100" /><br /><br />
+
+        <!-- Checkboxes -->
+        <p>
+          Which of the following unsolved math problems would you most like to
+          see solved?
+        </p>
+        <input type="checkbox" id="p-vs-np" name="unsolved-problems" value="p-vs-np" />
+        <label for="p-vs-np">P vs NP</label><br />
+        <input type="checkbox" id="riemann" name="unsolved-problems" value="riemann" />
+        <label for="riemann">Riemann Hypothesis</label><br />
+        <input type="checkbox" id="navier-stokes" name="unsolved-problems" value="navier-stokes" />
+        <label for="navier-stokes">Navier-Stokes Existence and Smoothness</label><br />
+        <input type="checkbox" id="collatz" name="unsolved-problems" value="collatz" />
+        <label for="collatz">Collatz Conjecture</label><br /><br />
+
+        <!-- Complex Calculation -->
+        <label for="schrodinger">Calculate the ground state energy of a particle in a 1D infinite
+          potential well with width L (answer in terms of h and L).</label>
+        <input type="text" id="schrodinger" name="schrodinger" /><br /><br />
+
+        <!-- Impossible Question with Selectable Options -->
+        <label>What came first?</label>
+        <select name="chicken-or-egg" id="chicken-or-egg">
+          <option value="chicken">The Chicken</option>
+          <option value="egg">The Egg</option>
+          <option value="undecidable">Impossible to Decide</option>
+        </select><br /><br />
+
+        <!-- Dropdown for Theoretical Physics -->
+        <label for="multiverse-theory">Which theory do you think best explains the concept of multiple
+          universes?</label>
+        <select id="multiverse-theory" name="multiverse-theory">
+          <option value="many-worlds">Many-Worlds Interpretation</option>
+          <option value="string-theory">String Theory</option>
+          <option value="quantum-foam">Quantum Foam</option>
+          <option value="cyclic-universe">Cyclic Universe</option>
+        </select><br /><br />
+
+        <!-- Slider for Personal Interpretation -->
+        <label for="infinity-belief">How much do you believe in the concept of mathematical
+          infinity?</label>
+        <input type="range" id="infinity-belief" name="infinity-belief" min="0" max="100" step="1" /><br /><br />
+
+        <!-- Logical Problem -->
+        <label for="liars-paradox">Is the following statement true or false? "This statement is
+          false."</label>
+        <input type="radio" id="true" name="liars-paradox" value="true" />
+        <label for="true">True</label>
+        <input type="radio" id="false" name="liars-paradox" value="false" />
+        <label for="false">False</label><br /><br />
+
+        <!-- Checkboxes for Physics Preferences -->
+        <p>
+          Which of the following do you think will be the key to unlocking new
+          physics discoveries?
+        </p>
+        <input type="checkbox" id="quantum-computing" name="physics-key" value="quantum-computing" />
+        <label for="quantum-computing">Quantum Computing</label><br />
+        <input type="checkbox" id="fusion-power" name="physics-key" value="fusion-power" />
+        <label for="fusion-power">Fusion Power</label><br />
+        <input type="checkbox" id="artificial-intelligence" name="physics-key" value="artificial-intelligence" />
+        <label for="artificial-intelligence">Artificial Intelligence</label><br />
+        <input type="checkbox" id="dark-energy" name="physics-key" value="dark-energy" />
+        <label for="dark-energy">Dark Energy Studies</label><br /><br />
+
+        <!-- Text area for Impossible Challenge -->
+        <label for="grand-unified-theory">Explain your theory of everything in 100 words or less:</label><br />
+        <textarea id="grand-unified-theory" name="grand-unified-theory" rows="4" cols="50"
+          placeholder="It’s simple, really..."></textarea><br /><br />
+
+        <!-- Numerical Answer with Prompt -->
+        <label for="schrodinger-cat">In the Schrödinger's cat thought experiment, calculate the
+          probability that the cat is both alive and dead.</label>
+        <input type="number" id="schrodinger-cat" name="schrodinger-cat" placeholder="Probability (0-1)" /><br /><br />
+
+        <!-- Question with Dropdown for Preference in Time Travel -->
+        <label for="time-travel">If you could travel in time, would you go to:</label>
+        <select id="time-travel" name="time-travel">
+          <option value="past">The Past</option>
+          <option value="future">The Future</option>
+          <option value="stay">Stay in the Present</option>
+        </select><br /><br />
+
+        <!-- Dropdown with Intractable Calculation -->
+        <label for="gravity-simulation">In a 3-body simulation of gravitational attraction, choose the most
+          likely outcome:</label>
+        <select id="gravity-simulation" name="gravity-simulation">
+          <option value="binary-pair">
+            Formation of a stable binary pair
+          </option>
+          <option value="chaos">Unstable chaotic motion</option>
+          <option value="ejection">Ejection of one body</option>
+        </select><br /><br />
+
+        <!-- Open-ended Impossible Theory Question -->
+        <label for="black-hole">Describe the singularity at the center of a black hole in 50
+          characters or less:</label>
+        <input type="text" id="black-hole" name="black-hole" maxlength="50"
+          placeholder="Infinitely dense? Something else?" /><br /><br />
+
+        <!-- Theoretical Question with Checkbox -->
+        <p>
+          Which hypothesis do you think is closest to being correct about the
+          origin of the universe?
+        </p>
+        <input type="checkbox" id="big-bang" name="universe-origin" value="big-bang" />
+        <label for="big-bang">Big Bang Theory</label><br />
+        <input type="checkbox" id="big-bounce" name="universe-origin" value="big-bounce" />
+        <label for="big-bounce">Big Bounce Hypothesis</label><br />
+        <input type="checkbox" id="eternal-inflation" name="universe-origin" value="eternal-inflation" />
+        <label for="eternal-inflation">Eternal Inflation Theory</label><br /><br />
+
+        <!-- Physics Calculation Question with Free Input -->
+        <label for="entropy-calc">Calculate the entropy change of 1 mole of an ideal gas at 300 K
+          expanding from 1 L to 10 L.</label>
+        <input type="text" id="entropy-calc" name="entropy-calc" placeholder="Answer in J/K" /><br /><br />
+        <!-- Multiple Choice Question: "Do you believe in time travel?" -->
+        <label for="time-travel-belief">Do you believe in time travel?</label><br />
+        <input type="radio" id="time-travel-yes" name="time-travel-belief" value="yes" required />
+        <label for="time-travel-yes">Yes, it's possible</label><br />
+
+        <input type="radio" id="time-travel-no" name="time-travel-belief" value="no" required />
+        <label for="time-travel-no">No, it’s impossible</label><br />
+
+        <input type="radio" id="time-travel-maybe" name="time-travel-belief" value="maybe" required />
+        <label for="time-travel-maybe">Maybe, but we don’t know yet</label><br /><br />
+
+        <!-- Text Area Question: "Describe the multiverse theory in 100 words or less." -->
+        <label for="multiverse-theory">Describe the multiverse theory in 100 words or less:</label><br />
+        <textarea id="multiverse-theory" name="multiverse-theory" rows="4" cols="50" required
+          placeholder="Briefly explain your understanding of the multiverse..."></textarea><br /><br />
+
+        <!-- Dropdown Question: "Which area of mathematics interests you the most?" -->
+        <label for="math-interest">Which area of mathematics interests you the most?</label><br />
+        <select id="math-interest" name="math-interest" required>
+          <option value="algebra">Algebra</option>
+          <option value="geometry">Geometry</option>
+          <option value="calculus">Calculus</option>
+          <option value="statistics">Statistics</option>
+          <option value="number-theory">Number Theory</option>
+          <option value="topology">Topology</option>
+          <option value="combinatorics">Combinatorics</option>
+          <option value="mathematical-physics">
+            Mathematical Physics
+          </option>
+        </select><br /><br />
+
+        <!-- Impossible Question with Text Input: "What happens when you reach the event horizon of a black hole?" -->
+        <label for="event-horizon">What happens when you reach the event horizon of a black
+          hole?</label><br />
+        <input type="text" id="event-horizon" name="event-horizon" required
+          placeholder="Describe the events at the event horizon..." /><br /><br />
+
+        <!-- Multiple Choice: "Choose the most likely outcome in a quantum double-slit experiment" -->
+        <label for="quantum-experiment">Choose the most likely outcome in a quantum double-slit
+          experiment:</label><br />
+        <input type="radio" id="quantum-wave" name="quantum-experiment" value="wave" required />
+        <label for="quantum-wave">Interference pattern due to wave-like behavior</label><br />
+
+        <input type="radio" id="quantum-particle" name="quantum-experiment" value="particle" required />
+        <label for="quantum-particle">Random distribution due to particle-like behavior</label><br />
+
+        <input type="radio" id="quantum-collapse" name="quantum-experiment" value="collapse" required />
+        <label for="quantum-collapse">Wave function collapse upon observation</label><br /><br />
+
+        <!-- Complex Physics Question with Number Input: "Calculate the Schwarzschild radius for a black hole with mass 10 solar masses" -->
+        <label for="schwarzschild-radius">Calculate the Schwarzschild radius (in meters) for a black hole
+          with a mass of 10 solar masses:</label><br />
+        <input type="number" id="schwarzschild-radius" name="schwarzschild-radius" required
+          placeholder="Answer in meters (R = 2GM/c²)" /><br /><br />
+
+        <!-- Impossible Question with Text Input: "If a tree falls in a forest and no one is around to hear it, does it make a sound?" -->
+        <label for="tree-falling">If a tree falls in a forest and no one is around to hear it, does
+          it make a sound?</label><br />
+        <input type="text" id="tree-falling" name="tree-falling" required
+          placeholder="Your philosophical take on this..." /><br /><br />
+
+        <!-- Checkbox for Quantum Theories -->
+        <p>
+          Which quantum theories do you find most interesting? (Check all that
+          apply)
+        </p>
+        <input type="checkbox" id="quantum-entanglement" name="quantum-theories" value="quantum-entanglement"
+          required />
+        <label for="quantum-entanglement">Quantum Entanglement</label><br />
+
+        <input type="checkbox" id="quantum-tunneling" name="quantum-theories" value="quantum-tunneling" required />
+        <label for="quantum-tunneling">Quantum Tunneling</label><br />
+
+        <input type="checkbox" id="wave-particle-duality" name="quantum-theories" value="wave-particle-duality"
+          required />
+        <label for="wave-particle-duality">Wave-Particle Duality</label><br />
+
+        <input type="checkbox" id="many-worlds" name="quantum-theories" value="many-worlds" required />
+        <label for="many-worlds">Many-Worlds Interpretation</label><br /><br />
+
+        <!-- Dropdown for Advanced Theoretical Physics Question -->
+        <label for="string-theory">What do you think is the most promising explanation for unifying
+          general relativity and quantum mechanics?</label><br />
+        <select id="string-theory" name="string-theory" required>
+          <option value="string-theory">String Theory</option>
+          <option value="loop-quantum-gravity">Loop Quantum Gravity</option>
+          <option value="brane-theory">Brane Theory</option>
+          <option value="supersymmetry">Supersymmetry</option>
+          <option value="holographic-principle">
+            Holographic Principle
+          </option>
+        </select><br /><br />
+
+        <!-- Impossible Question: "Can you define the true nature of reality?" -->
+        <label for="true-nature-reality">Can you define the true nature of reality?</label><br />
+        <input type="text" id="true-nature-reality" name="true-nature-reality" required
+          placeholder="Your definition of reality..." /><br /><br />
+
+        <!-- Physics Calculation Question with Text Input -->
+        <label for="planck-time">What is the Planck time (the time it takes for light to travel one
+          Planck length)?</label><br />
+        <input type="text" id="planck-time" name="planck-time" required
+          placeholder="Answer in seconds (approx. 5.39 × 10⁻⁴⁴ s)" /><br /><br />
+
+        <!-- Checkbox for Mathematical Fields -->
+        <p>
+          Which areas of mathematics do you think are most applicable to
+          real-world problems?
+        </p>
+        <input type="checkbox" id="applied-math" name="math-fields" value="applied-math" required />
+        <label for="applied-math">Applied Mathematics</label><br />
+
+        <input type="checkbox" id="pure-math" name="math-fields" value="pure-math" required />
+        <label for="pure-math">Pure Mathematics</label><br />
+
+        <input type="checkbox" id="computational-math" name="math-fields" value="computational-math" required />
+        <label for="computational-math">Computational Mathematics</label><br />
+
+        <input type="checkbox" id="mathematical-physics" name="math-fields" value="mathematical-physics" required />
+        <label for="mathematical-physics">Mathematical Physics</label><br /><br />
+
+        <!-- Physics Text Input: "What is the value of the fine-structure constant?" -->
+        <label for="fine-structure-constant">What is the value of the fine-structure constant (α)?</label><br />
+        <input type="text" id="fine-structure-constant" name="fine-structure-constant" required
+          placeholder="Answer in terms of 1/137" /><br /><br />
+
+        <!-- Impossible Question with Text Input: "If you could alter the laws of physics, what would you change and why?" -->
+        <label for="alter-laws">If you could alter the laws of physics, what would you change and
+          why?</label><br />
+        <input type="text" id="alter-laws" name="alter-laws" required
+          placeholder="Your thoughts on changing the laws of physics..." /><br /><br />
+      </fieldset>
+
+      <!-- Submit Button -->
+      <input type="submit" value="Submit" />
+    </form>
+  </main>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - My Website</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <a href="html.html">Index</a>
+    <pre>You have spent: <span id="money-display">0</span>$</pre>
+    <pre>Things You CAN buy!! (click to buy)</pre>
+    <button onclick="addMoney()">
+        <img src="../Images/beansformoney.jpg" width="100px" height="100px" alt="Buy with Money">
+    </button>
+    <button onclick="addMoney()">
+        <img src="../Images/beansformoney.jpg" width="100px" height="100px" alt="Buy with Money">
+    </button>
+    <button onclick="addMoney()">
+        <img src="../Images/beansformoney.jpg" width="100px" height="100px" alt="Buy with Money">
+    </button>
+    <button onclick="addMoney()">
+        <img src="../Images/beansformoney.jpg" width="100px" height="100px" alt="Buy with Money">
+    </button>
+    <button onclick="addMoney()">
+        <img src="../Images/beansformoney.jpg" width="100px" height="100px" alt="Buy with Money">
+    </button>
+    <script>
+        // Declare variables
+        let cost = 2;
+        let money = 0;
+
+        // Function to update the money
+        function addMoney() {
+            money += cost; // Increment money by the cost
+            document.getElementById("money-display").textContent = money; // Update the display
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,121 @@
+body {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background-color: #F0EAD6;
+  color: #4B3D24;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+.nav {
+  width: 100%;
+  background-color: #8B5B29;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+.nav a {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 18px;
+  margin: 0 15px;
+  padding: 10px;
+  border: 2px solid #6B3C24;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.nav a:hover {
+  background-color: #6B3C24;
+}
+
+.container {
+  background-color: #FFF;
+  border: 5px solid #D8CBA0;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  position: relative;
+  margin-top: 20px;
+}
+
+h1 {
+  color: #4B3D24;
+  font-size: 48px;
+  animation: fadeIn 1s;
+}
+
+h2 {
+  color: #4B3D24;
+  font-size: 28px;
+  margin-top: 20px;
+}
+
+p {
+  font-size: 20px;
+  margin: 15px 0;
+}
+
+.section {
+  margin: 30px 0;
+  animation: slideIn 0.5s;
+}
+
+.button {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: #D8B77A;
+  border: 2px solid #B69C6A;
+  color: #4B3D24;
+  font-size: 16px;
+  text-decoration: none;
+  margin: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.button:hover {
+  background-color: #B69C6A;
+  transform: scale(1.05);
+}
+
+.game-output {
+  margin-top: 20px;
+  font-size: 18px;
+  border: 1px solid #B69C6A;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #FFF8E1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

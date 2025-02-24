@@ -1,0 +1,23 @@
+body {
+  background-color: bisque;
+  color: steelblue;
+  font-family: bd-geminis, monospace;
+}
+
+button {
+  background-color: black;
+}
+
+button:hover {
+  background-color: white;
+}
+
+button:active {
+  background-color: red;
+}
+
+button:focus {
+  background-color: green;
+  outline: none;
+  /* Removes the default focus outline (optional) */
+}

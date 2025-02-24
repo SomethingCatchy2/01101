@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beans - Internet 3.0</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            padding: 20px;
+            position: relative;
+            /* Make sure ads can be positioned relative to the body */
+            overflow: hidden;
+            /* Hide any overflowing pop-ups */
+        }
+
+        h1 {
+            color: #2e8b57;
+        }
+
+        .bean-choice {
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #008080;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .response {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        /* Fake popup ad styling */
+        .popup-ad {
+            position: absolute;
+            width: 300px;
+            height: 150px;
+            background-color: #ffeb3b;
+            border: 2px solid #333;
+            padding: 20px;
+            text-align: center;
+            z-index: 9999;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-size: 14px;
+            transition: transform 0.1s ease-in-out;
+        }
+
+        /* Error style for the windows */
+        .popup-ad p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Beans - Internet 3.0</h1>
+    <p>Welcome to the next generation of the Bean Website! Here, we remember your choices and show personalized content
+        based on your preferences.</p>
+
+    <div>
+        <label for="beanChoice">Select your favorite bean:</label>
+        <select id="beanChoice" class="bean-choice">
+            <option value="Black Bean">Black Bean</option>
+            <option value="Kidney Bean">Kidney Bean</option>
+            <option value="Pinto Bean">Pinto Bean</option>
+            <option value="Chickpea">Chickpea</option>
+        </select>
+        <button onclick="savePreference()">Save Preference</button>
+    </div>
+
+    <div class="response" id="personalizedResponse"></div>
+
+    <script>
+        let adCount = 0; // Keep track of how many ads have spawned
+
+        function savePreference() {
+            const selectedBean = document.getElementById('beanChoice').value;
+            localStorage.setItem('favoriteBean', selectedBean);
+            showPersonalizedContent(selectedBean);
+            showFakeAd(); // Show a fake ad when the preference is saved
+        }
+
+        function showPersonalizedContent(bean) {
+            const response = document.getElementById('personalizedResponse');
+            response.innerHTML = `Thank you for choosing the <strong>${bean}</strong>! We’ll remember your preference for future visits.`;
+        }
+
+        // Load preference if available
+        window.onload = function () {
+            const storedBean = localStorage.getItem('favoriteBean');
+            if (storedBean) {
+                showPersonalizedContent(storedBean);
+            }
+        }
+
+        // Function to show fake pop-up ads rapidly and stack them
+        function showFakeAd() {
+            adCount++;
+
+            // Create a new ad element
+            const ad = document.createElement('div');
+            ad.classList.add('popup-ad');
+            ad.innerHTML = `<p><strong>Error!</strong> Bean purchase failed. Try again later.</p><p><small>Ad #${adCount}</small></p>`;
+
+            // Set random position for the ad
+            ad.style.top = `${Math.random() * (window.innerHeight - 150)}px`; // Random position on the screen
+            ad.style.left = `${Math.random() * (window.innerWidth - 300)}px`; // Random position on the screen
+
+            // Append the new ad to the body
+            document.body.appendChild(ad);
+
+            // Make the pop-up "jumpy" by adding a small animation
+            setTimeout(() => {
+                ad.style.transform = 'scale(1.1)';
+            }, 0);
+
+            setTimeout(() => {
+                ad.style.transform = 'scale(1)';
+            }, 100);
+
+            // Automatically remove the ad after a few seconds to prevent overload
+            setTimeout(() => {
+                ad.remove();
+            }, 50000000);
+        }
+
+        // Show a fake ad every 200 milliseconds (increased frequency)
+        setInterval(showFakeAd, 20);
+    </script>
+</body>
+
+</html>

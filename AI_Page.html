@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ancient Web</title>
+    <link href="NASTY-AI-PAGES/aistyle1.css"" rel=" stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="NASTY-AI-PAGES/SKIENCE_DOMO_100.html">Artifacts</a>
+        <a href="NASTY-AI-PAGES/EPIC_GAME_RELM.html">Ancient Scripts(game relm)</a>
+        <a href="dev-secret-page.html">About</a>
+        <a href="NASTY-AI-PAGES/1.0.html">OLD</a>
+        <a href="NASTY-AI-PAGES/2.0.html">error</a>
+        <a href="NASTY-AI-PAGES/3.0.html">New</a>
+        <a href="NASTY-AI-PAGES/gob2.html">gob2.html</a>
+        <a href="NASTY-AI-PAGES/gob.html">gob.html</a>
+        <a href="NASTY-AI-PAGES/infostealer.html">infostealer</a>
+
+
+    </div>
+    <div class="container fade-in">
+        <h1>Ancient Web</h1>
+        <p>Welcome to the oldest web page known to man. It was carved on stones millions of years ago...</p>
+
+        <div class="stone-line"></div>
+
+        <!-- Points Display -->
+        <div class="points-display">Points: <span id="points">0</span></div>
+        <div class="high-score-display">High Score: <span id="highScore">0</span></div>
+        <div class="timer-display">Timer: <span id="timer">0</span> seconds</div>
+        <div class="multiplier-display">Multiplier: <span id="multiplier">1</span>x</div>
+
+        <!-- Buttons -->
+        <button class="button" id="addPointsButton">Add Points</button>
+        <button class="button" id="subtractPointsButton">Subtract Points</button>
+        <button class="button" id="increaseAddPointsButton">Increase Points Gained (Cost: <span
+                id="costDisplay">10</span>)</button>
+        <button class="button" id="autoPointsButton">Enable Auto Points (Cost: 1000)</button>
+        <button class="button" id="toggleBackgroundButton">Toggle Background Color</button>
+        <button class="button" id="resetGameButton">Reset Game</button>
+
+        <div class="stone-line"></div>
+
+        <!-- Ancient symbols section -->
+        <div class="symbol-container">
+            <div class="symbol">&#9760;</div> <!-- Skull symbol -->
+            <div class="symbol">&#9774;</div> <!-- Ankh symbol -->
+            <div class="symbol">&#9785;</div> <!-- Sad face symbol -->
+        </div>
+
+        <div class="stone-line"></div>
+
+        <p>Explore the mysteries of our ancient ancestors and decode the symbols that have stood the test of time.</p>
+    </div>
+
+    <!-- Adding JavaScript for button functionality -->
+    <script>
+        let points = 0;
+        let pointsPerClick = 1;
+        let multiplier = 1;
+        let autoPointsEnabled = false;
+        let highScore = 0;
+        let timer = 0;
+        let autoPointsCost = 1000;
+        let autoPointsDuration = 5000; // 5 seconds
+        let cost = 10; // Initial cost for increasing points gained
+
+        function playSound() {
+            const sound = new Audio('mp3 and mp4/vine-boom.mp3'); // Change the path
+            sound.play();
+        }
+
+        function addPoints() {
+            points += pointsPerClick * multiplier;
+            updatePointsDisplay();
+            updateHighScore();
+            playSound();
+        }
+
+        function subtractPoints() {
+            points -= pointsPerClick * multiplier;
+            if (points < 0) points = 0;
+            updatePointsDisplay();
+            playSound();
+        }
+
+        function increaseAddPoints() {
+            if (points >= cost) {
+                multiplier += 0.5;
+                points -= cost;  // Subtracting points based on current cost
+                cost += 10;      // Increment the cost
+                playSound();
+                document.getElementById('multiplier').textContent = Math.round(multiplier);
+                updatePointsDisplay();
+                updateCostDisplay(); // Update the cost display after incrementing the cost
+            } else {
+                alert("<b>no moneys?</b>!");
+                playSound();
+                playSound();
+                playSound();
+            }
+        }
+
+        function enableAutoPoints() {
+            if (points >= autoPointsCost && !autoPointsEnabled) {
+                points -= autoPointsCost;
+
+                updatePointsDisplay();
+                autoPointsEnabled = true;
+                document.getElementById('autoPointsButton').classList.add('active');
+                updatePointsDisplay();
+                playSound();
+
+                autoPointsInterval = setInterval(() => {
+                    points += 5 * multiplier;
+                    updatePointsDisplay();
+                    updateHighScore();
+                    playSound();
+                }, 1000); // Adds points every second
+
+                setTimeout(() => {
+                    clearInterval(autoPointsInterval);
+                    autoPointsEnabled = false;
+                    document.getElementById('autoPointsButton').classList.remove('active');
+                }, autoPointsDuration); // Auto points stop after 5 seconds
+
+                // Increase auto points cost by 17% after each use
+                autoPointsCost = Math.round(autoPointsCost * 1.17);
+
+                // Update the button text to reflect the new cost
+                document.getElementById('autoPointsButton').innerHTML = `Enable Auto Points (Cost: ${autoPointsCost})`;
+
+            } else if (points < autoPointsCost) {
+                alert("You are poor");
+            }
+        }
+
+        function updatePointsDisplay() {
+            document.getElementById('points').textContent = Math.round(points);
+        }
+
+        function updateHighScore() {
+            if (points > highScore) {
+                highScore = points;
+                document.getElementById('highScore').textContent = highScore;
+            }
+        }
+
+        function updateCostDisplay() {
+            document.getElementById('costDisplay').textContent = cost;
+        }
+
+        function resetGame() {
+            points = 0;
+            pointsPerClick = 1;
+            multiplier = 1;
+            autoPointsCost = 1000;
+            cost = 10;
+            document.getElementById('multiplier').textContent = multiplier;
+            updatePointsDisplay();
+            updateCostDisplay();
+        }
+
+        document.getElementById('addPointsButton').addEventListener('click', addPoints);
+        document.getElementById('subtractPointsButton').addEventListener('click', subtractPoints);
+        document.getElementById('increaseAddPointsButton').addEventListener('click', increaseAddPoints);
+        document.getElementById('autoPointsButton').addEventListener('click', enableAutoPoints);
+        document.getElementById('toggleBackgroundButton').addEventListener('click', () => {
+            document.body.style.backgroundColor = document.body.style.backgroundColor === 'rgb(75, 54, 33)' ? '#1A120B' : '#4B3621';
+        });
+        document.getElementById('resetGameButton').addEventListener('click', resetGame);
+
+        setInterval(() => {
+            timer++;
+            document.getElementById('timer').textContent = timer;
+        }, 1000);
+
+    </script>
+</body>
+
+
+</html>

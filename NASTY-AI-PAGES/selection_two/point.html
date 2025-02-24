@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Project Showcase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        input,
+        button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+
+        .todo-item,
+        .memory-card {
+            margin: 5px 0;
+            padding: 5px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .memory-game {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .memory-card {
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        #chart {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Multi-Project Showcase</h1>
+        <div class="tabs">
+            <button class="tab active" onclick="showContent('todo')">Todo List</button>
+            <button class="tab" onclick="showContent('memory')">Memory Game</button>
+            <button class="tab" onclick="showContent('data')">Data Visualization</button>
+            <button class="tab" onclick="showContent('pomodoro')">Pomodoro Timer</button>
+            <button class="tab" onclick="showContent('joke')">Joke Generator</button>
+        </div>
+
+        <div id="todo" class="content active">
+            <h2>Todo List</h2>
+            <input type="text" id="todoInput" placeholder="Add a new todo">
+            <button onclick="addTodo()">Add</button>
+            <div id="todoList"></div>
+        </div>
+
+        <div id="memory" class="content">
+            <h2>Memory Game</h2>
+            <div class="memory-game" id="memoryGame"></div>
+            <button onclick="initializeMemoryGame()">Reset Game</button>
+        </div>
+
+        <div id="data" class="content">
+            <h2>Data Visualization</h2>
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div id="pomodoro" class="content">
+            <h2>Pomodoro Timer</h2>
+            <div id="timer">25:00</div>
+            <button onclick="toggleTimer()">Start</button>
+            <button onclick="resetTimer()">Reset</button>
+        </div>
+
+        <div id="joke" class="content">
+            <h2>Joke Generator</h2>
+            <p id="jokeText">Click the button to generate a joke!</p>
+            <button onclick="generateJoke()">Generate Joke</button>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        function showContent(contentId) {
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(contentId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Todo List
+        let todos = [];
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            if (input.value.trim() !== '') {
+                todos.push({text: input.value, completed: false});
+                input.value = '';
+                renderTodos();
+            }
+        }
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('div');
+                todoItem.className = 'todo-item';
+                todoItem.innerHTML = `
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})">
+                    <span style="${todo.completed ? 'text-decoration: line-through;' : ''}">${todo.text}</span>
+                    <button onclick="removeTodo(${index})">Remove</button>
+                `;
+                todoList.appendChild(todoItem);
+            });
+        }
+        function toggleTodo(index) {
+            todos[index].completed = !todos[index].completed;
+            renderTodos();
+        }
+        function removeTodo(index) {
+            todos.splice(index, 1);
+            renderTodos();
+        }
+
+        // Memory Game
+        const ICONS = ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"];
+        let cards = [];
+        let flipped = [];
+        let solved = [];
+        function initializeMemoryGame() {
+            cards = [...ICONS, ...ICONS].sort(() => Math.random() - 0.5);
+            flipped = [];
+            solved = [];
+            renderMemoryGame();
+        }
+        function renderMemoryGame() {
+            const gameBoard = document.getElementById('memoryGame');
+            gameBoard.innerHTML = '';
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'memory-card';
+                cardElement.textContent = flipped.includes(index) || solved.includes(index) ? card : '?';
+                cardElement.onclick = () => !flipped.includes(index) && !solved.includes(index) && flipCard(index);
+                gameBoard.appendChild(cardElement);
+            });
+        }
+        function flipCard(index) {
+            if (flipped.length === 0) {
+                flipped = [index];
+            } else if (flipped.length === 1) {
+                flipped.push(index);
+                if (cards[flipped[0]] === cards[flipped[1]]) {
+                    solved.push(...flipped);
+                }
+                setTimeout(() => {
+                    flipped = [];
+                    renderMemoryGame();
+                }, 1000);
+            }
+            renderMemoryGame();
+        }
+        initializeMemoryGame();
+
+        // Data Visualization
+        function drawChart() {
+            const canvas = document.getElementById('chart');
+            const ctx = canvas.getContext('2d');
+            const data = [12, 19, 3, 5, 2, 3];
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+            let total = data.reduce((a, b) => a + b, 0);
+            let startAngle = 0;
+            for (let i = 0; i < data.length; i++) {
+                let sliceAngle = 2 * Math.PI * data[i] / total;
+                ctx.beginPath();
+                ctx.fillStyle = colors[i];
+                ctx.moveTo(150, 150);
+                ctx.arc(150, 150, 150, startAngle, startAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fill();
+                startAngle += sliceAngle;
+            }
+        }
+        drawChart();
+
+        // Pomodoro Timer
+        let timerInterval;
+        let minutes = 25;
+        let seconds = 0;
+        let isActive = false;
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        function toggleTimer() {
+            isActive = !isActive;
+            if (isActive) {
+                timerInterval = setInterval(() => {
+                    if (seconds > 0) {
+                        seconds--;
+                    } else if (minutes > 0) {
+                        minutes--;
+                        seconds = 59;
+                    } else {
+                        clearInterval(timerInterval);
+                        isActive = false;
+                    }
+                    updateTimerDisplay();
+                }, 1000);
+            } else {
+                clearInterval(timerInterval);
+            }
+        }
+        function resetTimer() {
+            clearInterval(timerInterval);
+            minutes = 25;
+            seconds = 0;
+            isActive = false;
+            updateTimerDisplay();
+        }
+
+        // Joke Generator
+        const JOKES = [
+            "Why don't scientists trust atoms? Because they make up everything!",
+            "Why did the scarecrow win an award? He was outstanding in his field!",
+            "Why don't eggs tell jokes? They'd crack each other up!",
+            "Why don't skeletons fight each other? They don't have the guts!",
+            "What do you call a fake noodle? An impasta!"
+        ];
+        function generateJoke() {
+            const jokeText = document.getElementById('jokeText');
+            const randomIndex = Math.floor(Math.random() * JOKES.length);
+            jokeText.textContent = JOKES[randomIndex];
+        }
+    </script>
+</body>
+
+</html>

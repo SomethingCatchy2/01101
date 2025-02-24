@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #text-display {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        #input-field {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Typing Speed Test</h1>
+        <p id="text-display"></p>
+        <input type="text" id="input-field" placeholder="Start typing here..." disabled>
+        <button id="start-btn">Start Test</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        const textDisplay = document.getElementById('text-display');
+        const inputField = document.getElementById('input-field');
+        const startButton = document.getElementById('start-btn');
+        const result = document.getElementById('result');
+
+        const testText = "The quick brown fox jumps over the lazy dog. This pangram contains every letter of the English alphabet at least once.";
+        let startTime, endTime;
+
+        startButton.addEventListener('click', startTest);
+
+        function startTest() {
+            textDisplay.textContent = testText;
+            inputField.value = "";
+            inputField.disabled = false;
+            inputField.focus();
+            startButton.disabled = true;
+            result.textContent = "";
+            startTime = new Date().getTime();
+
+            inputField.addEventListener('input', checkTest);
+        }
+
+        function checkTest() {
+            const typedText = inputField.value;
+            const originalText = testText.substring(0, typedText.length);
+
+            if (typedText === testText) {
+                endTest();
+            } else if (typedText !== originalText) {
+                inputField.style.backgroundColor = "#ffcccc";
+            } else {
+                inputField.style.backgroundColor = "#ffffff";
+            }
+        }
+
+        function endTest() {
+            endTime = new Date().getTime();
+            const totalTime = (endTime - startTime) / 1000;
+            const wordsTyped = testText.split(' ').length;
+            const wpm = Math.round((wordsTyped / totalTime) * 60);
+
+            inputField.disabled = true;
+            startButton.disabled = false;
+            result.textContent = `Your typing speed: ${wpm} WPM`;
+            inputField.removeEventListener('input', checkTest);
+        }
+    </script>
+</body>
+
+</html>

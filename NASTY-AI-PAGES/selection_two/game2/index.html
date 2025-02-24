@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zelda-like Exploration Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        #inventory {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+        .inventory-item {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="inventory"></div>
+    <script>
+        // Configuration variables
+        const CONFIG = {
+            tileSize: 40,
+            chunkSize: 500,
+            playerStartX: 1000,
+            playerStartY: 1000,
+            playerSpeed: 3,
+            viewDistance: 800,
+            itemCountPerChunk: 10,
+            obstacleCountPerChunk: 20,
+        };
+
+        class Item {
+            constructor(x, y, name) {
+                this.x = x;
+                this.y = y;
+                this.name = name || this.getRandomItemName();
+                this.color = this.getColorForItem(this.name);
+            }
+
+            getRandomItemName() {
+                const items = ['Gem', 'Coin', 'Key', 'Potion', 'Scroll'];
+                return items[Math.floor(Math.random() * items.length)];
+            }
+
+            getColorForItem(name) {
+                const colors = {
+                    'Gem': '#00ffff',
+                    'Coin': '#ffd700',
+                    'Key': '#c0c0c0',
+                    'Potion': '#ff00ff',
+                    'Scroll': '#f5deb3'
+                };
+                return colors[name] || '#ffffff';
+            }
+
+            draw(ctx, offsetX, offsetY) {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x - offsetX, this.y - offsetY, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            use(player) {
+                // Example effect for potions: restore health or increase speed (or other effects)
+                if (this.name === 'Potion') {
+                    player.restoreHealth();
+                    player.inventory[this.name]--;
+                }
+            }
+        }
+
+        class World {
+            constructor() {
+                this.tileSize = CONFIG.tileSize;
+                this.chunks = new Map();
+            }
+
+            generateChunk(x, y) {
+                const items = [];
+                const obstacles = [];
+                for (let i = 0; i < CONFIG.itemCountPerChunk; i++) {
+                    const newX = Math.floor(Math.random() * CONFIG.chunkSize) + x;
+                    const newY = Math.floor(Math.random() * CONFIG.chunkSize) + y;
+                    items.push(new Item(newX, newY, 'Potion')); // Example: generating potions
+                }
+                for (let i = 0; i < CONFIG.obstacleCountPerChunk; i++) {
+                    const newX = Math.floor(Math.random() * CONFIG.chunkSize) + x;
+                    const newY = Math.floor(Math.random() * CONFIG.chunkSize) + y;
+                    obstacles.push({x: newX, y: newY});
+                }
+                return {items, obstacles};
+            }
+
+            getChunk(x, y) {
+                const chunkKey = `${Math.floor(x / CONFIG.chunkSize)},${Math.floor(y / CONFIG.chunkSize)}`;
+                if (!this.chunks.has(chunkKey)) {
+                    const chunk = this.generateChunk(x, y);
+                    this.chunks.set(chunkKey, chunk);
+                }
+                return this.chunks.get(chunkKey);
+            }
+
+            draw(ctx, offsetX, offsetY, playerX, playerY) {
+                const startX = Math.floor((playerX - CONFIG.viewDistance) / CONFIG.chunkSize) * CONFIG.chunkSize;
+                const startY = Math.floor((playerY - CONFIG.viewDistance) / CONFIG.chunkSize) * CONFIG.chunkSize;
+                const endX = Math.floor((playerX + CONFIG.viewDistance) / CONFIG.chunkSize) * CONFIG.chunkSize;
+                const endY = Math.floor((playerY + CONFIG.viewDistance) / CONFIG.chunkSize) * CONFIG.chunkSize;
+
+                for (let x = startX; x <= endX; x += CONFIG.chunkSize) {
+                    for (let y = startY; y <= endY; y += CONFIG.chunkSize) {
+                        const chunk = this.getChunk(x, y);
+                        chunk.items.forEach(item => item.draw(ctx, offsetX, offsetY));
+                        chunk.obstacles.forEach(obstacle => {
+                            ctx.fillStyle = '#654321';
+                            ctx.fillRect(obstacle.x - offsetX - this.tileSize / 2,
+                                obstacle.y - offsetY - this.tileSize / 2, this.tileSize, this.tileSize);
+                        });
+                    }
+                }
+            }
+        }
+
+        class Player {
+            constructor() {
+                this.x = CONFIG.playerStartX;
+                this.y = CONFIG.playerStartY;
+                this.speed = CONFIG.playerSpeed;
+                this.health = 100;
+                this.inventory = {};
+            }
+
+            restoreHealth() {
+                this.health = Math.min(this.health + 20, 100); // Example: restore 20 health (max 100)
+            }
+
+            update(keys, world) {
+                const newX = this.x + (keys['ArrowRight'] ? this.speed : 0) - (keys['ArrowLeft'] ? this.speed : 0);
+                const newY = this.y + (keys['ArrowDown'] ? this.speed : 0) - (keys['ArrowUp'] ? this.speed : 0);
+
+                this.x = newX;
+                this.y = newY;
+            }
+
+            collectItem(item) {
+                this.inventory[item.name] = (this.inventory[item.name] || 0) + 1;
+            }
+
+            useItem(key) {
+                const itemNames = ['Potion', 'Gem', 'Coin', 'Key', 'Scroll'];
+                const itemName = itemNames[key - 1]; // Mapping 1-5 keys to item names
+                const itemCount = this.inventory[itemName] || 0;
+                if (itemCount > 0) {
+                    // Use the item if available in inventory
+                    const item = new Item(this.x, this.y, itemName);
+                    item.use(this);
+                    this.inventory[itemName]--;
+                }
+            }
+
+            draw(ctx, offsetX, offsetY) {
+                const playerX = this.x - offsetX;
+                const playerY = this.y - offsetY;
+
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(playerX, playerY - 20, 10, 0, Math.PI * 2);
+
+                ctx.fillStyle = '#0000ff';
+                ctx.fillRect(playerX - 5, playerY - 10, 10, 20);
+
+                ctx.fillStyle = '#ff9900';
+                ctx.fillRect(playerX - 5, playerY + 10, 4, 10);
+                ctx.fillRect(playerX + 1, playerY + 10, 4, 10);
+            }
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const inventoryDiv = document.getElementById('inventory');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const game = {
+            player: new Player(),
+            world: new World(),
+            keys: {},
+
+            init() {
+                this.setupEventListeners();
+                this.gameLoop();
+            },
+
+            setupEventListeners() {
+                window.addEventListener('keydown', e => {
+                    if (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3' || e.code === 'Digit4' || e.code === 'Digit5') {
+                        this.player.useItem(parseInt(e.code.charAt(5))); // Use item by key press (1-5)
+                    }
+                    this.keys[e.code] = true;
+                });
+                window.addEventListener('keyup', e => this.keys[e.code] = false);
+            },
+
+            update() {
+                this.player.update(this.keys, this.world);
+
+                this.world.getChunk(this.player.x, this.player.y).items = this.world.getChunk(this.player.x, this.player.y).items.filter(item => {
+                    const distance = Math.hypot(this.player.x - item.x, this.player.y - item.y);
+                    if (distance < 20) {
+                        this.player.collectItem(item);
+                        return false;
+                    }
+                    return true;
+                });
+            },
+
+            draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const offsetX = this.player.x - canvas.width / 2;
+                const offsetY = this.player.y - canvas.height / 2;
+
+                this.world.draw(ctx, offsetX, offsetY, this.player.x, this.player.y);
+                this.player.draw(ctx, offsetX, offsetY);
+
+                this.updateInventory();
+            },
+
+            gameLoop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            },
+
+            updateInventory() {
+                inventoryDiv.innerHTML = 'Inventory:<br>' +
+                    Object.entries(this.player.inventory)
+                        .map(([item, count]) => `<div class="inventory-item">${item}: ${count}</div>`)
+                        .join('');
+            }
+        };
+
+        game.init();
+    </script>
+</body>
+
+</html>

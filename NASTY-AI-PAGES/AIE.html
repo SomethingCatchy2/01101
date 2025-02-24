@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Color Wave</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: "Courier New", Courier, monospace;
+            background-color: #d4d0c8;
+            color: black;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #controls,
+        .color-controls {
+            background-color: #c0c0c0;
+            border: 2px solid #808080;
+            box-shadow: inset 2px 2px #ffffff, inset -2px -2px #808080;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: absolute;
+            z-index: 2;
+        }
+
+        #controls {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            flex-direction: row;
+        }
+
+        button,
+        input[type="range"] {
+            font-family: "Courier New", Courier, monospace;
+            padding: 5px;
+            border: 2px solid #808080;
+            background-color: #c0c0c0;
+            color: black;
+            box-shadow: inset 1px 1px #ffffff, inset -1px -1px #808080;
+            cursor: pointer;
+        }
+
+        button:hover,
+        input[type="range"]:hover {
+            background-color: #d4d0c8;
+        }
+
+        input[type="range"] {
+            appearance: none;
+            width: 100px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px;
+            background: #808080;
+            border: 1px solid #404040;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 10px;
+            height: 16px;
+            background: #c0c0c0;
+            border: 1px solid #404040;
+            cursor: pointer;
+        }
+
+        .color-controls {
+            top: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="paintCanvas"></canvas>
+    <div id="controls">
+        <button id="speed-up">Speed Up</button>
+        <button id="slow-down">Slow Down</button>
+        <button id="pause-resume">Pause</button>
+        <button id="add-color">Add Color</button>
+        <button id="toggle-eraser">Eraser</button>
+    </div>
+    <div class="color-controls">
+        <label>
+            Red: <input type="range" id="red-slider" min="0" max="255" value="255">
+        </label>
+        <label>
+            Green: <input type="range" id="green-slider" min="0" max="255" value="255">
+        </label>
+        <label>
+            Blue: <input type="range" id="blue-slider" min="0" max="255" value="255">
+        </label>
+        <label>
+            Brush Size: <input type="range" id="brush-slider" min="1" max="50" value="5">
+        </label>
+    </div>
+    <script src="AIE.js"></script>
+</body>
+
+</html>

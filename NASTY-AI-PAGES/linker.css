@@ -1,0 +1,61 @@
+/* General Page Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Page Title */
+h1 {
+    text-align: center;
+    background-color: #007acc;
+    color: #fff;
+    padding: 1rem;
+    margin: 0;
+}
+
+/* Links Container */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+/* Link Items */
+li {
+    margin: 10px 0;
+    background-color: #e3f2fd;
+    padding: 10px;
+    border-radius: 5px;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+/* Link Text */
+a {
+    text-decoration: none;
+    color: #007acc;
+    font-weight: bold;
+}
+
+/* Hover Effects */
+li:hover {
+    background-color: #b3e5fc;
+    transform: scale(1.02);
+}
+
+a:hover {
+    color: #005f99;
+}
+
+/* Optional Footer */
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 10px;
+    background-color: #007acc;
+    color: #fff;
+}

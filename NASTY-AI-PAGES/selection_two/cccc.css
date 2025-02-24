@@ -1,0 +1,21 @@
+/* Base styles to keep it simple and default */
+.container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.box {
+  border: 1px solid black;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.marquee-container {
+  border: 1px solid black;
+  padding: 5px;
+  margin-bottom: 10px;
+  height: 30px;
+  overflow: show;
+}

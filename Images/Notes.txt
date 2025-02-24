@@ -1,0 +1,29 @@
+CSS not working fix1:
+https://stackoverflow.com/questions/9480773/html-not-loading-css-file
+---
+
+<ol> and <ul> for lists
+<li> for list items
+
+Primary and secondary memory:
+  primary is faster, but has less storage. EX: RAM and ROM.
+  Secondary memory is much bigger bot has less storage. EX: HDD, DVD and CD.
+
+File sizes:
+  least to greatest: bit, byte (B), kilobyte (KB), megabyte (MB), gigabyte (GB), terabyte (TB) and petabyte (PB) etc.
+
+  THINGS IN <head>
+  <head>
+    <title> - title of page
+    <link href="style.css" rel="stylesheet"> - setting link for stylesheet
+    
+  </head>
+
+  <meta> store/add meta data. Has stuffs like key words and things</meta> 
+  <meta> name = keyword </meta>
+  <meta name="keyword" content="Merit, School">
+  More Meta Data
+  <meta name="revised" content="10/6/26">
+  <meta name="description" content="A descrpition">
+  <meta name="author" content="Name of author">
+  <meta name="viewpoint" content="width=devicewidth">

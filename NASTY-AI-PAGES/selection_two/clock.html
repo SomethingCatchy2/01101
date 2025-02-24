@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Degree-Based Earth Rotation Clock</title>
+  <style>
+    /* body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background: #f0f0f0;
+    } */
+    #clockDisplay {
+      font-size: 1.2em;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Degree-Based Earth Rotation Clock</h1>
+  <p>This clock converts local (user) time to Mountain Time (Utah) and then to our new system.</p>
+  <div id="clockDisplay"></div>
+
+  <script>
+    // --------------------------------------------------
+    // CONFIGURATION & CONSTANTS
+    // --------------------------------------------------
+    // We define a reference solar noon for Springville, UT.
+    // For our example, we choose an epoch (when Springville is facing the Sun) in Mountain Time.
+    // Adjust this value to an accurate observed time if available.
+    // Here, we assume January 1, 2024 at 12:00:00 local Mountain Time is our reference.
+    // We convert that local time to a Unix timestamp (in seconds).
+    const REF_SOLAR_NOON_LOCAL = "2024-01-01T12:00:00"; // local Mountain Time string
+    // Convert to America/Denver time using toLocaleString with the proper timeZone.
+    function convertLocalToDenverTimestamp(localStr) {
+      // Create a Date using the provided string as if it's in America/Denver.
+      // This trick uses Intl to get the equivalent UTC timestamp.
+      const options = { timeZone: "America/Denver", hour12: false };
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Denver",
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      }).formatToParts(new Date(localStr));
+      let year, month, day, hour, minute, second;
+      parts.forEach(part => {
+        if(part.type === "year") year = part.value;
+        if(part.type === "month") month = part.value;
+        if(part.type === "day") day = part.value;
+        if(part.type === "hour") hour = part.value;
+        if(part.type === "minute") minute = part.value;
+        if(part.type === "second") second = part.value;
+      });
+      // Create a date string in ISO format assumed to be local Mountain time.
+      const denverISO = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+      return new Date(denverISO + "Z").getTime() / 1000; // treat as UTC timestamp now
+    }
+    let REF_SOLAR_NOON = convertLocalToDenverTimestamp(REF_SOLAR_NOON_LOCAL);
+
+    // One full rotation is defined as exactly 24 hours = 86,400 seconds.
+    const ROTATION_PERIOD = 24 * 3600; // 86,400 seconds
+    // Degrees per second
+    const DEG_PER_SECOND = 360 / ROTATION_PERIOD;  // ≈0.00416666667° per second
+
+    // Threshold (in degrees) for re-sync (every 15° we re-sync)
+    const RESYNC_THRESHOLD = 0.00001;
+
+    // --------------------------------------------------
+    // UTILITY: Get current time in America/Denver timezone (in seconds)
+    // --------------------------------------------------
+    function getDenverTimeInSeconds() {
+      // Get the current time from the browser.
+      const now = new Date();
+      // Format it for America/Denver.
+      const denverString = now.toLocaleString("en-US", { timeZone: "America/Denver", hour12: false });
+      // Create a new Date from the Denver string.
+      return new Date(denverString).getTime() / 1000;
+    }
+
+    // --------------------------------------------------
+    // CLOCK UPDATE FUNCTION
+    // --------------------------------------------------
+    function updateClock() {
+      // Fetch current Denver time (in seconds)
+      const currentDenverTime = getDenverTimeInSeconds();
+
+      // Calculate elapsed seconds since our reference solar noon.
+      let delta = currentDenverTime - REF_SOLAR_NOON;
+
+      // Compute current time-of-day: seconds into the current rotation (modulo ROTATION_PERIOD)
+      const secondsIntoRotation = ((delta % ROTATION_PERIOD) + ROTATION_PERIOD) % ROTATION_PERIOD;
+      // Current degrees (with high precision)
+      const currentDegrees = secondsIntoRotation * DEG_PER_SECOND;
+
+      // Every 15° (within threshold) re-sync the reference.
+      // We check if currentDegrees modulo 15 is very near 0.
+      if (Math.abs(currentDegrees % 15) < RESYNC_THRESHOLD) {
+        // Re-sync: update our REF_SOLAR_NOON to the current Denver time minus the elapsed seconds within the rotation.
+        REF_SOLAR_NOON = currentDenverTime - secondsIntoRotation;
+        console.log("Re-sync performed at currentDegrees = " + currentDegrees.toFixed(8));
+      }
+
+      // Compute the total full rotations (days) since the reference.
+      const fullRotations = Math.floor(delta / ROTATION_PERIOD);
+
+      // For the "year:month:rotation" display:
+      // We'll derive the "year" from the reference's local date.
+      const refDate = new Date(REF_SOLAR_NOON * 1000);
+      const year = refDate.getUTCFullYear();
+
+      let month, dayOfMonth;
+      // For months 1-35: each month is exactly 10 rotations.
+      if (fullRotations < 350) {
+        month = Math.floor(fullRotations / 10) + 1;
+        dayOfMonth = (fullRotations % 10) + 1;
+      } else {
+        // Month 36 is the long month (rest of the rotations in the year).
+        month = 36;
+        dayOfMonth = fullRotations - 350 + 1;
+      }
+
+      // Format currentDegrees to 8 decimal places.
+      const currentDegreesStr = currentDegrees.toFixed(8);
+
+      // Build the display string.
+      const displayString = `
+${year}-Revolutions (Full revolutions about the sun):
+${month}-Months (10 rotations each, 36 total, with the 36th being 5 ish extra long):
+${dayOfMonth}-Rotations (when the earth spins all the way, so 0° is when Springville UT is facing the sun):
+${currentDegreesStr}-Time (Degrees, 360° per rotation)`;
+      
+      document.getElementById("clockDisplay").innerText = displayString;
+    }
+
+    // --------------------------------------------------
+    // Start the Clock: update every 50ms
+    // --------------------------------------------------
+    setInterval(updateClock, 50);
+    updateClock();
+  </script>
+</body>
+</html>

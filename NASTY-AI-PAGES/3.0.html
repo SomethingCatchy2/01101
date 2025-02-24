@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beans</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #2e8b57;
+        }
+
+        .bean-choice {
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #008080;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .response {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .popup-ad {
+            position: absolute;
+            width: 300px;
+            height: 150px;
+            background-color: #ffeb3b;
+            border: 2px solid #333;
+            padding: 20px;
+            text-align: center;
+            z-index: 9999;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-size: 14px;
+            transition: transform 0.1s ease-in-out;
+            cursor: move;
+        }
+
+        .popup-ad p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 18px;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="../prject/html.html">Index</a>
+    <h1>Beans</h1>
+    <p>Welcome to the most <b>important decision of your life.</b> Choose your preferred bean, and we'll remember your
+        choice
+        forever.</p>
+
+    <div>
+        <label for="beanChoice">Select your favorite bean:</label>
+        <select id="beanChoice" class="bean-choice">
+            <option value="Black Bean">Black Bean</option>
+            <option value="Kidney Bean">Kidney Bean</option>
+            <option value="Pinto Bean">Pinto Bean</option>
+
+        </select>
+        <button onclick="savePreference()">Save Preference</button>
+    </div>
+
+    <div class="response" id="personalizedResponse"></div>
+
+    <script>
+        let adCount = 0;
+
+        // Mapping of ads based on bean choice with 10 ads each
+        const adMessages = {
+            "Black Bean": [
+                "The secret to greatness is right in front of you. Black Beans will change everything. Don’t wait! Use Your Money, BUY BEANS",
+                "You can't afford to miss this. Black Beans are on the verge of becoming the next global sensation! Use Your Money, BUY BEANS ",
+                "Black Beans are the key to unlocking your hidden potential. Don’t let this moment pass! Use Your Money, BUY BEANS",
+                "Did you know? Black Beans are revolutionizing the future of food. Secure yours today. Use Your Money, BUY BEANS",
+                "You deserve the best. Black Beans will elevate your life in ways you can't even imagine. Use Your Money, BUY BEANS",
+                "This is your destiny calling. Choose Black Beans and step into the future of flavor. Use Your Money, BUY BEANS",
+                "Everyone is talking about it: Black Beans. Don’t miss out on what could be your game-changer! Use Your Money, BUY BEANS",
+                "You’ll never find a better deal than this. Black Beans are the future, and it's yours for the taking. Use Your Money, BUY BEANS",
+                "Can you afford to ignore Black Beans? Experts are saying this is the moment to act. Use Your Money, BUY BEANS",
+                "Time is running out. Buy Black Beans today or risk being left behind. Use Your Money, BUY BEANS"
+            ],
+            "Kidney Bean": [
+                "Kidney Beans: A choice so powerful it’s practically destiny. Are you ready to make history? Use Your Money, BUY BEANS",
+                "If you’re not choosing Kidney Beans, you’re missing out on the next big thing. This is your chance. Use Your Money, BUY BEANS",
+                "The world is waiting for you to take action. Kidney Beans are going to be HUGE. Use Your Money, BUY BEANS",
+                "You don't want to look back and wonder what could've been. Kidney Beans are here for the taking! Use Your Money, BUY BEANS",
+                "This isn’t just a purchase. It’s an investment in your future. Kidney Beans are the future of food. Use Your Money, BUY BEANS",
+                "You might think you’re ready, but are you really? Kidney Beans will change your life. Use Your Money, BUY BEANS",
+                "Still on the fence? Kidney Beans are the answer to everything you’ve been waiting for. Use Your Money, BUY BEANS",
+                "Experts agree: Kidney Beans are going to dominate the world. Get in while you can. Use Your Money, BUY BEANS",
+                "Kidney Beans are your future. This isn’t a drill. Act NOW. Use Your Money, BUY BEANS",
+                "People will be talking about Kidney Beans for years to come. Will you be part of the story? Use Your Money, BUY BEANS"
+            ],
+            "Pinto Bean": [
+                "Pinto Beans are here to change the way you think about food. Don’t miss this once-in-a-lifetime chance! Use Your Money, BUY BEANS",
+                "Every meal deserves Pinto Beans. Don't let this life-changing opportunity slip by. Use Your Money, BUY BEANS",
+                "Want to be part of something HUGE? Pinto Beans are at the forefront of the food revolution. Use Your Money, BUY BEANS",
+                "Pinto Beans are the future, and you can be part of it. Choose wisely. Choose Pinto Beans. Use Your Money, BUY BEANS",
+                "Pinto Beans aren’t just food. They’re a lifestyle. Don’t wait to get yours. Use Your Money, BUY BEANS",
+                "Why settle for ordinary when you could have Pinto Beans? Get in now before it's too late. Use Your Money, BUY BEANS",
+                "Pinto Beans are the answer to a brighter tomorrow. What are you waiting for? Use Your Money, BUY BEANS",
+                "Everyone is raving about Pinto Beans. Get yours now before they’re all gone! Use Your Money, BUY BEANS",
+                "Be the first to experience the power of Pinto Beans. They’re more than just food; they’re a movement. Use Your Money, BUY BEANS",
+                "This is your moment. Pinto Beans will change your life. Don’t let it pass you by. Use Your Money, BUY BEANS or else/"
+            ],
+            // Add more beans here...
+        };
+
+        function savePreference() {
+            const selectedBean = document.getElementById('beanChoice').value;
+            localStorage.setItem('favoriteBean', selectedBean);
+            showPersonalizedContent(selectedBean);
+            showFakeAd(selectedBean);
+        }
+
+        function showPersonalizedContent(bean) {
+            const response = document.getElementById('personalizedResponse');
+            response.innerHTML = `Thank you for choosing the <strong>${bean}</strong>! We’ll remember <strong>you</strong> for future visits.`;
+        }
+
+        window.onload = function () {
+            const storedBean = localStorage.getItem('favoriteBean');
+            if (storedBean) {
+                showPersonalizedContent(storedBean);
+            }
+        }
+
+        function showFakeAd(bean) {
+            adCount++;
+
+            const ad = document.createElement('div');
+            ad.classList.add('popup-ad');
+
+            const beanAds = adMessages[bean];
+            const randomAdMessage = beanAds[Math.floor(Math.random() * beanAds.length)];
+
+            ad.innerHTML = `<p><strong>Special Ad:</strong> ${randomAdMessage}</p><p><small>Ad #${adCount}</small></p>`;
+
+            const closeButton = document.createElement('button');
+            closeButton.classList.add('close-btn');
+            closeButton.innerHTML = "X";
+            closeButton.onclick = function () {
+                ad.remove();
+            };
+
+            ad.appendChild(closeButton);
+
+            ad.style.top = `${Math.random() * (window.innerHeight - 150)}px`;
+            ad.style.left = `${Math.random() * (window.innerWidth - 300)}px`;
+
+            // Make the ad draggable
+            let offsetX = 0;
+            let offsetY = 0;
+            let isDragging = false;
+
+            ad.onmousedown = function (e) {
+                isDragging = true;
+                offsetX = e.clientX - ad.offsetLeft;
+                offsetY = e.clientY - ad.offsetTop;
+                ad.style.cursor = 'move';
+            };
+
+            document.onmousemove = function (e) {
+                if (isDragging) {
+                    ad.style.left = `${e.clientX - offsetX}px`;
+                    ad.style.top = `${e.clientY - offsetY}px`;
+                }
+            };
+
+            document.onmouseup = function () {
+                isDragging = false;
+                ad.style.cursor = 'default';
+            };
+
+            document.body.appendChild(ad);
+
+            setTimeout(() => {
+                ad.style.transform = 'scale(1.1)';
+            }, 0);
+
+            setTimeout(() => {
+                ad.style.transform = 'scale(1)';
+            }, 100);
+
+            setTimeout(() => {
+                ad.remove();
+            }, 500000000000);
+        }
+    </script>
+</body>
+
+</html>
