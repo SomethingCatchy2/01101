@@ -2,143 +2,179 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Degree-Based Earth Rotation Clock</title>
+  <title>Rotation Clock</title>
   <style>
-    /* body {
+    body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-      background: #f0f0f0;
-    } */
-    #clockDisplay {
+      margin: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    #clockDisplay, #errorDisplay {
       font-size: 1.2em;
       background: #fff;
       padding: 10px;
-      border: 1px solid #ccc;
+      border: 1px solid;
       border-radius: 5px;
       white-space: pre-wrap;
       text-align: left;
+      margin-bottom: 20px;
+    }
+    #clockDisplay {
+      border-color: #4CAF50;
+    }
+    #errorDisplay {
+      border-color: #f44336;
+      color: #f44336;
+      display: none;
+    }
+    #explanation {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 5px;
+      border: 1px solid #90caf9;
+    }
+    p, ul {
+      line-height: 1.6;
+    }
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 3px;
     }
   </style>
 </head>
 <body>
   <h1>Degree-Based Earth Rotation Clock</h1>
-  <p>This clock converts local (user) time to Mountain Time (Utah) and then to our new system.</p>
+  <p>This clock uses your computer's system time (without any timezone conversion) and then converts it into our custom degree-based time system. In this system, 0° is aligned with solar noon (assumed to be 12:00 PM).</p>
+  
   <div id="clockDisplay"></div>
+  <div id="errorDisplay"></div>
+
+  <section id="explanation">
+    <h2>How It Works</h2>
+    <p>
+      Our unified time system is based solely on your system's local time. It converts that time into a custom degree-based representation as follows:
+    </p>
+    <ul>
+      <li>
+        <strong>Full Rotation:</strong> 86,400 seconds (24 hours) represent one full day (rotation).
+      </li>
+      <li>
+        <strong>Degrees:</strong> The clock calculates degrees by dividing 360° by 86,400 seconds:
+        <code>DEG_PER_SECOND = 360 / 86400</code>.
+      </li>
+      <li>
+        <strong>Solar Noon Alignment:</strong> We adjust so that 0° corresponds to 12:00 PM by subtracting 43,200 seconds (half a day) from the seconds since midnight.
+      </li>
+      <li>
+        <strong>Revolutions, orbitals, and Rotations:</strong>
+        <ul>
+          <li>
+            <em>Revolutions:</em> Count the full days since the start of the year.
+          </li>
+          <li>
+            <em>orbitals:</em> Each “orbital” is defined as 10 full rotations (days). For example, 54 rotations since New Year's means 5 full orbitals (50 rotations) plus 4 extra rotations.
+          </li>
+          <li>
+            <em>Rotations (Days into orbital):</em> The remainder after dividing the total full rotations by 10.
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <h2>Conversion Equations</h2>
+    <ul>
+      <li>
+        <strong>Degrees per Second:</strong> <code>DEG_PER_SECOND = 360 / 86400</code>
+      </li>
+      <li>
+        <strong>Adjusted Seconds:</strong> <code>(secondsSinceMidnight - 43200 + 86400) % 86400</code>
+      </li>
+      <li>
+        <strong>Degrees:</strong> <code>adjustedSeconds * DEG_PER_SECOND</code>
+      </li>
+      <li>
+        <strong>orbitals:</strong> <code>Math.floor(fullRotations / 10) + 1</code>
+      </li>
+      <li>
+        <strong>Rotations (Days into orbital):</strong> <code>(fullRotations % 10) + 1</code>
+      </li>
+    </ul>
+    <p>
+      Any errors encountered during the clock update will be displayed in the error box below the clock.
+    </p>
+  </section>
 
   <script>
-    // --------------------------------------------------
-    // CONFIGURATION & CONSTANTS
-    // --------------------------------------------------
-    // We define a reference solar noon for Springville, UT.
-    // For our example, we choose an epoch (when Springville is facing the Sun) in Mountain Time.
-    // Adjust this value to an accurate observed time if available.
-    // Here, we assume January 1, 2024 at 12:00:00 local Mountain Time is our reference.
-    // We convert that local time to a Unix timestamp (in seconds).
-    const REF_SOLAR_NOON_LOCAL = "2024-01-01T12:00:00"; // local Mountain Time string
-    // Convert to America/Denver time using toLocaleString with the proper timeZone.
-    function convertLocalToDenverTimestamp(localStr) {
-      // Create a Date using the provided string as if it's in America/Denver.
-      // This trick uses Intl to get the equivalent UTC timestamp.
-      const options = { timeZone: "America/Denver", hour12: false };
-      const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Denver",
-        year: "numeric", month: "2-digit", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", second: "2-digit"
-      }).formatToParts(new Date(localStr));
-      let year, month, day, hour, minute, second;
-      parts.forEach(part => {
-        if(part.type === "year") year = part.value;
-        if(part.type === "month") month = part.value;
-        if(part.type === "day") day = part.value;
-        if(part.type === "hour") hour = part.value;
-        if(part.type === "minute") minute = part.value;
-        if(part.type === "second") second = part.value;
-      });
-      // Create a date string in ISO format assumed to be local Mountain time.
-      const denverISO = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
-      return new Date(denverISO + "Z").getTime() / 1000; // treat as UTC timestamp now
-    }
-    let REF_SOLAR_NOON = convertLocalToDenverTimestamp(REF_SOLAR_NOON_LOCAL);
+    // Constants for time conversion
+    const ROTATION_PERIOD = 86400; // 86,400 seconds per full rotation (1 day)
+    const DEG_PER_SECOND = 360 / ROTATION_PERIOD;
 
-    // One full rotation is defined as exactly 24 hours = 86,400 seconds.
-    const ROTATION_PERIOD = 24 * 3600; // 86,400 seconds
-    // Degrees per second
-    const DEG_PER_SECOND = 360 / ROTATION_PERIOD;  // ≈0.00416666667° per second
-
-    // Threshold (in degrees) for re-sync (every 15° we re-sync)
-    const RESYNC_THRESHOLD = 0.00001;
-
-    // --------------------------------------------------
-    // UTILITY: Get current time in America/Denver timezone (in seconds)
-    // --------------------------------------------------
-    function getDenverTimeInSeconds() {
-      // Get the current time from the browser.
+    /**
+     * Calculate the current degrees from system time.
+     * Adjusts the seconds so that 0° is at solar noon (12:00 PM).
+     * @returns {number} The degree value.
+     */
+    function getDegreesFromSystemTime() {
       const now = new Date();
-      // Format it for America/Denver.
-      const denverString = now.toLocaleString("en-US", { timeZone: "America/Denver", hour12: false });
-      // Create a new Date from the Denver string.
-      return new Date(denverString).getTime() / 1000;
+      const secondsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      // Adjust so that 0° corresponds to 12:00 PM (solar noon)
+      const adjustedSeconds = (secondsSinceMidnight - 43200 + ROTATION_PERIOD) % ROTATION_PERIOD;
+      return adjustedSeconds * DEG_PER_SECOND;
     }
 
-    // --------------------------------------------------
-    // CLOCK UPDATE FUNCTION
-    // --------------------------------------------------
+    /**
+     * Update the clock display with the current degree-based time.
+     * Includes robust error handling to display any issues.
+     */
     function updateClock() {
-      // Fetch current Denver time (in seconds)
-      const currentDenverTime = getDenverTimeInSeconds();
+      try {
+        const now = new Date();
+        // Calculate elapsed seconds since the start of the year (New Year's Day at midnight)
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const elapsedSeconds = (now.getTime() - startOfYear.getTime()) / 1000;
+        // Full rotations (days) since the start of the year
+        const fullRotations = Math.floor(elapsedSeconds / ROTATION_PERIOD);
 
-      // Calculate elapsed seconds since our reference solar noon.
-      let delta = currentDenverTime - REF_SOLAR_NOON;
+        // Calculate orbitals (10 rotations per orbital) and rotations (days into current orbital)
+        const orbitals = Math.floor(fullRotations / 10) + 1;
+        const daysIntoorbital = (fullRotations % 10) + 1;
 
-      // Compute current time-of-day: seconds into the current rotation (modulo ROTATION_PERIOD)
-      const secondsIntoRotation = ((delta % ROTATION_PERIOD) + ROTATION_PERIOD) % ROTATION_PERIOD;
-      // Current degrees (with high precision)
-      const currentDegrees = secondsIntoRotation * DEG_PER_SECOND;
+        // Get the current degree time, with 0° at solar noon
+        const currentDegrees = getDegreesFromSystemTime();
 
-      // Every 15° (within threshold) re-sync the reference.
-      // We check if currentDegrees modulo 15 is very near 0.
-      if (Math.abs(currentDegrees % 15) < RESYNC_THRESHOLD) {
-        // Re-sync: update our REF_SOLAR_NOON to the current Denver time minus the elapsed seconds within the rotation.
-        REF_SOLAR_NOON = currentDenverTime - secondsIntoRotation;
-        console.log("Re-sync performed at currentDegrees = " + currentDegrees.toFixed(8));
+        // Display the unified time system information
+        document.getElementById("clockDisplay").innerText = `
+        Here is the proper way to show a clock + date:
+
+${now.getFullYear()},${orbitals},${daysIntoorbital}: ${currentDegrees.toFixed(3)}°
+--------------------------------------------------------------------------------------
+
+${now.getFullYear()}-Revolutions:
+${orbitals}-Orbitals (10 rotations per orbital, orbital is month):
+${daysIntoorbital}-Rotations (full days since start of orbital):
+${currentDegrees.toFixed(4)}°-Time
+
+
+        `.trim();
+
+        // Clear any previous error messages
+        const errorDisplay = document.getElementById("errorDisplay");
+        errorDisplay.style.display = "none";
+        errorDisplay.innerText = "";
+      } catch (error) {
+        // Log error details and display a user-friendly error message
+        console.error("Error in updateClock:", error);
+        const errorDisplay = document.getElementById("errorDisplay");
+        errorDisplay.style.display = "block";
+        errorDisplay.innerText = "An error occurred while updating the clock: " + error.message;
       }
-
-      // Compute the total full rotations (days) since the reference.
-      const fullRotations = Math.floor(delta / ROTATION_PERIOD);
-
-      // For the "year:month:rotation" display:
-      // We'll derive the "year" from the reference's local date.
-      const refDate = new Date(REF_SOLAR_NOON * 1000);
-      const year = refDate.getUTCFullYear();
-
-      let month, dayOfMonth;
-      // For months 1-35: each month is exactly 10 rotations.
-      if (fullRotations < 350) {
-        month = Math.floor(fullRotations / 10) + 1;
-        dayOfMonth = (fullRotations % 10) + 1;
-      } else {
-        // Month 36 is the long month (rest of the rotations in the year).
-        month = 36;
-        dayOfMonth = fullRotations - 350 + 1;
-      }
-
-      // Format currentDegrees to 8 decimal places.
-      const currentDegreesStr = currentDegrees.toFixed(8);
-
-      // Build the display string.
-      const displayString = `
-${year}-Revolutions (Full revolutions about the sun):
-${month}-Months (10 rotations each, 36 total, with the 36th being 5 ish extra long):
-${dayOfMonth}-Rotations (when the earth spins all the way, so 0° is when Springville UT is facing the sun):
-${currentDegreesStr}-Time (Degrees, 360° per rotation)`;
-      
-      document.getElementById("clockDisplay").innerText = displayString;
     }
 
-    // --------------------------------------------------
-    // Start the Clock: update every 50ms
-    // --------------------------------------------------
+    // Update the clock every 50ms
     setInterval(updateClock, 50);
     updateClock();
   </script>
