@@ -1,0 +1,46 @@
+html {
+  height: 100%;
+  width: 100%;
+}
+
+button {
+  color: green;
+}
+
+h4 {
+  color: red;
+}
+
+body {
+  background-color: bisque;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+div.bean_html_background {
+  background-color: green;
+
+}
+
+div.yellow_bad {
+  color: blue;
+  font-size: 3;
+}
+
+div.div1 {
+  color: yellow;
+}
+
+div.div0 {
+  color: black;
+}
+
+b {
+  color: black;
+}
+
+/*
+
+
+
+
+*/
