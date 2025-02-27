@@ -9,7 +9,7 @@ When starting a new project, **organization is key**. Here's how to set it up:
 - This folder serves as the **root directory** for all project files.
 
 **Example:**  
-`/011001/All_The_Others/Your_Project_Name `
+`/011001/-Projects/Your_Project_Name `
 
 ## 2. Organize Your Content
 - Place **all project-related files** and folders inside the new folder.
