@@ -1,4 +1,4 @@
-This read me was made with AI btw. (sorry : )
+This read me was mostly made with AI btw. (sorry : )
 
 # Project Structure Guidelines
 
