@@ -351,10 +351,12 @@ function workInStapleTables() {
       { value: 100, message: "Not a failure! Earned $100." },
       { value: -25000, message: "Stapler jammed and hurt your finger. Medical expense: $25000." },
       { value: 200, message: "Found someone's lost wallet while stapling. They gave you $200 reward!" },
+      { value: 350, message: "Found someone's lost wallet while stapling. You kept it, $350." },
       { value: 0, message: "The tables were already stapled. No pay today." },
       {value: -1000, message: "Nearly Fired. Charged 1000 Dollour bucks."},
       { value: 1000, message: "You found a mouse! Supper for all! (+$1000)"},
       { value: -200, message: "Lost grandma's spare teeth, -200."},
+      
     ];
     
     const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
