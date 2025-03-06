@@ -1,17 +1,20 @@
-/* Base styles to keep it simple and default */ 
+/* cs.css */
+/* Base container styling */
 .container {     
     width: 80%;     
     margin: 0 auto;     
     padding: 10px;     
     box-sizing: border-box;   
-  }      
+  }
   
+  /* Styling for boxes displaying game info */
   .box {     
     border: 1px solid black;     
     padding: 10px;     
     margin-bottom: 10px;   
-  }      
+  }
   
+  /* Styling for a marquee container (if used) */
   .marquee-container {     
     border: 1px solid black;     
     padding: 5px;     
@@ -22,17 +25,16 @@
   
   /* Basic button styling */
   button {
-    margin: 5px;
-    padding: 5px 10px;
+
     cursor: pointer;
   }
-  
   button:disabled {
     cursor: not-allowed;
     opacity: 0.7;
   }
   
-  /* Basic header styling */
+  /* Center the header */
   h1 {
     text-align: center;
   }
+  

@@ -3,19 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Work Simulation Game</title>
+  <title>Tower of Gable</title>
+  <!-- Link to external CSS for base styling -->
   <link rel="stylesheet" href="cs.css">
 </head>
 <body>
   <div class="container">
-    <h1>Work and Dice Simulation Game</h1>
+    <h1>Tower of Gable - Web version: 13</h1>
+    <p>About Tower of Gable. You are a four year old gabling adict named Gabel. The IRS has been hunting you for the last 4 year, can you finaly escape finantial ruin? Find out in Tower of Gable - WebV13 (DLC 2.4)</p>
 
+    <!-- Display box for dice rolls, bonus, and total points -->
     <div class="box">
       <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span></p>
       <p><strong>Bonus Points:</strong> <span id="bonus-points">0</span></p>
       <p><strong>Total Points:</strong> <span id="total-points">-</span></p>
     </div>
 
+    <!-- Display box for wins and money info -->
     <div class="box">
       <p><strong>Wins:</strong> <span id="wins">0</span> | 
       <strong>Money Earned:</strong> $<span id="money-earned">0</span></p>
@@ -25,6 +29,7 @@
       <strong>Net Money:</strong> $<span id="net-money">0</span></p>
     </div>
 
+    <!-- Buttons to interact with the game -->
     <div class="box">
       <button id="roll-dice-btn">Roll Dice</button>
       <button id="commit-btn">Commit</button>
@@ -35,6 +40,8 @@
     </div>
   </div>
 
+  <!-- Link to external JavaScript file with game logic -->
   <script src="je.js"></script>
+
 </body>
 </html>
