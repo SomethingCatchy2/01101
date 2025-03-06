@@ -353,7 +353,8 @@ function workInStapleTables() {
       { value: 200, message: "Found someone's lost wallet while stapling. They gave you $200 reward!" },
       { value: 0, message: "The tables were already stapled. No pay today." },
       {value: -1000, message: "Nearly Fired. Charged 1000 Dollour bucks."},
-      { value: 1000, message: "You found a mouse! Supper for all! (+$1000)"}
+      { value: 1000, message: "You found a mouse! Supper for all! (+$1000)"},
+      { value: -200, message: "Lost grandma's spare teeth, -200."},
     ];
     
     const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
@@ -374,9 +375,9 @@ function workInStapleTables() {
 // Helper function to check if player is in serious debt
 function isInDebt() {
   if (netMoney <= -100) {
-    showMessage(netMoney <= -1000 
+    showMessage(netMoney <= -5000
       ? "The IRS will take your assets! You need to pay your debts before re-entering the workforce!"
-      : "You need to pay your debts before working.");
+      : "You are close to bankrupsy.");
     return true;
   }
   return false;
@@ -427,7 +428,7 @@ function handleNextRoll() {
 
 // Periodically check for bankruptcy
 function checkBankruptcy() {
-  if (netMoney <= -1000000) {
+  if (netMoney <= -10000) {
     showMessage("BANKRUPTCY! The IRS took all your assets remaining. Refresh page to start again.", 0);
     document.querySelectorAll("button").forEach(btn => btn.disabled = true);
   }
