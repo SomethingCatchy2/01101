@@ -1,80 +1,38 @@
-body {
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-}
-
-.game-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-}
-
-.dino {
-    position: absolute;
-    bottom: 50px;
-    left: 50px;
-    width: 50px;
-    height: 50px;
-    background-color: #555;
-    border-radius: 5px;
-    animation: run 0.5s steps(2) infinite;
-}
-
-@keyframes run {
-    0% {
-        background-color: #555;
-    }
-
-    50% {
-        background-color: #888;
-    }
-
-    100% {
-        background-color: #555;
-    }
-}
-
-.cactus {
-    position: absolute;
-    bottom: 50px;
-    right: -50px;
-    width: 30px;
-    height: 50px;
-    background-color: #228b22;
-    border-radius: 3px;
-    animation: moveCactus 2s linear infinite;
-}
-
-@keyframes moveCactus {
-    from {
-        right: -50px;
-    }
-
-    to {
-        right: 100vw;
-    }
-}
-
-.jump {
-    animation: jump 0.3s ease-out;
-}
-
-@keyframes jump {
-    0% {
-        bottom: 50px;
-    }
-
-    50% {
-        bottom: 150px;
-    }
-
-    100% {
-        bottom: 50px;
-    }
-}
+/* Base styles to keep it simple and default */ 
+.container {     
+    width: 80%;     
+    margin: 0 auto;     
+    padding: 10px;     
+    box-sizing: border-box;   
+  }      
+  
+  .box {     
+    border: 1px solid black;     
+    padding: 10px;     
+    margin-bottom: 10px;   
+  }      
+  
+  .marquee-container {     
+    border: 1px solid black;     
+    padding: 5px;     
+    margin-bottom: 10px;     
+    height: 30px;     
+    overflow: show;   
+  }
+  
+  /* Basic button styling */
+  button {
+    margin: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  /* Basic header styling */
+  h1 {
+    text-align: center;
+  }

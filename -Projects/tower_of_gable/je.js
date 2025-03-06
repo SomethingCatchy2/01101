@@ -11,12 +11,67 @@ let alreadyCounted = false;
 let workInProgress = false;
 let officeWorkInProgress = false;
 let stapleWorkInProgress = false; 
-let napWorkInProgress = false; // Track if the "Take Nap" job is in progress
-let nextRollChance = null; // Store the nap result (gain or lose money)
+let napWorkInProgress = false;
+let nextRollChance = null;
+let messageTimeout = null;
+
+// Create a message display element
+const messageDisplay = document.createElement("div");
+messageDisplay.style.position = "fixed";
+messageDisplay.style.top = "10px";
+messageDisplay.style.left = "50%";
+messageDisplay.style.transform = "translateX(-50%)";
+messageDisplay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+messageDisplay.style.color = "white";
+messageDisplay.style.padding = "10px 20px";
+messageDisplay.style.borderRadius = "5px";
+messageDisplay.style.zIndex = "1000";
+messageDisplay.style.display = "none";
+document.body.appendChild(messageDisplay);
+
+// Show message to user
+function showMessage(message, duration = 3000) {
+  messageDisplay.textContent = message;
+  messageDisplay.style.display = "block";
+  
+  // Clear any existing timeout
+  if (messageTimeout) {
+    clearTimeout(messageTimeout);
+  }
+  
+  // Set timeout to hide message
+  messageTimeout = setTimeout(() => {
+    messageDisplay.style.display = "none";
+  }, duration);
+}
+
+function updateButtonStates() {
+  const anyWorkInProgress = workInProgress || officeWorkInProgress || stapleWorkInProgress || napWorkInProgress;
+  const buttons = [
+    "roll-dice-btn", 
+    "commit-btn", 
+    "work-in-mines-btn", 
+    "work-in-office-btn", 
+    "work-staple-tables-btn", 
+    "take-nap-btn"
+  ];
+  
+  buttons.forEach(id => {
+    document.getElementById(id).disabled = anyWorkInProgress;
+  });
+  
+  // Enable commit button only when dice have been rolled and no work is in progress
+  document.getElementById("commit-btn").disabled = (anyWorkInProgress || dice.length === 0);
+}
 
 function rollDice() {
   if (workInProgress || officeWorkInProgress || stapleWorkInProgress || napWorkInProgress) {
-    return; // Prevent rolling if the player is working in any job
+    return;
+  }
+
+  // Handle nap effect if active
+  if (nextRollChance) {
+    handleNextRoll();
   }
 
   dice = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
@@ -28,6 +83,7 @@ function rollDice() {
   calculateBonus();
   updateTotalPoints();
   updateMoneyDisplay();
+  updateButtonStates();
 
   // Subtract $1 for each roll
   netMoney -= 1;
@@ -80,6 +136,7 @@ function updateTotalPoints() {
     missedWins++;
     moneyLost += 500;
     document.getElementById("missed-wins").textContent = missedWins;
+    showMessage("Missed Win! Lost $500 by not committing!");
     alreadyCounted = true;
   }
   updateMoneyDisplay();
@@ -93,6 +150,11 @@ function updateMoneyDisplay() {
 }
 
 function commit() {
+  if (dice.length === 0) {
+    showMessage("Roll the dice first!");
+    return;
+  }
+  
   const totalPoints = dice.reduce((a, b) => a + b, 0) + bonusPoints;
 
   if (totalPoints === 24) {
@@ -102,10 +164,11 @@ function commit() {
     moneyEarned += winnings;
     wins++;
     document.getElementById("wins").textContent = wins;
-    console.log(`You win! Streak: ${consecutiveWins}x. Earned $${winnings}`);
+    showMessage(`You win! Streak: ${consecutiveWins}x. Earned $${winnings}`);
   } else {
     moneyLost += 100;
-    consecutiveWins = 0; 
+    consecutiveWins = 0;
+    showMessage(`Wrong! Lost $100. Total does not equal 24.`);
   }
   updateMoneyDisplay();
   resetGame();
@@ -117,17 +180,21 @@ function resetGame() {
   document.getElementById("dice-rolls").textContent = "-";
   document.getElementById("bonus-points").textContent = "0";
   document.getElementById("total-points").textContent = "-";
+  updateButtonStates();
 }
 
+// Using original loading bar style
 function workInMines() {
   if (workInProgress || netMoney <= -100) {
+    if (netMoney <= -100) {
+      showMessage("You need to pay your debts before working!");
+    }
     return;
   }
 
   workInProgress = true;
-
-  const rollButton = document.querySelector("button[onclick='rollDice()']");
-  rollButton.disabled = true;
+  updateButtonStates();
+  showMessage("Working in the mines...", 10000);
 
   const loadingBar = document.createElement("div");
   loadingBar.style.height = "10px";
@@ -141,30 +208,43 @@ function workInMines() {
   }, 0);
 
   setTimeout(() => {
-    const outcomes = [0, 100, 1000, 10, 75, getRandomInt(-10000, 40000)];
+    // More balanced outcomes
+    const outcomes = [
+      { value: 0, message: "You found nothing in the mines today." },
+      { value: 100, message: "You found some copper worth $100!" },
+      { value: 500, message: "You found silver ore worth $500!" },
+      { value: 1000, message: "You found gold! Earned $1000!" },
+      { value: -200, message: "Minor injury in the mines. Medical bills: $200." },
+      { value: getRandomInt(1000, 5000), message: "You found a rare gem!" }
+    ];
+    
     const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
-
-    if (outcome < 0) {
-      console.log(`You fell victim to a cave-in! Hospital bills: $${Math.abs(outcome)}`);
+    
+    if (outcome.value < 0) {
+      moneyLost -= outcome.value; // Convert negative to positive for moneyLost
     } else {
-      console.log(`You found a rare gem worth $${outcome}`);
+      moneyEarned += outcome.value;
     }
-
-    moneyEarned += outcome;
+    
+    showMessage(outcome.message);
     updateMoneyDisplay();
     workInProgress = false;
-    rollButton.disabled = false;
-    loadingBar.style.width = "100%";
-    setTimeout(() => loadingBar.remove(), 1000);
+    updateButtonStates();
+    loadingBar.remove();
   }, 10000);
 }
 
 function workInOfficeJob() {
   if (officeWorkInProgress || netMoney <= -100) {
+    if (netMoney <= -100) {
+      showMessage("You need to pay your debts before working!");
+    }
     return;
   }
 
   officeWorkInProgress = true;
+  updateButtonStates();
+  showMessage("Working in the office...", 7000);
 
   const loadingBar = document.createElement("div");
   loadingBar.style.height = "10px";
@@ -179,23 +259,29 @@ function workInOfficeJob() {
 
   setTimeout(() => {
     moneyEarned += 5;
+    showMessage("Office work complete. Earned $5");
     updateMoneyDisplay();
     officeWorkInProgress = false;
-    loadingBar.style.width = "100%";
-    setTimeout(() => loadingBar.remove(), 1000);
-  }, 7000); // Duration for office work
+    updateButtonStates();
+    loadingBar.remove();
+  }, 7000);
 }
 
 function workInStapleTables() {
   if (stapleWorkInProgress || netMoney <= -100) {
+    if (netMoney <= -100) {
+      showMessage("You need to pay your debts before working!");
+    }
     return;
   }
 
   stapleWorkInProgress = true;
+  updateButtonStates();
+  showMessage("Stapling tables...", 5000);
 
   const loadingBar = document.createElement("div");
   loadingBar.style.height = "10px";
-  loadingBar.style.backgroundColor = "#0f0"; 
+  loadingBar.style.backgroundColor = "#0f0";
   loadingBar.style.transition = "width 5s linear";
   loadingBar.style.width = "0%";
   document.body.appendChild(loadingBar);
@@ -205,24 +291,30 @@ function workInStapleTables() {
   }, 0);
 
   setTimeout(() => {
-    moneyEarned += 10; 
+    moneyEarned += 10;
+    showMessage("Tables stapled successfully. Earned $10");
     updateMoneyDisplay();
     stapleWorkInProgress = false;
-    loadingBar.style.width = "100%";
-    setTimeout(() => loadingBar.remove(), 1000);
-  }, 5000); // Duration for stapling tables
+    updateButtonStates();
+    loadingBar.remove();
+  }, 5000);
 }
 
 function takeNap() {
   if (napWorkInProgress || netMoney <= -100) {
+    if (netMoney <= -100) {
+      showMessage("You need to pay your debts before napping!");
+    }
     return;
   }
 
   napWorkInProgress = true;
+  updateButtonStates();
+  showMessage("Taking a nap...", 5000);
 
   const loadingBar = document.createElement("div");
   loadingBar.style.height = "10px";
-  loadingBar.style.backgroundColor = "#ff0"; 
+  loadingBar.style.backgroundColor = "#ff0";
   loadingBar.style.transition = "width 5s linear";
   loadingBar.style.width = "0%";
   document.body.appendChild(loadingBar);
@@ -232,35 +324,63 @@ function takeNap() {
   }, 0);
 
   setTimeout(() => {
-    nextRollChance = Math.random() < 0.5 ? "gain" : "lose"; // 50% chance to gain or lose 77% of money
+    nextRollChance = Math.random() < 0.5 ? "gain" : "lose";
+    const resultMessage = nextRollChance === "gain" ? 
+      "You had a good dream! Next roll will give you 77% more money!" : 
+      "You had a nightmare! Next roll will cost you 77% of your money!";
+    showMessage(resultMessage);
     napWorkInProgress = false;
-    loadingBar.style.width = "100%";
-    setTimeout(() => loadingBar.remove(), 1000);
-  }, 5000); // Duration for taking nap
+    updateButtonStates();
+    loadingBar.remove();
+  }, 5000);
+}
+
+function handleNextRoll() {
+  if (nextRollChance === "gain") {
+    const gainAmount = Math.abs(netMoney) * 0.77;
+    moneyEarned += gainAmount;
+    showMessage(`Dream bonus! Earned $${gainAmount.toFixed(2)}`);
+  } else if (nextRollChance === "lose") {
+    const lossAmount = Math.abs(netMoney) * 0.77;
+    moneyLost += lossAmount;
+    showMessage(`Nightmare penalty! Lost $${lossAmount.toFixed(2)}`);
+  }
+  nextRollChance = null; // Reset for the next roll
 }
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function handleNextRoll() {
-  if (nextRollChance === "gain") {
-    const gainAmount = netMoney * 0.77;
-    moneyEarned += gainAmount;
-    console.log(`You gained 77% of your money! Earned $${gainAmount}`);
-  } else if (nextRollChance === "lose") {
-    const lossAmount = netMoney * 0.77;
-    moneyLost += lossAmount;
-    console.log(`You lost 77% of your money! Lost $${lossAmount}`);
+// Check if player is bankrupt
+function checkBankruptcy() {
+  if (netMoney <= -1000) {
+    showMessage("BANKRUPTCY! Game over. Refresh to start again.", 0);
+    document.querySelectorAll("button").forEach(btn => btn.disabled = true);
   }
-  nextRollChance = null; // Reset for the next roll
 }
-// Event listener setup for buttons
-document.getElementById("roll-dice-btn").addEventListener("click", rollDice);
-document.getElementById("commit-btn").addEventListener("click", commit);
-document.getElementById("work-in-mines-btn").addEventListener("click", workInMines);
-document.getElementById("work-in-office-btn").addEventListener("click", workInOfficeJob);
-document.getElementById("work-staple-tables-btn").addEventListener("click", workInStapleTables);
-document.getElementById("take-nap-btn").addEventListener("click", takeNap);
 
-// Roll Dice, Work in Mines, Office Job, Staple Tables, Take Nap, and Commit functions remain unchanged
+// Initialize the game
+function initGame() {
+  updateButtonStates();
+  
+  // Add event listeners
+  document.getElementById("roll-dice-btn").addEventListener("click", rollDice);
+  document.getElementById("commit-btn").addEventListener("click", commit);
+  document.getElementById("work-in-mines-btn").addEventListener("click", workInMines);
+  document.getElementById("work-in-office-btn").addEventListener("click", workInOfficeJob);
+  document.getElementById("work-staple-tables-btn").addEventListener("click", workInStapleTables);
+  document.getElementById("take-nap-btn").addEventListener("click", takeNap);
+  
+  // Start with the commit button disabled
+  document.getElementById("commit-btn").disabled = true;
+  
+  // Check bankruptcy on any update
+  setInterval(checkBankruptcy, 1000);
+  
+  // Welcome message
+  showMessage("Welcome to the Work Simulation Game!", 5000);
+}
+
+// Initialize the game when the page loads
+window.addEventListener("load", initGame);
