@@ -21,8 +21,8 @@ const state = {
 
 // Star properties
 const SPEED_OF_LIGHT = 3e9;
-const INITIAL_ACCELERATION = 1e7;
-const ACCELERATION_EXPONENT = 0.00001;
+const INITIAL_ACCELERATION = 1e20;
+const ACCELERATION_EXPONENT = 2.5;
 
 // Initialize stars for the background with more variety and behavior
 for (let i = 0; i < 300; i++) {
@@ -45,7 +45,7 @@ function calculateExponentialAcceleration(currentSpeed) {
 }
 
 function applyThrust() {
-  state.acceleration = 0;
+  state.acceleration = 10;
   const currentAcceleration = calculateExponentialAcceleration(Math.abs(state.raptorSpeedX));
 
   // Left and right movement using both Arrow keys and A/D keys
