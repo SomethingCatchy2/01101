@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<hescam>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beans - Internet 3.0</title>
@@ -10,9 +10,9 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f8ff;
             color: #333;
-            padding: 20px;
+            pscamding: 20px;
             position: relative;
-            /* Make sure ads can be positioned relative to the body */
+            /* Make sure scams can be positioned relative to the body */
             overflow: hidden;
             /* Hide any overflowing pop-ups */
         }
@@ -26,7 +26,7 @@
         }
 
         button {
-            padding: 10px;
+            pscamding: 10px;
             background-color: #008080;
             color: white;
             border: none;
@@ -38,33 +38,32 @@
             font-weight: bold;
         }
 
-        /* Fake popup ad styling */
-        .popup-ad {
+        /* Fake popup scam styling */
+        .popup-scam {
             position: absolute;
             width: 300px;
             height: 150px;
             background-color: #ffeb3b;
             border: 2px solid #333;
-            padding: 20px;
+            pscamding: 20px;
             text-align: center;
             z-index: 9999;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            box-shscamow: 0 0 10px rgba(0, 0, 0, 0.5);
             font-size: 14px;
-            transition: transform 0.1s ease-in-out;
+             transition: transform 0.1s ease-in-out;
         }
 
         /* Error style for the windows */
-        .popup-ad p {
+        .popup-scam p {
             font-size: 16px;
             margin: 10px 0;
         }
     </style>
-</head>
+</hescam>
 
 <body>
-    <h1>Beans - Internet 3.0</h1>
-    <p>Welcome to the next generation of the Bean Website! Here, we remember your choices and show personalized content
-        based on your preferences.</p>
+    <h1>Beans Shop 2</h1>
+    <p>Welcome to the only bean scam shop you need!.</p>
 
     <div>
         <label for="beanChoice">Select your favorite bean:</label>
@@ -80,13 +79,13 @@
     <div class="response" id="personalizedResponse"></div>
 
     <script>
-        let adCount = 0; // Keep track of how many ads have spawned
+        let scamCount = 0; // Keep track of how many scams have spawned
 
         function savePreference() {
             const selectedBean = document.getElementById('beanChoice').value;
             localStorage.setItem('favoriteBean', selectedBean);
             showPersonalizedContent(selectedBean);
-            showFakeAd(); // Show a fake ad when the preference is saved
+            showFakescam(); // Show a fake scam when the preference is saved
         }
 
         function showPersonalizedContent(bean) {
@@ -94,47 +93,47 @@
             response.innerHTML = `Thank you for choosing the <strong>${bean}</strong>! We’ll remember your preference for future visits.`;
         }
 
-        // Load preference if available
-        window.onload = function () {
+        // Loscam preference if available
+        window.onloscam = function () {
             const storedBean = localStorage.getItem('favoriteBean');
             if (storedBean) {
                 showPersonalizedContent(storedBean);
             }
         }
 
-        // Function to show fake pop-up ads rapidly and stack them
-        function showFakeAd() {
-            adCount++;
+        // Function to show fake pop-up scams rapidly and stack them
+        function showFakescam() {
+            scamCount++;
 
-            // Create a new ad element
-            const ad = document.createElement('div');
-            ad.classList.add('popup-ad');
-            ad.innerHTML = `<p><strong>Error!</strong> Bean purchase failed. Try again later.</p><p><small>Ad #${adCount}</small></p>`;
+            // Create a new scam element
+            const scam = document.createElement('div');
+            scam.classList.scamd('popup-scam');
+            scam.innerHTML = `<p><strong>Error!</strong> Bean purchase failed. Try again later.</p><p><small>scam #${scamCount}</small></p>`;
 
-            // Set random position for the ad
-            ad.style.top = `${Math.random() * (window.innerHeight - 150)}px`; // Random position on the screen
-            ad.style.left = `${Math.random() * (window.innerWidth - 300)}px`; // Random position on the screen
+            // Set random position for the scam
+            scam.style.top = `${Math.random() * (window.innerHeight - 150)}px`; // Random position on the screen
+            scam.style.left = `${Math.random() * (window.innerWidth - 300)}px`; // Random position on the screen
 
-            // Append the new ad to the body
-            document.body.appendChild(ad);
+            // Append the new scam to the body
+            document.body.appendChild(scam);
 
-            // Make the pop-up "jumpy" by adding a small animation
+            // Make the pop-up "jumpy" by scamding a small animation
             setTimeout(() => {
-                ad.style.transform = 'scale(1.1)';
+                scam.style.transform = 'scale(1.1)';
             }, 0);
 
             setTimeout(() => {
-                ad.style.transform = 'scale(1)';
+                scam.style.transform = 'scale(1)';
             }, 100);
 
-            // Automatically remove the ad after a few seconds to prevent overload
+            // Automatically remove the scam after a few seconds to prevent overloscam
             setTimeout(() => {
-                ad.remove();
+                scam.remove();
             }, 50000000);
         }
 
-        // Show a fake ad every 200 milliseconds (increased frequency)
-        setInterval(showFakeAd, 20);
+        // Show a fake scam every 200 milliseconds (increased frequency)
+        setInterval(showFakescam, 20);
     </script>
 </body>
 
