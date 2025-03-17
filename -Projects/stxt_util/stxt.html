@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STXT File Utility</title>
+  <style>
+    /* Minimal CSS to create simple boxes and layout */
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      margin: 20px;
+      background-color: #163d0438;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .box {
+      border: 1px solid #000000;
+      padding: 15px;
+      margin: 10px;
+      background-color: #25570469;
+      width: 400px;
+      box-sizing: border-box;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="file"],
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 12px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .result {
+      margin-top: 10px;
+      word-wrap: break-word;
+      background: #ffffff;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>STXT File Utility</h1>
+  <div class="container">
+    <!-- Encoding Box -->
+    <div class="box" id="encodeBox">
+      <h2>Encode .txt File</h2>
+      <label for="txtFile">Select .txt file:</label>
+      <input type="file" id="txtFile" accept=".txt">
+      <button id="encodeBtn">Encode</button>
+      <div class="result" id="encodeResult"></div>
+    </div>
+<br><hr>
+    <!-- Decoding Box -->
+    <div class="box" id="decodeBox">
+      <h2>Decode .stxt File</h2>
+      <label for="stxtFile">Select .stxt file:</label>
+      <input type="file" id="stxtFile" accept=".stxt">
+      <button id="decodeBtn">Decode</button>
+      <textarea id="decodedText" rows="10" placeholder="Decoded text will appear here..."></textarea>
+    </div>
+  </div>
+  <br><hr>
+  <!-- Write and Save Box with Recent Files Menu -->
+  <div class="box" id="writeBox">
+    <h2>Write and Save STXT File</h2>
+    <p>
+      You can type your text below and then save it as a .stxt file. <br>
+      Only the following characters are allowed: <br>
+      "abcdefghijklmnopqrstuvwxyz,.?' [space] and newline.
+    </p>
+    <label for="writeText">Enter your text:</label>
+    <textarea id="writeText" rows="8" placeholder="Write your text here..."></textarea>
+    <label for="saveFilename">File Name (without extension):</label>
+    <input type="text" id="saveFilename" placeholder="Enter file name">
+    <button id="saveBtn">Save to .stxt</button>
+    <div class="result" id="saveResult"></div>
+  </div>
+  <br><hr>
+  <div class="box" id="writeBox">
+    <h3>Recent Files</h3>
+    <p>Select a recent file to load its content into the editor.</p>
+    <select id="recentFiles">
+      <option value="">-- Select a recent file --</option>
+    </select>
+    <button id="loadRecentBtn">Load Selected File</button>
+    <div class="result" id="recentResult"></div>
+ </div>
+
+  <script>
+    // Allowed characters used in the STXT encoding
+    const ALLOWED = "abcdefghijklmnopqrstuvwxyz,.?' \n";
+
+    /**
+     * Convert a character to its corresponding 5-bit value.
+     * Returns -1 if the character is not allowed.
+     */
+    function charToValue(c) {
+      c = c.toLowerCase();
+      const idx = ALLOWED.indexOf(c);
+      return idx !== -1 ? idx : -1;
+    }
+
+    /**
+     * Convert a 5-bit value back to its character.
+     */
+    function valueToChar(v) {
+      return (v >= 0 && v < ALLOWED.length) ? ALLOWED[v] : '?';
+    }
+
+    /**
+     * Encode a string using 5-bit packing.
+     * Returns an array of encoded bytes.
+     */
+    function encodeText(text) {
+      let bitstream = 0;  // Temporary bit buffer.
+      let bitCount = 0;   // Number of bits in the buffer.
+      const bytes = [];   // Array to hold output bytes.
+
+      // Process each character in the text.
+      for (let i = 0; i < text.length; i++) {
+        const val = charToValue(text[i]);
+        if (val < 0) {
+          throw new Error("Invalid character found: " + text[i]);
+        }
+        // Shift the bitstream and add the new 5-bit value.
+        bitstream = (bitstream << 5) | val;
+        bitCount += 5;
+        // When at least 8 bits are in the buffer, extract a byte.
+        while (bitCount >= 8) {
+          bitCount -= 8;
+          const byte = (bitstream >> bitCount) & 0xFF;
+          bytes.push(byte);
+        }
+      }
+      // If any bits remain, pad them to form a full byte.
+      if (bitCount > 0) {
+        const byte = (bitstream << (8 - bitCount)) & 0xFF;
+        bytes.push(byte);
+      }
+      return bytes;
+    }
+
+    /**
+     * Create a header for the .stxt file.
+     * Format:
+     *  - Magic: 3 bytes ("STX")
+     *  - Version: 1 byte (1)
+     *  - Text length: 4 bytes (big-endian)
+     */
+    function createHeader(textLength) {
+      const header = new Uint8Array(8);
+      header[0] = "S".charCodeAt(0);
+      header[1] = "T".charCodeAt(0);
+      header[2] = "X".charCodeAt(0);
+      header[3] = 1;
+      header[4] = (textLength >> 24) & 0xFF;
+      header[5] = (textLength >> 16) & 0xFF;
+      header[6] = (textLength >> 8) & 0xFF;
+      header[7] = textLength & 0xFF;
+      return header;
+    }
+
+    /**
+     * Decode the 5-bit encoded data from the .stxt file.
+     * Returns the decoded text.
+     */
+    function decodeText(encodedBytes, expectedChars) {
+      let bitstream = 0;  // Temporary bit buffer.
+      let bitCount = 0;   // Number of bits in the buffer.
+      let text = "";      // Accumulated decoded text.
+
+      // Process each byte in the encoded data.
+      for (let i = 0; i < encodedBytes.length; i++) {
+        bitstream = (bitstream << 8) | encodedBytes[i];
+        bitCount += 8;
+        // Extract 5-bit groups when possible.
+        while (bitCount >= 5 && text.length < expectedChars) {
+          bitCount -= 5;
+          const value = (bitstream >> bitCount) & 0x1F;
+          text += valueToChar(value);
+        }
+      }
+      return text;
+    }
+
+    /**
+     * Handle the encoding process for a selected .txt file.
+     */
+    document.getElementById("encodeBtn").addEventListener("click", function() {
+      const fileInput = document.getElementById("txtFile");
+      const resultDiv = document.getElementById("encodeResult");
+      resultDiv.innerHTML = "";
+      if (!fileInput.files || fileInput.files.length === 0) {
+        resultDiv.innerHTML = "Please select a .txt file.";
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      // Read the file as text.
+      reader.onload = function(event) {
+        let text = event.target.result;
+        text = text.toLowerCase();
+        // Validate that every character is allowed.
+        for (let i = 0; i < text.length; i++) {
+          if (charToValue(text[i]) < 0) {
+            resultDiv.innerHTML = "Error: Invalid character encountered: '" + text[i] + "'";
+            return;
+          }
+        }
+        try {
+          // Perform the encoding.
+          const encodedBytes = encodeText(text);
+          // Create the header.
+          const header = createHeader(text.length);
+          // Combine header and encoded data.
+          const stxtArray = new Uint8Array(header.length + encodedBytes.length);
+          stxtArray.set(header, 0);
+          stxtArray.set(encodedBytes, header.length);
+          // Create a Blob and generate a download link.
+          const blob = new Blob([stxtArray], { type: "application/octet-stream" });
+          const url = URL.createObjectURL(blob);
+
+          // Create a link to download the encoded file.
+          const downloadLink = document.createElement("a");
+          downloadLink.href = url;
+          downloadLink.download = file.name.replace(/\.txt$/i, "") + ".stxt";
+          downloadLink.textContent = "Download encoded .stxt file";
+          resultDiv.innerHTML = "";
+          resultDiv.appendChild(downloadLink);
+        } catch (error) {
+          resultDiv.innerHTML = "Error during encoding: " + error.message;
+        }
+      };
+      reader.onerror = function() {
+        resultDiv.innerHTML = "Error reading file.";
+      };
+      reader.readAsText(file);
+    });
+
+    /**
+     * Handle the decoding process for a selected .stxt file.
+     */
+    document.getElementById("decodeBtn").addEventListener("click", function() {
+      const fileInput = document.getElementById("stxtFile");
+      const textArea = document.getElementById("decodedText");
+      textArea.value = "";
+      if (!fileInput.files || fileInput.files.length === 0) {
+        textArea.value = "Please select a .stxt file.";
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      // Read the file as an ArrayBuffer.
+      reader.onload = function(event) {
+        const arrayBuffer = event.target.result;
+        if (arrayBuffer.byteLength < 8) {
+          textArea.value = "Error: File too short.";
+          return;
+        }
+        const data = new Uint8Array(arrayBuffer);
+
+        // Verify the header: first 3 bytes should be "STX".
+        if (data[0] !== "S".charCodeAt(0) ||
+            data[1] !== "T".charCodeAt(0) ||
+            data[2] !== "X".charCodeAt(0)) {
+          textArea.value = "Error: Invalid file header.";
+          return;
+        }
+        // Check version (byte 3).
+        if (data[3] !== 1) {
+          textArea.value = "Error: Unsupported version: " + data[3];
+          return;
+        }
+        // Get the text length from the next 4 bytes (big-endian).
+        const textLength = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
+        // The rest of the file is the encoded data.
+        const encodedBytes = data.slice(8);
+        try {
+          const decoded = decodeText(encodedBytes, textLength);
+          textArea.value = decoded;
+        } catch (error) {
+          textArea.value = "Error during decoding: " + error.message;
+        }
+      };
+      reader.onerror = function() {
+        textArea.value = "Error reading file.";
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    /***********************
+     * Write and Save STXT *
+     ***********************/
+
+    /**
+     * Saves the text written in the text area as a .stxt file.
+     * Also stores the file name and content in localStorage for recent files.
+     */
+    document.getElementById("saveBtn").addEventListener("click", function() {
+      const text = document.getElementById("writeText").value;
+      const filenameInput = document.getElementById("saveFilename").value.trim();
+      const saveResult = document.getElementById("saveResult");
+      saveResult.innerHTML = "";
+
+      if (text.length === 0) {
+        saveResult.innerHTML = "Please enter some text.";
+        return;
+      }
+      if (filenameInput.length === 0) {
+        saveResult.innerHTML = "Please enter a file name.";
+        return;
+      }
+      // Validate each character in the text.
+      for (let i = 0; i < text.length; i++) {
+        if (charToValue(text[i]) < 0) {
+          saveResult.innerHTML = "Error: Invalid character encountered: '" + text[i] + "'";
+          return;
+        }
+      }
+      try {
+        const encodedBytes = encodeText(text);
+        const header = createHeader(text.length);
+        const stxtArray = new Uint8Array(header.length + encodedBytes.length);
+        stxtArray.set(header, 0);
+        stxtArray.set(encodedBytes, header.length);
+        const blob = new Blob([stxtArray], { type: "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+
+        // Create a download link with the user-specified filename.
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = filenameInput + ".stxt";
+        downloadLink.textContent = "Download " + downloadLink.download;
+        saveResult.innerHTML = "";
+        saveResult.appendChild(downloadLink);
+
+        // Save file info to recent files in localStorage.
+        saveRecentFile(filenameInput, text);
+        updateRecentFilesMenu();
+      } catch (error) {
+        saveResult.innerHTML = "Error during saving: " + error.message;
+      }
+    });
+
+    /**
+     * Save a recent file's name and content to localStorage.
+     * Stores up to 5 recent files.
+     */
+    function saveRecentFile(name, content) {
+      let recentFiles = JSON.parse(localStorage.getItem("recentFiles")) || [];
+      // Remove any existing entry with the same name.
+      recentFiles = recentFiles.filter(item => item.name !== name);
+      // Add the new file at the beginning.
+      recentFiles.unshift({ name, content });
+      // Limit to 5 recent files.
+      if (recentFiles.length > 5) {
+        recentFiles = recentFiles.slice(0, 5);
+      }
+      localStorage.setItem("recentFiles", JSON.stringify(recentFiles));
+    }
+
+    /**
+     * Update the recent files dropdown menu with entries from localStorage.
+     */
+    function updateRecentFilesMenu() {
+      const recentSelect = document.getElementById("recentFiles");
+      // Clear current options (except the default).
+      recentSelect.innerHTML = '<option value="">-- Select a recent file --</option>';
+      const recentFiles = JSON.parse(localStorage.getItem("recentFiles")) || [];
+      recentFiles.forEach(file => {
+        const option = document.createElement("option");
+        option.value = file.name;
+        option.textContent = file.name;
+        recentSelect.appendChild(option);
+      });
+    }
+
+    /**
+     * Load the selected recent file's content into the text area for editing.
+     */
+    document.getElementById("loadRecentBtn").addEventListener("click", function() {
+      const recentSelect = document.getElementById("recentFiles");
+      const selectedName = recentSelect.value;
+      const recentResult = document.getElementById("recentResult");
+      recentResult.innerHTML = "";
+      if (!selectedName) {
+        recentResult.innerHTML = "Please select a recent file.";
+        return;
+      }
+      const recentFiles = JSON.parse(localStorage.getItem("recentFiles")) || [];
+      const file = recentFiles.find(item => item.name === selectedName);
+      if (file) {
+        document.getElementById("writeText").value = file.content;
+        document.getElementById("saveFilename").value = file.name;
+        recentResult.innerHTML = "Loaded recent file: " + file.name;
+      } else {
+        recentResult.innerHTML = "Error: File not found.";
+      }
+    });
+
+    // Initialize recent files menu on page load.
+    updateRecentFilesMenu();
+
+    /*********************************************
+     * Force Allowed Characters in Write Textbox *
+     *********************************************/
+    document.getElementById("writeText").addEventListener("input", function() {
+      let filtered = "";
+      // Process each character and only allow allowed characters (force lowercase).
+      for (let i = 0; i < this.value.length; i++) {
+        let c = this.value[i].toLowerCase();
+        if (ALLOWED.indexOf(c) !== -1) {
+          filtered += c;
+        }
+      }
+      if (this.value !== filtered) {
+        this.value = filtered;
+      }
+    });
+  </script>
+</body>
+</html>
