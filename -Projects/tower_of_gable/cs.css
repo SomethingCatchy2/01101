@@ -1,80 +1,82 @@
-body {
-    margin: 0;
-    overflow: hidden;
+/* cs.css */
+/* Base container styling */
+.container {     
+    width: 80%;     
+    margin: 0 auto;     
+    padding: 10px;     
+    box-sizing: border-box;
     font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-}
-
-.game-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-}
-
-.dino {
-    position: absolute;
-    bottom: 50px;
-    left: 50px;
-    width: 50px;
-    height: 50px;
-    background-color: #555;
+  }
+  
+  /* Styling for boxes displaying game info */
+  .box {     
+    border: 1px solid black;     
+    padding: 10px;     
+    margin-bottom: 10px;
     border-radius: 5px;
-    animation: run 0.5s steps(2) infinite;
-}
+    background-color: #f9f9f9;
+  }
+  
+  /* Marquee container styling fixed */
+  .marquee-container {     
+    border: 1px solid black;     
+    padding: 5px;     
+    margin-bottom: 10px;     
+    height: 30px;     
+    overflow: hidden; /* Fixed: changed 'show' to 'hidden' */
+  }
+  
+  /* Improved button styling */
+  button {
 
-@keyframes run {
-    0% {
-        background-color: #555;
-    }
-
-    50% {
-        background-color: #888;
-    }
-
-    100% {
-        background-color: #555;
-    }
-}
-
-.cactus {
-    position: absolute;
-    bottom: 50px;
-    right: -50px;
-    width: 30px;
-    height: 50px;
-    background-color: #228b22;
-    border-radius: 3px;
-    animation: moveCactus 2s linear infinite;
-}
-
-@keyframes moveCactus {
-    from {
-        right: -50px;
-    }
-
-    to {
-        right: 100vw;
-    }
-}
-
-.jump {
-    animation: jump 0.3s ease-out;
-}
-
-@keyframes jump {
-    0% {
-        bottom: 50px;
-    }
-
-    50% {
-        bottom: 150px;
-    }
-
-    100% {
-        bottom: 50px;
-    }
-}
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  button:hover {
+    background-color: #091b0a69;
+  }
+  
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background-color: #cccccc;
+  }
+  
+  /* Center the header */
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Message display styling */
+  #message-display {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgb(0, 0, 0);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none;
+  }
+  
+  /* Progress bar container */
+  #progress-container {
+    width: 100%;
+    height: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+  
+  /* Progress bar */
+  #progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #4CAF50;
+    border-radius: 5px;
+    transition: width 0.1s linear;
+  }
