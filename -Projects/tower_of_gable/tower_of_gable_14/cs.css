@@ -128,3 +128,63 @@ h1 {
 
 /* Remove the old status-box styling or repurpose if needed */
 /* #status-box { display: none; } */ /* Hide if fully replaced */
+
+/* Shopping Box Styling */
+.shopping-box {
+  background-color: #f0f8ff; /* Alice blue - distinct color */
+}
+
+.shop-section {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+.shop-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.shop-section h5 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.shop-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px; /* Spacing between buttons */
+  margin-bottom: 10px;
+}
+
+.shop-grid button {
+  flex: 1 1 180px; /* Allow buttons to grow/shrink, base width 180px */
+  font-size: 0.85em;
+  padding: 6px 8px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+.shop-grid button:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+}
+.shop-grid button:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  border-color: #ced4da;
+  opacity: 0.8;
+  cursor: default;
+}
+
+.equipment-select label {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.equipment-select select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-width: 150px; /* Give dropdown some width */
+}

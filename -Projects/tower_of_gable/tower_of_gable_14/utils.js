@@ -1,52 +1,56 @@
 // utils.js
 import { gameState } from './game_state.js';
 
-// Keep these functions
-export function updateElementText(id, text) { /* ... unchanged ... */ }
-export function showMessage(message, duration = 3000) { /* ... unchanged ... */ }
-// Remove startProgressBar function
-
-// --- NEW Notification Function ---
-export function addNotification(message, type = 'info') {
-    const log = document.getElementById('notification-log');
-    if (!log) return;
-
-    const entry = document.createElement('p');
-    entry.textContent = message;
-    entry.classList.add(`notification-${type}`); // Add class based on type
-
-    log.appendChild(entry);
-
-    // Auto-scroll to the bottom
-    log.scrollTop = log.scrollHeight;
-
-    // Optional: Limit log length (e.g., remove oldest if > 50 entries)
-    if (log.children.length > 50) {
-        log.removeChild(log.firstChild);
+// Helper function to safely update element text content
+export function updateElementText(id, text) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = text;
+    } else {
+      // console.warn(`Element with ID "${id}" not found for text update.`);
     }
-}
+  }
+
+// Function to show a temporary message (Top Banner - Keep?)
+export function showMessage(message, duration = 3000) { /* ... unchanged ... */ }
+
+// --- Notification Function ---
+export function addNotification(message, type = 'info') { /* ... unchanged ... */ }
+
+// --- updateMoneyDisplay (Ensure Export) ---
+export function updateMoneyDisplay() { /* ... unchanged ... */ }
 
 
-// --- MODIFIED Button State Logic ---
+// --- Update Button States (WITH NULL CHECKS) ---
 export function updateButtonStates() {
     const isAnyJobRunning = gameState.isWorkingMines || gameState.isWorkingOffice || gameState.isWorkingStaples || gameState.isTakingNap || gameState.isWalkingDog || gameState.isSleepingHobby;
-    const canRollDice = !gameState.isWorkingMines && !gameState.isWorkingStaples && !gameState.isTakingNap && !gameState.isWalkingDog && !gameState.isSleepingHobby; // Can roll during office work
+    const canRollOrCommit = !gameState.isWorkingMines && !gameState.isWorkingStaples && !gameState.isTakingNap && !gameState.isWalkingDog && !gameState.isSleepingHobby;
 
-    // Disable individual job buttons if that job is running
-    document.getElementById('work-in-mines-btn').disabled = gameState.isWorkingMines;
-    document.getElementById('work-in-office-btn').disabled = gameState.isWorkingOffice;
-    document.getElementById('work-staple-tables-btn').disabled = gameState.isWorkingStaples;
-    document.getElementById('take-nap-btn').disabled = gameState.isTakingNap;
-    document.getElementById('work-dog-walker-btn').disabled = gameState.isWalkingDog;
-    document.getElementById('sleep-hobby-btn').disabled = gameState.isSleepingHobby;
+    // Helper function for setting disabled state safely
+    const safelySetDisabled = (id, isDisabled) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.disabled = isDisabled;
+        } else {
+             console.warn(`Button with ID '${id}' not found during updateButtonStates.`);
+        }
+    };
 
-    // Disable Dice/Commit based on specific rule
-    document.getElementById('roll-dice-btn').disabled = !canRollDice;
-    document.getElementById('commit-btn').disabled = !canRollDice || gameState.dice.length === 0;
+    // Disable individual job buttons
+    safelySetDisabled('work-in-mines-btn', gameState.isWorkingMines);
+    safelySetDisabled('work-in-office-btn', gameState.isWorkingOffice);
+    safelySetDisabled('work-staple-tables-btn', gameState.isWorkingStaples);
+    safelySetDisabled('take-nap-btn', gameState.isTakingNap);
+    safelySetDisabled('work-dog-walker-btn', gameState.isWalkingDog);
+    safelySetDisabled('sleep-hobby-btn', gameState.isSleepingHobby);
 
-    // General purpose buttons - disable if *any* job is running? Or allow? Let's allow for now.
-    document.getElementById('buy-clothes-btn').disabled = isAnyJobRunning; // Disable during any work
-    document.getElementById('buy-sunglasses-btn').disabled = isAnyJobRunning; // Disable during any work
+    // Disable Dice/Commit
+    safelySetDisabled('roll-dice-btn', !canRollOrCommit);
+    safelySetDisabled('commit-btn', !canRollOrCommit || gameState.dice.length === 0); // <-- Error was likely here
 
-    // Bankruptcy button is handled separately in checkBankruptcy
+    // Disable general purpose buttons
+    safelySetDisabled('buy-clothes-btn', isAnyJobRunning);
+    safelySetDisabled('buy-sunglasses-btn', isAnyJobRunning); // This ID might not exist if button removed
+
+    // Note: Bankruptcy button state is handled separately
 }

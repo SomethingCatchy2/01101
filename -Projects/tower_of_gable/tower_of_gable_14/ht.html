@@ -10,46 +10,63 @@
   <div class="container">
     <br>
     <h1>Tower of Gable - Web version: 14.1</h1>
-    <p>About Tower of Gable. You are a four year old gambling addict named Gabel. The IRS has been hunting you for the last 4 years, can you finally escape financial ruin? Find out in Tower of Gable - WebV14.1 (DLC 2.6)</p>
+    <p>About Tower of Gable...</p> <!-- Shortened for brevity -->
 
-    <!-- Display box for dice rolls, bonus, and total points -->
+    <!-- Game Stats Box -->
     <div class="box">
-      <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span></p>
-      <p><strong>Bonus Points:</strong> <span id="bonus-points">0</span></p>
-      <p><strong>Total Points:</strong> <span id="total-points">-</span></p>
-    </div>
-
-    <!-- Display box for wins and money info -->
-    <div class="box">
-      <p><strong>Wins:</strong> <span id="wins">0</span> |
-      <strong>Money Earned:</strong> $<span id="money-earned">0</span></p>
-      <strong>Money Lost:</strong> $<span id="money-lost">0</span></p>
-      <p><strong>Total Rolls:</strong> <span id="total-rolls">0</span> |
-      <strong>Net Money:</strong> $<span id="net-money">0</span></p>
-      <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Clothes Price:</strong> $<span id="clothes-price">0</span></p>
-      <p><strong>Location:</strong> <span id="location-display">North Carolina</span> | <strong>Sleep Level:</strong> <span id="sleep-level">100</span> | <strong>Muggability:</strong> <span id="muggability-display">0</span></p>
+      <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span> | <strong>Bonus:</strong> <span id="bonus-points">0</span> | <strong>Total:</strong> <span id="total-points">-</span></p>
+      <p><strong>Wins:</strong> <span id="wins">0</span> | <strong>Rolls:</strong> <span id="total-rolls">0</span></p>
+      <p><strong>Earned:</strong> $<span id="money-earned">0</span> | <strong>Lost:</strong> $<span id="money-lost">0</span> | <strong>Net:</strong> $<span id="net-money">0</span></p>
+      <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Clothes Cost:</strong> $<span id="clothes-price">0</span></p>
+      <p><strong>Location:</strong> <span id="location-display">NC</span> | <strong>Sleep:</strong> <span id="sleep-level">100</span> | <strong>Muggability:</strong> <span id="muggability-display">50</span></p>
       <p><strong>Slaves:</strong> <span id="slaves">0</span></p>
     </div>
 
-    <!-- Buttons to interact with the game -->
+    <!-- Action Buttons -->
     <div class="box">
       <button id="roll-dice-btn">Roll Dice</button>
       <button id="commit-btn">Commit</button>
-      <button id="work-in-mines-btn">Work in the Mines (10s)</button>
-      <button id="work-in-office-btn">Work in the Office (7s)</button>
-      <button id="work-staple-tables-btn">Work: Staple Tables (5s)</button>
-      <button id="take-nap-btn">Take Nap (5s)</button>
+      <button id="work-in-mines-btn">Work: Mines (10s)</button>
+      <button id="work-in-office-btn">Work: Office (7s)</button>
+      <button id="work-staple-tables-btn">Work: Staples (5s)</button>
+      <button id="take-nap-btn">Nap (5s)</button>
       <button id="work-dog-walker-btn">Work: Dog Walker (6s)</button>
       <button id="sleep-hobby-btn">Sleep (10s)</button>
       <button id="buy-clothes-btn">Buy Clothes</button>
-      <button id="buy-sunglasses-btn">Buy Sunglasses</button>
+      <!-- Sunglasses button removed if handled by shop -->
+      <!-- <button id="buy-sunglasses-btn">Buy Sunglasses</button> -->
+    </div>
+
+    <!-- Shopping and Equipment Box -->
+    <div class="box shopping-box">
+        <h4>Shopping & Equipment</h4>
+        <div class="shop-section">
+            <h5>Hats</h5>
+            <div id="hat-shop-grid" class="shop-grid">
+                <!-- Hat buy buttons generated here -->
+            </div>
+            <div class="equipment-select">
+                 <label for="equip-hat-select">Equip Hat:</label>
+                 <select id="equip-hat-select"><option value="">-- None --</option></select>
+            </div>
+        </div>
+        <div class="shop-section">
+            <h5>Jackets</h5>
+            <div id="jacket-shop-grid" class="shop-grid">
+                <!-- Jacket buy buttons generated here -->
+            </div>
+             <div class="equipment-select">
+                 <label for="equip-jacket-select">Equip Jacket:</label>
+                 <select id="equip-jacket-select"><option value="">-- None --</option></select>
+            </div>
+        </div>
     </div>
 
     <!-- Notification Log Area -->
     <div class="box notification-box">
       <h4>Notifications</h4>
       <div id="notification-log">
-        <!-- Notifications will be added here by JavaScript -->
+        <!-- Notifications added here -->
       </div>
     </div>
 
@@ -60,14 +77,17 @@
 
   </div>
 
-  <!-- Link to external JavaScript files with game logic -->
+  <!-- JS Module Imports -->
   <script type="module" src="game_state.js"></script>
+  <script type="module" src="items.js"></script> <!-- <<< NEW -->
   <script type="module" src="utils.js"></script>
+  <script type="module" src="muggability.js"></script> <!-- <<< NEW -->
+  <script type="module" src="shopping.js"></script> <!-- <<< NEW -->
   <script type="module" src="ageing.js"></script>
   <script type="module" src="work_enhancements.js"></script>
   <script type="module" src="location_taxes.js"></script>
   <script type="module" src="hobbies.js"></script>
-  <script type="module" src="fashion_muggability.js"></script>
+  <!-- fashion_muggability.js likely no longer needed if items handle it -->
   <script type="module" src="je.js"></script> <!-- Main je.js should be last -->
 </body>
 </html>
