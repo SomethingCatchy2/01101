@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tower of Gable</title>
+  <!-- Link to external CSS for base styling -->
+  <link rel="stylesheet" href="cs.css">
+</head>
+<body>
+  <div class="container">
+    <br>
+    <h1>Tower of Gable - Web version: 14</h1>
+    <p>About Tower of Gable. You are a four year old gambling addict named Gabel. The IRS has been hunting you for the last 4 years, can you finally escape financial ruin? Find out in Tower of Gable - WebV14 (DLC 2.5)</p>
+
+    <!-- Display box for dice rolls, bonus, and total points -->
+    <div class="box">
+      <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span></p>
+      <p><strong>Bonus Points:</strong> <span id="bonus-points">0</span></p>
+      <p><strong>Total Points:</strong> <span id="total-points">-</span></p>
+    </div>
+
+    <!-- Display box for wins and money info -->
+    <div class="box">
+      <p><strong>Wins:</strong> <span id="wins">0</span> |
+      <strong>Money Earned:</strong> $<span id="money-earned">0</span></p>
+      <!-- <p><strong>Missed Wins:</strong> <span id="missed-wins">0</span> |  -->
+      <strong>Money Lost:</strong> $<span id="money-lost">0</span></p>
+      <p><strong>Total Rolls:</strong> <span id="total-rolls">0</span> |
+      <strong>Net Money:</strong> $<span id="net-money">0</span></p>
+      <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Clothes Price:</strong> $<span id="clothes-price">0</span></p>
+      <p><strong>Location:</strong> <span id="location-display">North Carolina</span> | <strong>Sleep Level:</strong> <span id="sleep-level">100</span> | <strong>Muggability:</strong> <span id="muggability-display">0</span></p>
+      <p><strong>Slaves:</strong> <span id="slaves">0</span></p> <!-- Added slave count display -->
+    </div>
+
+    <!-- Buttons to interact with the game -->
+    <div class="box">
+      <button id="roll-dice-btn">Roll Dice</button>
+      <button id="commit-btn">Commit</button>
+      <button id="work-in-mines-btn">Work in the Mines</button>
+      <button id="work-in-office-btn">Work in the Office</button>
+      <button id="work-staple-tables-btn">Work: Staple Tables</button>
+      <button id="take-nap-btn">Take Nap</button>
+      <button id="work-dog-walker-btn">Work: Dog Walker</button>
+      <button id="sleep-hobby-btn">Sleep</button>
+      <button id="buy-clothes-btn">Buy Clothes</button>
+      <button id="buy-sunglasses-btn">Buy Sunglasses</button>
+    </div>
+
+    <!-- Status display for work in progress -->
+    <div class="box" id="status-box" style="display: none; position: relative;"> <!-- Added position: relative for button positioning -->
+      <p><strong>Status:</strong> <span id="status-message">Idle</span></p>
+      <div id="progress-container" style="width: 100%; height: 10px; background-color: #eee; margin-top: 10px;">
+        <div id="progress-bar" style="width: 0%; height: 100%; background-color: #4CAF50;"></div>
+      </div>
+      <button id="reset-game-btn" style="position: absolute; bottom: 5px; right: 5px;">Reset Game</button> <!-- Moved and positioned button -->
+    </div>
+  </div>
+
+  <!-- Link to external JavaScript files with game logic -->
+  <script type="module" src="game_state.js"></script>
+  <script type="module" src="utils.js"></script>
+  <script type="module" src="ageing.js"></script>
+  <script type="module" src="work_enhancements.js"></script>
+  <script type="module" src="location_taxes.js"></script>
+  <script type="module" src="hobbies.js"></script>
+  <script type="module" src="fashion_muggability.js"></script>
+  <script type="module" src="je.js"></script> <!-- Main je.js should be last -->
+</body>
+</html>
