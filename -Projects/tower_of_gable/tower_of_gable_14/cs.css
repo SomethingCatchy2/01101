@@ -17,30 +17,38 @@
   background-color: #f9f9f9;
 }
 
-/* Marquee container styling fixed */
+/* Marquee container styling fixed (Can likely be removed if not used) */
+/*
 .marquee-container {
   border: 1px solid black;
   padding: 5px;
   margin-bottom: 10px;
   height: 30px;
-  overflow: hidden; /* Fixed: changed 'show' to 'hidden' */
+  overflow: hidden;
 }
+*/
 
 /* Improved button styling */
 button {
-
+  margin: 2px; /* Add some space between buttons */
+  padding: 8px 12px; /* Consistent padding */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #e7e7e7;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 button:hover {
-  background-color: #091b0a69;
+  background-color: #d8d8d8;
+  border-color: #aaa;
 }
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
-  background-color: #cccccc;
+  opacity: 0.6;
+  background-color: #f0f0f0;
+  color: #999;
 }
 
 /* Center the header */
@@ -49,55 +57,74 @@ h1 {
   color: #333;
 }
 
-/* Message display styling */
+/* Message display styling (Top notification - KEEP for now) */
 #message-display {
   position: fixed;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.8); /* Slightly transparent black */
   color: white;
   padding: 10px 20px;
   border-radius: 5px;
   z-index: 1000;
   display: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Progress bar container */
-#progress-container {
-  width: 100%;
-  height: 10px;
-  background-color: #f1f1f1;
-  border-radius: 5px;
-  margin-top: 10px;
+/* Notification Log Styling */
+.notification-box {
+  background-color: #eee; /* Slightly different background */
 }
 
-/* Progress bar */
-#progress-bar {
-  width: 0%;
-  height: 100%;
-  background-color: #4CAF50;
-  border-radius: 5px;
-  transition: width 0.1s linear;
+#notification-log {
+  height: 150px; /* Fixed height */
+  overflow-y: scroll; /* Enable vertical scrolling */
+  border: 1px solid #ccc;
+  padding: 5px;
+  background-color: #fff;
+  font-size: 0.9em;
+  line-height: 1.4;
 }
 
-/* Styling for Reset Button in Status Box */
-#reset-game-btn {
-  background-color: #f44336; /* Initial red-ish color */
+#notification-log p {
+  margin: 2px 0;
+  padding: 3px;
+  border-bottom: 1px dotted #eee;
+}
+
+#notification-log p:last-child {
+  border-bottom: none;
+}
+
+/* Notification Type Styles */
+.notification-start { color: #666; }
+.notification-finish-success { color: green; font-weight: bold; }
+.notification-finish-fail { color: red; font-weight: bold; }
+.notification-win { color: #007bff; font-weight: bold; }
+.notification-loss { color: #dc3545; }
+.notification-info { color: #333; }
+.notification-mom { color: #ff8c00; font-style: italic; } /* Orange-ish for Mom */
+.notification-mom-rant { color: #ff8c00; font-style: italic; font-size: 0.95em; border: 1px solid #ff8c00; padding: 5px; margin: 5px 0; background-color: #fff9e6;}
+
+
+/* Bankruptcy Reset Button Styling */
+#bankruptcy-reset-btn {
+  background-color: #dc3545; /* Bootstrap danger red */
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 10px 20px; /* Make it more prominent */
+  font-size: 1.1em;
+  font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s; /* Smooth transition for hover */
+  transition: background-color 0.3s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-#reset-game-btn:hover {
-  background-color: #da190b; /* Darker red on hover */
+#bankruptcy-reset-btn:hover {
+  background-color: #c82333; /* Darker red on hover */
 }
 
-#reset-game-btn:disabled {
-  background-color: #cccccc; /* Grey when disabled */
-  cursor: not-allowed;
-  opacity: 0.7;
-}
+/* Remove the old status-box styling or repurpose if needed */
+/* #status-box { display: none; } */ /* Hide if fully replaced */

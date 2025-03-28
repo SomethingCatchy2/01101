@@ -10,17 +10,24 @@ export const gameState = {
     netMoney: 0,
     dice: [],
     alreadyCounted: false,
-    workInProgress: false,
-    officeWorkInProgress: false,
-    stapleWorkInProgress: false,
-    napWorkInProgress: false,
-    nextRollChance: null,
+  
+    // --- Individual Work Flags ---
+    isWorkingMines: false,
+    isWorkingOffice: false,
+    isWorkingStaples: false,
+    isTakingNap: false,
+    isWalkingDog: false,
+    isSleepingHobby: false,
+    // --- End Work Flags ---
+  
+    nextRollChance: null, // For nap outcome
     age: 4,
-    clothesPrice: 10 + (4 * 4), // Initial clothes price for age 4
+    clothesPrice: 10 + (4 * 4),
     lastClothingChange: Date.now(),
     currentLocation: "North Carolina",
     muggability: 0,
     equippedItems: {},
     sleepLevel: 100,
-    slaves: 0
+    slaves: 0,
+    momNagCount: 0, // Counter for Mom's nagging
   };

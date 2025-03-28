@@ -1,43 +1,47 @@
 // work_enhancements.js
 import { gameState } from './game_state.js';
-import { updateButtonStates, showMessage, startProgressBar, updateMoneyDisplay } from './utils.js';
+import { updateButtonStates, addNotification, updateMoneyDisplay } from './utils.js'; // Import addNotification
 
-let dogWalkerWorkInProgress = false; // Local work in progress flag
-
-export function initWorkEnhancements() {
-  // No specific initialization needed right now for work enhancements, but can add later
-}
+export function initWorkEnhancements() { }
 
 export function workAsDogWalker() {
-  if (dogWalkerWorkInProgress || gameState.netMoney <= -100) { // Using netMoney from gameState
+  // Use the specific flag from gameState
+  if (gameState.isWalkingDog || gameState.netMoney <= -100) {
     return;
   }
 
-  dogWalkerWorkInProgress = true;
-  updateButtonStates(); // Assuming updateButtonStates is in utils.js and handles all work types
-  showMessage("Walking dogs...", 6000); // Shorter duration for testing
+  gameState.isWalkingDog = true; // Set flag
+  updateButtonStates();
+  addNotification("Started walking dogs.", "start"); // Use addNotification
 
-  startProgressBar(6000); // Assuming startProgressBar is in utils.js
+  const duration = 6000; // 6 seconds
 
   setTimeout(() => {
+    // --- Balanced Outcomes ---
     const outcomes = [
-      { value: 150, message: "Walked a pack of happy pups! Earned $150." },
-      { value: -75, message: "A dog ran away and you got fined! Lost $75." },
-      { value: 250, message: "Found a lost wallet while dog walking! Earned $250." },
-      { value: 0, message: "Just a normal dog walking day. No extra earnings." }
+      { value: 120, message: "Walked a pack of happy pups! Reliable work." }, // Slightly buffed
+      { value: -75, message: "A dog ran away and you got fined!" },
+      { value: 200, message: "Found a lost wallet while dog walking!" }, // Kept
+      { value: 80, message: "Just a normal dog walking day. Steady pay." }, // Added okay outcome
+      { value: -20, message: "Stepped in dog poop. Cleaning cost you." } // Added small negative
     ];
+    // --- End Balanced Outcomes ---
 
     const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+    let notificationType = 'info';
 
     if (outcome.value < 0) {
-      gameState.moneyLost -= outcome.value;
+      gameState.moneyLost -= outcome.value; // moneyLost is positive loss
+      notificationType = 'finish-fail';
     } else {
       gameState.moneyEarned += outcome.value;
+      notificationType = 'finish-success';
     }
 
-    showMessage(outcome.message);
-    updateMoneyDisplay(); // Assuming updateMoneyDisplay is in utils.js
-    dogWalkerWorkInProgress = false;
-    updateButtonStates(); // Update button states after work is done
-  }, 6000);
+    // Use addNotification for finish message
+    addNotification(`Finished walking dogs. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
+    updateMoneyDisplay();
+    gameState.isWalkingDog = false; // Clear flag
+    updateButtonStates();
+  }, duration);
 }
