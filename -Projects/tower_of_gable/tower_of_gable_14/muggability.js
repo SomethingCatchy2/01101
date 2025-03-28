@@ -1,103 +1,140 @@
 // muggability.js
+// Handles the calculation and events related to the player's muggability score.
 import { gameState } from './game_state.js';
 import { itemDefinitions } from './items.js';
 import { addNotification, updateElementText, updateMoneyDisplay } from './utils.js';
 
-const MUGGABILITY_UPDATE_INTERVAL = 5000; // 5 seconds
-const SLEEP_DEPRIVATION_THRESHOLD = 10 * 60 * 1000; // 10 minutes without sleep/nap
+const MUGGABILITY_UPDATE_INTERVAL = 5000; // Update every 5 seconds
+const SLEEP_DEPRIVATION_THRESHOLD = 10 * 60 * 1000; // 10 minutes without sleep/nap increases risk
+const MUGGING_THRESHOLD = 100; // Muggability level at which mugging is triggered
+const MUGGING_RESET_VALUE = 50; // Value muggability resets to after a mugging attempt
+const MUGGING_SUCCESS_RATE = 0.75; // 75% chance the mugger succeeds
+const MONEY_LOSS_PERCENTAGE = 0.50; // Lose 50% of net money if mugged successfully
 
+/**
+ * Initializes the muggability system. Sets the interval timer.
+ */
 export function initMuggability() {
-    // Ensure lastSleepOrNapTime is initialized if loading old save
+    // Ensure lastSleepOrNapTime is initialized if loading old save or starting fresh
     gameState.lastSleepOrNapTime = gameState.lastSleepOrNapTime || Date.now();
+    // Ensure muggability is within bounds on load, defaulting to 50
+    gameState.muggability = Math.max(0, Math.min(100, Math.round(gameState.muggability ?? MUGGING_RESET_VALUE)));
+
     updateElementText("muggability-display", gameState.muggability); // Initial display
     setInterval(updateMuggability, MUGGABILITY_UPDATE_INTERVAL);
 }
 
+/**
+ * Periodically updates the player's muggability score based on various factors.
+ * Clamps the value between 0 and 100 and checks for mugging trigger.
+ */
 function updateMuggability() {
     let change = 0;
 
-    // 1. Base random fluctuation
-    change += Math.random() < 0.5 ? -1 : 1; // +/- 1
+    // 1. Base random fluctuation (+/- 1 or 2)
+    change += (Math.random() * 3) - 1.5; // Average change of 0, range ~ +/- 1.5
 
     // 2. Sleep Deprivation
     const timeSinceSleep = Date.now() - gameState.lastSleepOrNapTime;
     if (timeSinceSleep > SLEEP_DEPRIVATION_THRESHOLD) {
-        change += 3; // Increase faster if sleep deprived
-        if(Math.random() < 0.1) { // Small chance for extra notification
-             addNotification("You look tired and vulnerable...", "info");
+        change += 2.5; // Increase faster if sleep deprived (adjust amount as needed)
+        if (Math.random() < 0.05) { // Small chance for extra notification
+             addNotification("You look tired, making you an easier target...", "info");
         }
     } else {
-        // Slight decrease if recently slept
-         change -= 1;
+        change -= 0.5; // Slight decrease if recently rested
     }
 
-    // 3. Equipment Effects (Call helper function)
+    // 3. Equipment Effects
     change += calculateEquipmentMuggabilityEffect();
 
-    // 4. Crime Effects (Placeholder for future)
-    // if (gameState.committedCrimeRecently) { change += 5; }
+    // 4. Crime Effects (Placeholder - Add when crime system exists)
+    // Example: if (gameState.recentCrimeScore > 5) { change += 3; }
+
+    // 5. Net Money Effect (Slight increase if very wealthy, slight decrease if very poor)
+    if (gameState.netMoney > 10000) {
+        change += 0.5; // Look like you have money
+    } else if (gameState.netMoney < -1000) {
+        change -= 0.5; // Look like you have nothing worth taking
+    }
+
 
     // Apply change
     gameState.muggability += change;
 
-    // Clamp between 0 and 100
-    gameState.muggability = Math.max(0, Math.min(100, Math.round(gameState.muggability))); // Round to avoid decimals
+    // Clamp between 0 and 100 and round
+    gameState.muggability = Math.max(0, Math.min(100, Math.round(gameState.muggability)));
 
     // Update UI
     updateElementText("muggability-display", gameState.muggability);
 
     // Check for mugging event
-    if (gameState.muggability >= 100) {
+    if (gameState.muggability >= MUGGING_THRESHOLD) {
         triggerMugging();
     }
 }
 
-// Function called by equipItem in shopping.js AND by the interval
+/**
+ * Recalculates muggability immediately, typically after equipment change or rest.
+ */
 export function recalculateMuggability() {
-    // This function could potentially just call updateMuggability,
-    // but for immediate effect after equipping, we might just recalculate the equipment part.
-    // Let's just call the main update function for simplicity.
+    // We want the effect of equipment/rest to be factored in *now*,
+    // rather than waiting for the next interval.
+    // So, run the calculation logic directly.
     updateMuggability();
 }
 
 
+/**
+ * Calculates the combined muggability effect from equipped hat and jacket.
+ * @returns {number} The total muggability change from equipment.
+ */
 function calculateEquipmentMuggabilityEffect() {
     let effect = 0;
-    if (gameState.equippedHat && itemDefinitions[gameState.equippedHat]?.effects?.muggability) {
-        effect += itemDefinitions[gameState.equippedHat].effects.muggability;
-    }
-    if (gameState.equippedJacket && itemDefinitions[gameState.equippedJacket]?.effects?.muggability) {
-        effect += itemDefinitions[gameState.equippedJacket].effects.muggability;
-    }
+    // Safely access effects, default to 0 if item/effect doesn't exist
+    effect += itemDefinitions[gameState.equippedHat]?.effects?.muggability ?? 0;
+    effect += itemDefinitions[gameState.equippedJacket]?.effects?.muggability ?? 0;
     return effect;
 }
 
-
+/**
+ * Handles the mugging event when muggability reaches the threshold.
+ * Determines success/failure and applies consequences. Resets muggability.
+ */
 function triggerMugging() {
-    addNotification("Someone is trying to mug you!", "loss");
-    const successRate = 0.75; // 75% chance mugger succeeds
+    addNotification("Someone menacing approaches you!", "loss"); // Initial warning
 
-    if (Math.random() < successRate) {
-        // Mugger succeeds
-        const moneyToLose = Math.floor(gameState.netMoney / 2); // Lose 50%
-        if (moneyToLose > 0) {
-            gameState.moneyLost += moneyToLose;
-            addNotification(`Mugging successful! You lost $${moneyToLose.toFixed(2)}.`, "loss");
-            updateMoneyDisplay();
+    // Add a slight delay for suspense?
+    setTimeout(() => {
+        if (Math.random() < MUGGING_SUCCESS_RATE) {
+            // Mugger succeeds
+            let moneyToLose = 0;
+            if (gameState.netMoney > 0) { // Only lose if you have positive net money
+                 moneyToLose = Math.floor(gameState.netMoney * MONEY_LOSS_PERCENTAGE);
+            }
+
+            if (moneyToLose > 0) {
+                gameState.moneyLost += moneyToLose; // Add to losses
+                addNotification(`MUGGED! They took $${moneyToLose.toFixed(2)}!`, "loss");
+                updateMoneyDisplay();
+            } else {
+                addNotification("They tried to mug you... but you're broke! They left disgusted.", "info");
+            }
         } else {
-            addNotification("Mugging successful... but you had no money to steal!", "info");
+            // Mugger fails
+            addNotification("You fought them off! The mugger ran away!", "finish-success");
         }
-    } else {
-        // Mugger fails
-        addNotification("You managed to scare off the mugger!", "finish-success");
-    }
 
-    // Reset muggability regardless of outcome
-    gameState.muggability = 50;
-    updateElementText("muggability-display", gameState.muggability); // Update UI immediately
+        // Reset muggability
+        gameState.muggability = MUGGING_RESET_VALUE;
+        updateElementText("muggability-display", gameState.muggability); // Update UI immediately
+    }, 500); // 0.5 second delay
 }
 
-// Helper to be called when player sleeps or naps
+/**
+ * Updates the timestamp for the last sleep or nap action.
+ * Called from sleepHobby and takeNap functions.
+ */
 export function recordSleepOrNap() {
     gameState.lastSleepOrNapTime = Date.now();
 }

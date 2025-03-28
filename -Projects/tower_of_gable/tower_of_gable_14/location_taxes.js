@@ -1,28 +1,66 @@
 // location_taxes.js
+// Handles location-based effects, primarily taxes (currently very basic).
 import { gameState } from './game_state.js';
-import { updateElementText, showMessage, updateMoneyDisplay } from './utils.js';
+import { updateElementText, addNotification, updateMoneyDisplay } from './utils.js';
 
+// Example location data - Expand later
 const locations = {
   "North Carolina": {
-    hospitalStay: 2511,
-    totalTax: 0.15, // 15% - Example value, adjust as needed
+    hospitalStay: 2511, // Example data, not used yet
+    totalTaxRate: 0.10, // Example: 10% flat tax on NET money per year
     name: "North Carolina"
   },
-  // Add more locations later if needed
+  // Add California, New York, etc. later with different rates
 };
 
+// Tax interval now matches age interval (apply taxes on birthday)
+const TAX_INTERVAL = 5 * 60 * 1000; // Apply tax every game year (5 minutes)
+
+/**
+ * Initializes location display and starts the tax interval timer.
+ */
 export function initLocationTaxes() {
-  updateElementText("location-display", locations[gameState.currentLocation].name); // Display location name
-  setInterval(calculateTaxes, 5 * 60 * 1000); // Calculate taxes every 5 minutes
+  // Ensure currentLocation exists, default if not
+  gameState.currentLocation = gameState.currentLocation || "North Carolina";
+  const locationData = locations[gameState.currentLocation] || locations["North Carolina"];
+
+  updateElementText("location-display", locationData.name); // Display location name
+  setInterval(calculateAndApplyTaxes, TAX_INTERVAL);
 }
 
-function calculateTaxes() {
-  const locationData = locations[gameState.currentLocation];
-  const taxAmount = gameState.netMoney * locationData.totalTax;
-  if (taxAmount > 0) { // Only apply tax if netMoney is positive or zero
-    gameState.moneyLost += taxAmount;
-    gameState.netMoney -= taxAmount;
-    updateMoneyDisplay();
-    showMessage(`Paid taxes: $${taxAmount.toFixed(2)}`);
+/**
+ * Calculates and applies taxes based on current location and net money.
+ * Called periodically (on player's birthday).
+ */
+function calculateAndApplyTaxes() {
+  const locationData = locations[gameState.currentLocation] || locations["North Carolina"]; // Fallback
+
+  // Only tax if net money is positive
+  if (gameState.netMoney > 0) {
+      // Calculate tax based on NET money at the time tax is due
+      const taxAmount = Math.floor(gameState.netMoney * locationData.totalTaxRate);
+
+      if (taxAmount > 0) {
+          gameState.moneyLost += taxAmount; // Add to total losses
+          addNotification(`Paid $${taxAmount.toFixed(2)} in yearly taxes for ${locationData.name}. Happy Birthday?`, 'loss'); // Changed type to loss
+          updateMoneyDisplay(); // Update net money display
+      } else {
+           addNotification(`No taxes due this year in ${locationData.name} (Net income too low).`, 'info');
+      }
+  } else {
+      // Notify if no tax due to being broke/in debt
+       addNotification(`No taxes due this year in ${locationData.name} (you're broke!).`, 'info');
   }
+}
+
+// Function to potentially change location later (via UI or event)
+export function changeLocation(newLocationKey) {
+    if (locations[newLocationKey]) {
+        gameState.currentLocation = newLocationKey;
+        updateElementText("location-display", locations[newLocationKey].name);
+        addNotification(`Moved to ${locations[newLocationKey].name}. Tax rates may differ.`, 'info');
+        // Potentially add cost or time delay for moving later
+    } else {
+        addNotification(`Invalid location: ${newLocationKey}`, 'loss');
+    }
 }
