@@ -52,7 +52,7 @@
       }
 
       .box {
-        border: 1px solid #000000;
+        border: 1px solid #00000051;
         padding: 15px;
         margin-bottom: 15px;
         /* border-radius: 5px; */
@@ -146,6 +146,47 @@
           user-select: none; /* Prevent text selection on click */
       }
       /* --- END OF ADDED RULES --- */
+
+      .notification-box {
+        height: 500px; /* Match the height of the quote-marquee */
+        overflow: hidden; /* Prevent scrolling */
+        border: 1px solid #00000051;
+        padding: 15px;
+        background-color: #ffffff;
+      }
+
+      .notification-box p {
+        margin: 0 0 10px;
+        color: #495057;
+        font-size: 0.9em;
+        line-height: 1.4;
+      }
+
+      .notification-box p.notification-info {
+        color: #abaeb1;
+      }
+
+      .notification-box p.notification-loss {
+        color: #533a3d;
+      }
+
+      .notification-box p.notification-win {
+        color: #88938a;
+      }
+
+      .notification-box p.notification-mom,
+      .notification-box p.notification-mom-rant {
+        color: #606060;
+        font-style: italic;
+      }
+
+      .notification-box p.notification-finish-success {
+        color: #3c4749;
+      }
+
+      .notification-box p.notification-finish-fail {
+        color: #3e3b33;
+      }
     </style>
     <audio src="../../../../mp3 and mp4/Office2.wav" autoplay loop></audio>
 </head>
@@ -399,9 +440,11 @@
         </div>
 
         <!-- Right Sidebar: Notification Log Area -->
-        <div class="sidebar right-sidebar notification-box">
+        <div class="sidebar right-sidebar">
             <h4>Notificatiary</h4>
-            <div id="notification-log"></div>
+            <div class="box notification-box">
+                <div id="notification-log"></div>
+            </div>
         </div>
 
     </div> <!-- End of .page-wrapper -->
@@ -417,7 +460,7 @@
       // --- START OF CONSOLIDATED JAVASCRIPT ---
 
       // --- Configuration Constants ---
-      const SIGNIFICANT_DEBT_THRESHOLD = -200;
+      const SIGNIFICANT_DEBT_THRESHOLD = -5000;
       const BANKRUPTCY_THRESHOLD = -10000;
       const MISSED_WIN_PENALTY = 125;
       const COMMIT_FAIL_PENALTY = 75;
@@ -568,14 +611,20 @@
       }
       function addNotification(message, type = 'info') {
           const log = document.getElementById('notification-log');
-          if (!log) { console.error("Notification log element not found!"); return; }
+          if (!log) {
+              console.error("Notification log element not found!");
+              return;
+          }
+
           const entry = document.createElement('p');
           entry.textContent = message;
           entry.className = `notification-${type}`;
-          log.insertBefore(entry, log.firstChild); // Add to top
-          const MAX_LOG_ENTRIES = 100;
-          while (log.children.length > MAX_LOG_ENTRIES) {
-              log.removeChild(log.lastChild);
+          log.appendChild(entry); // Add to the bottom
+
+          // Remove old notifications to maintain the box size
+          const MAX_VISIBLE_NOTIFICATIONS = 10; // Adjust as needed
+          while (log.children.length > MAX_VISIBLE_NOTIFICATIONS) {
+              log.removeChild(log.firstChild);
           }
       }
       function updateMoneyDisplay() {
