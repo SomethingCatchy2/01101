@@ -7,17 +7,24 @@
     <link rel="icon" type="image/png" href="../../../../Images/favicon.png">
     <style>
       html, body {
-        height: 100%;
+        /* height: 100%; <--- REMOVED THIS LINE */
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
         background-color: #f4f4f4;
         color: #333;
+        /* Added min-height to ensure body fills at least viewport height
+           when content is very short, preventing footer from floating mid-screen,
+           but still allowing it to be pushed down by longer content. */
+        min-height: 100vh;
+        display: flex; /* Use flexbox on body */
+        flex-direction: column; /* Stack children vertically */
       }
 
       .page-wrapper {
         display: flex;
         width: 100%;
+        flex-grow: 1; /* Allow this wrapper to grow and fill available space */
       }
 
       .sidebar {
@@ -34,7 +41,7 @@
       .main-content {
         flex: 1;
         padding: 15px 25px;
-        overflow-y: auto;
+        overflow-y: auto; /* Keep scrolling within main content if needed */
       }
 
       .header-section h1 {
@@ -98,6 +105,9 @@
         text-align: center;
         font-size: 0.9em;
         color: #495057;
+        /* Removed any specific height/positioning rules if they existed */
+        /* Added margin-top: auto; IS NOT NEEDED with the flexbox setup on body */
+        /* flex-shrink: 0; /* Prevent footer from shrinking */
       }
 
       /* Marquee effect for quotes */
@@ -115,15 +125,29 @@
           overflow-wrap: break-word;
           padding-right: 15px;
         }
-  
+
       @keyframes scrollQuotes {
           0% { transform: translateY(0%); }
           100% { transform: translateY(-50%); }
       }
+
+      /* --- ADDED RULES FOR COLLAPSIBLE MENU --- */
+      /* Rule to hide the content when collapsed */
+      .collapsible-content.collapsed {
+          display: none;
+      }
+
+      /* Optional: Make the toggle header look clickable */
+      #shop-toggle {
+          cursor: pointer;
+          user-select: none; /* Prevent text selection on click */
+      }
+      /* --- END OF ADDED RULES --- */
     </style>
     <audio src="../../../../mp3 and mp4/Office2.wav" autoplay loop></audio>
 </head>
 <body>
+    <!-- The .page-wrapper now handles the main content area -->
     <div class="page-wrapper">
 
         <!-- Left Sidebar: Quote Marquee -->
@@ -198,6 +222,82 @@
                     <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
                     <p>When Anthropology, you have.</p>
                     <p>If are ever that are good, remember Abraham hair.</p>
+                    <!-- Repeat quotes for continuous marquee effect -->
+                    <p>All dreams come, if have courage pursue.</p>
+                    <p>5It never late be you have.</p>
+                    <p>Try to a of, but try become man value.</p>
+                    <p>Keep face toward sunshine, shadows fall you.</p>
+                    <p>Either run day, the runs you.</p>
+                    <p>Every brings closer the home.</p>
+                    <p>Nothing impossible, word says possible.</p>
+                    <p>Success of from to without of.</p>
+                    <p>If dont the youre, start another.</p>
+                    <p>He conquers is mightiest.</p>
+                    <p>One with makes majority.</p>
+                    <p>The adventure can take to the of dreams.</p>
+                    <p>The Preparation tomorrow doing best.</p>
+                    <p>Be you you in right, stand.</p>
+                    <p>Life no, except ones make.</p>
+                    <p>Everyone is taken.</p>
+                    <p>Nothing impossible is possible.</p>
+                    <p>The belongs those in the of dreams.</p>
+                    <p>Keep face always the, and will behind you.</p>
+                    <p>If can it, you can.</p>
+                    <p>Keep eyes, and feet ground.</p>
+                    <p>We must get rid the of life, so as to have the life.</p>
+                    <p>I'd rather I've done than I haven't done.</p>
+                    <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
+                    <p>Those who, you.</p>
+                    <p>Being in the was, tomato pursued.</p>
+                    <p>If you soup, do not floor.</p>
+                    <p>When you acquire, burn trash.</p>
+                    <p>Get the new Ford F-120, then you Ernn Graph.</p>
+                    <p>Grandma? Why do these cookies taste like ash?</p>
+                    <p>Failure, an opportunity for Failure.</p>
+                    <p>Do not Failure success.</p>
+                    <p>I found a toad.</p>
+                    <p>If tall, don’t short people too.</p>
+                    <p>Help I having a heatstroke.</p>
+                    <p>Are do flooring tiles? No.</p>
+                    <p>Nehhhh WEHHHH.</p>
+                    <p>People of types, there are two. You the flu.</p>
+                    <p>Sir Ver once said “What would you like to order?”</p>
+                    <p>Snake with two tails, thats why hats.</p>
+                    <p>If at first you don’t succeed, quit and blame others.</p>
+                    <p>If you forgot, just forget you forgot.</p>
+                    <p>If you go bankrupt, take out a loan.</p>
+                    <p>If you are in debt, take out a loan.</p>
+                    <p>If you are breaking the national debt limit, take out a loan.</p>
+                    <p>One must, you find.</p>
+                    <p>Therein you shall find, The all new FORD F-120.</p>
+                    <p>If lost your, just your.</p>
+                    <p>"The life is living." -Play Dough.</p>
+                    <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
+                    <p>Whys the the gone?</p>
+                    <p>“And thats why they don’t build roads with toads.”</p>
+                    <p>Wasing in the doing, being in the not.</p>
+                    <p>The mind not, but fire should be kindled.</p>
+                    <p>Every beginning comes, some beginning.</p>
+                    <p>Wealth in having great, but having few.</p>
+                    <p>The greatest lies in falling, but in rising every we fall.</p>
+                    <p>No great, without great your.</p>
+                    <p>No Taxation without Representation!</p>
+                    <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
+                    <p>Your dream is, follow and will.</p>
+                    <p>Failure 99%, still 1.</p>
+                    <p>If you are in soup, do not in floor.</p>
+                    <p>Gulping Gerberium.</p>
+                    <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
+                    <p>When Anthropology, you have.</p>
+                    <p>If are ever that are good, remember Abraham hair.</p>
+                    <p>Are do lightbulbs? Seven hundred men.</p>
+                    <p> I have severe lung damage.</p>
+                    <p> [cookie clicker reference]</p>
+                    <p>Work and fun what do I that's more. have choose do.</p>
+                    <p>Failure the that success flavor.</p>
+                    <p>At one woke, morning the.</p>
+                    <p>What's money? A is success he up the and to at and between what wants do.</p>
+
                 </div>
             </div>
         </div>
@@ -301,11 +401,11 @@
             <div id="notification-log"></div>
         </div>
 
-    </div>
+    </div> <!-- End of .page-wrapper -->
 
     <div id="message-display" style="display: none;"></div>
 
-    <footer>
+    <footer> <!-- Footer is now outside page-wrapper, directly under body -->
         <span>Tower of Gable v14.6 (DLC 2.8)</span> <!-- VERSION UPDATE -->
         <button id="bankruptcy-reset-btn">Reset Game</button> <!-- No longer starts disabled -->
     </footer>
@@ -519,7 +619,7 @@
               safelySetDisabled('work-in-mines-btn', true); // Restricted
               safelySetDisabled('work-in-office-btn', true); // Restricted
               safelySetDisabled('work-staple-tables-btn', gameState.isWorkingStaples); // Allowed if not running
-              safelySetDisabled('work-dog-walker-btn', gameState.isWalkingDog); // Allowed if not running
+              safelySetDisabled('work-dog-walker-btn', gameState.isWorkingDog); // Allowed if not running
               safelySetDisabled('take-nap-btn', true); // Restricted
               safelySetDisabled('sleep-hobby-btn', true); // Restricted
           } else {
@@ -528,7 +628,7 @@
               safelySetDisabled('work-in-office-btn', gameState.isWorkingOffice);
               safelySetDisabled('work-staple-tables-btn', gameState.isWorkingStaples);
               safelySetDisabled('take-nap-btn', gameState.isTakingNap);
-              safelySetDisabled('work-dog-walker-btn', gameState.isWalkingDog);
+              safelySetDisabled('work-dog-walker-btn', gameState.isWorkingDog);
               safelySetDisabled('sleep-hobby-btn', gameState.isSleepingHobby);
 
               // Roll/Commit depend on other jobs running
@@ -849,7 +949,7 @@
       // --- Content from hobbies.js ---
       const SLEEP_DURATION = 10000;
       const SLEEP_RECOVERY = 50;
-      const SLEEP_UPDATE_INTERVAL = 60 * 100; // Should be 1 minute (60 * 1000)
+      const SLEEP_UPDATE_INTERVAL = 60 * 1000; // Corrected interval to 1 minute
       const FAINT_PENALTY = 50;
       function initHobbies() {
         updateElementText("sleep-level", gameState.sleepLevel);
@@ -887,18 +987,21 @@
 
       // --- Content from ui_enhancements.js ---
       function initUIEnhancements() { initCollapsibleShop(); }
-      function initCollapsibleShop() { /* ... (no changes needed) ... */
+      function initCollapsibleShop() { /* ... (no changes needed, relies on CSS now) ... */
           const shopToggle = document.getElementById('shop-toggle');
           const shopContent = document.querySelector('.shopping-box .collapsible-content');
           const toggleIndicator = document.querySelector('#shop-toggle .toggle-indicator');
           if (shopToggle && shopContent && toggleIndicator) {
+              // Check localStorage to set initial state
               const isCollapsed = localStorage.getItem('shopCollapsed') === 'true';
-              shopContent.classList.toggle('collapsed', isCollapsed);
-              toggleIndicator.textContent = isCollapsed ? '►' : '▼';
+              shopContent.classList.toggle('collapsed', isCollapsed); // Apply 'collapsed' class if needed
+              toggleIndicator.textContent = isCollapsed ? '►' : '▼'; // Set indicator based on state
+
+              // Add click listener to toggle
               shopToggle.addEventListener('click', () => {
-                  const currentlyCollapsed = shopContent.classList.toggle('collapsed');
-                  toggleIndicator.textContent = currentlyCollapsed ? '►' : '▼';
-                  localStorage.setItem('shopCollapsed', currentlyCollapsed);
+                  const currentlyCollapsed = shopContent.classList.toggle('collapsed'); // Toggle the class
+                  toggleIndicator.textContent = currentlyCollapsed ? '►' : '▼'; // Update indicator
+                  localStorage.setItem('shopCollapsed', currentlyCollapsed); // Save state
               });
           } else { console.error("Collapsible shop elements not found!"); }
       }
@@ -1205,6 +1308,7 @@
 
       function resetGameAll(notify = true) {
         console.log("Resetting game state...");
+        const notificationLog = document.getElementById('notification-log'); // Get log element here
         // Define initial state clearly
         const initialState = {
             wins: 0, consecutiveWins: 0, missedWins: 0, bonusPoints: 0, totalRolls: 0, dice: [], alreadyCounted: false,
@@ -1247,7 +1351,7 @@
         initHobbies();
         initShopping();
         initMuggability();
-        initUIEnhancements();
+        initUIEnhancements(); // This now calls initCollapsibleShop
 
         // Attach button listeners
         const buttonMappings = {
