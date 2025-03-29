@@ -687,7 +687,7 @@
       }
       function checkMajorMuggingEvent() {
           const effectiveMuggability = calculateEffectiveMuggability();
-          addNotification(`Performing 7-minute mugging check. Effective Muggability: ${effectiveMuggability}%...`, "muggability");
+          addNotification(`You notice a shadowed figure...`, "muggability");
           if (Math.random() * 100 < effectiveMuggability) {
               triggerMugging();
           } else {
@@ -698,8 +698,8 @@
           // This function is called whenever something *might* change the effective muggability (equip, sleep change)
           updateMuggabilityDisplay();
       }
-      function triggerMugging() {
-          addNotification("Someone menacing approaches you!", "loss");
+      function triggerMugging() { //main
+          addNotification("The shadow aproches!", "loss");
           // Reduce base muggability immediately
           gameState.baseMuggability = Math.max(0, gameState.baseMuggability - MUGGABILITY_RESET_REDUCTION);
           updateMuggabilityDisplay(); // Show the reduced base value right away
@@ -712,13 +712,37 @@
                   }
                   if (moneyToLose > 0) {
                       gameState.moneyLost += moneyToLose;
-                      addNotification(`MUGGED! They took $${moneyToLose.toFixed(2)}! (${(MONEY_LOSS_PERCENTAGE * 100).toFixed(0)}% of your cash)`, "loss");
+                      addNotification(`You've been mugged! Lost $${moneyToLose.toFixed(2)}! (${(MONEY_LOSS_PERCENTAGE * 100).toFixed(0)}% of your cash)`, "loss");
                       updateMoneyDisplay(); // Update money and potentially trigger bankruptcy/debt states
                   } else {
-                      addNotification("They tried to mug you... but you're broke! They left disgusted.", "info");
+                      addNotification("The shadow mugged you... but you're broke! They left looking disapointed.", "info");
                   }
               } else {
-                  addNotification("You fought them off! The mugger ran away!", "finish-success");
+                  addNotification("You scared off the shadow.", "finish-success");
+              }
+          }, 1500); // Delay for confrontation message
+      }
+      function triggerFaintMugging() { //for fainting
+     
+          // Reduce base muggability immediately
+          gameState.baseMuggability = Math.max(0, gameState.baseMuggability - MUGGABILITY_RESET_REDUCTION);
+          updateMuggabilityDisplay(); // Show the reduced base value right away
+
+          setTimeout(() => {
+              if (Math.random() < MUGGING_SUCCESS_RATE) {
+                  let moneyToLose = 0;
+                  if (gameState.netMoney > 0) {
+                      moneyToLose = Math.floor(gameState.netMoney * MONEY_LOSS_PERCENTAGE);
+                  }
+                  if (moneyToLose > 0) {
+                      gameState.moneyLost += moneyToLose;
+                      addNotification(`You've been mugged! Lost $${moneyToLose.toFixed(2)}! (${(MONEY_LOSS_PERCENTAGE * 100).toFixed(0)}% of your cash)`, "loss");
+                      updateMoneyDisplay(); // Update money and potentially trigger bankruptcy/debt states
+                  } else {
+                      addNotification("Something mugged you... but you were too poor to be mugged! It left looking disapointed.", "info");
+                  }
+              } else {
+                //   addNotification("Your hairline scared off the shadow.", "finish-success");
               }
           }, 1500); // Delay for confrontation message
       }
@@ -907,7 +931,7 @@
       function momNag() { /* ... (no changes needed) ... */
           gameState.momNagCount++;
           if (gameState.momNagCount < MOM_RANT_THRESHOLD) {
-              const nags = ["Mom: Go shower.", "Mom: you showered recently?", "Don't forget you need to shower...", "Mom: You need to shower."];
+              const nags = ["Mom: Go shower.", "Mom: Have you showered recently?", "Don't forget you need to shower...", "Mom: You need to shower."];
               addNotification(nags[Math.floor(Math.random() * nags.length)], "mom");
           } else {
               const hours = Math.floor(gameState.momNagCount * 5 / 60);
@@ -920,7 +944,7 @@
       // --- Content from work_enhancements.js ---
       const DOG_WALKER_JOB_DURATION = 5000;
       function workAsDogWalker() { /* ... (no changes needed) ... */
-        if (gameState.isWalkingDog || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start this job due to significant debt.", "loss"); return; }
+        // if (gameState.isWalkingDog || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start this job due to significant debt.", "loss"); return; }
         gameState.isWalkingDog = true; updateButtonStates(); addNotification("Started walking dogs.", "start");
         setTimeout(() => {
           const outcomes = [ { value: 120, message: "Walked a pack of happy pups!" }, { value: 0, message: "A dog tried to run away, but you caught it! Wasted time." }, { value: 200, message: "Found a lost wallet!" }, { value: 80, message: "Just a normal day." }, { value: 10, message: "Stepped in poop... but found a dollar!" }, { value: 50, message: "Taught a dog a new trick." } ];
@@ -986,6 +1010,7 @@
         gameState.moneyLost += FAINT_PENALTY; gameState.sleepLevel = 15;
         updateElementText("sleep-level", gameState.sleepLevel); updateMoneyDisplay();
         recalculateAndDisplayMuggability();
+        triggerFaintMugging();// Optional: Trigger mugging on fainting
        }
 
       // --- Content from ui_enhancements.js ---
