@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Gable</title>
+    <link rel="icon" type="image/png" href="../../../../Images/favicon.png">
+    <style>
+      /* --- START OF Content from cs.css --- */
+      html, body {
+          height: 100%; /* Ensure html and body take full height */
+          margin: 0;
+          padding: 0;
+      }
+      body {
+        padding-bottom: 60px; /* Footer height */
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        /* Removed overflow: hidden; */
+        display: flex;
+        flex-direction: column;
+      }
+
+      .page-wrapper {
+        display: flex;
+        flex: 1; /* Allow wrapper to grow */
+        width: 100%;
+        /* Removed overflow: hidden; Rely on children overflow */
+        min-height: 0; /* Prevent flex item from exceeding container in some browsers */
+      }
+
+      .sidebar {
+        flex: 0 0 280px;
+        height: 100%;
+        overflow-y: hidden; /* Keep sidebar content clipped/scrollable if needed */
+        padding: 15px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        background-color: #e9ecef;
+        border-right: 1px solid #dee2e6;
+      }
+      .right-sidebar {
+        border-right: none;
+        border-left: 1px solid #dee2e6;
+      }
+
+      .sidebar h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #343a40;
+        flex-shrink: 0;
+        border-bottom: 1px solid #ced4da;
+        padding-bottom: 8px;
+      }
+
+      .main-content {
+        flex: 1;
+        height: 100%;
+        overflow-y: auto; /* THIS MUST BE AUTO for scrolling */
+        /* overflow-x: hidden; Optional: Prevent horizontal scroll if content pushes */
+        padding: 15px 25px;
+        box-sizing: border-box;
+        position: relative; /* Needed for potential absolute positioning of custom dropdowns later, but might not be needed for native selects */
+        min-height: 0; /* Prevent flex item from exceeding container */
+      }
+
+      .header-section {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header-section h1 {
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+      .header-section p {
+        color: #555;
+        font-size: 0.95em;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .box {
+        border: 1px solid #ced4da;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .box p {
+        margin: 6px 0;
+      }
+
+      .box p strong {
+        color: #111;
+      }
+
+      /* Muggability Display Style - REMOVED specific color */
+      /* #muggability-info strong {
+          /* color: #dc3545; /* REMOVED */
+      /* } */
+
+      .quote-marquee {
+        flex-grow: 1;
+        overflow: hidden;
+        position: relative;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        min-height: 100px; /* Ensure it has some minimum height */
+      }
+
+      .quote-content {
+        animation: vertical-scroll 180s linear infinite;
+        width: 100%;
+      }
+
+      .quote-content p {
+        margin: 0;
+        padding: 8px 10px;
+        font-size: 0.9em;
+        color: #495057;
+        border-bottom: 1px dotted #dee2e6;
+        white-space: normal;
+      }
+      .quote-content p:last-child {
+        border-bottom: none;
+      }
+
+      @keyframes vertical-scroll {
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-50%);
+        }
+      }
+
+      .notification-box {
+        padding: 0;
+        background-color: #e9ecef;
+        border: none;
+        box-shadow: none;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .right-sidebar h4 {
+        margin: 15px 15px 10px 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #ced4da;
+        flex-shrink: 0;
+      }
+
+      #notification-log {
+        flex-grow: 1;
+        overflow-y: scroll;
+        border: 1px solid #ced4da;
+        padding: 8px;
+        background-color: #ffffff;
+        font-size: 0.9em;
+        line-height: 1.45;
+        border-radius: 4px;
+        /* height: auto; Let flexbox control */
+        min-height: 100px; /* Ensure it doesn't collapse */
+        margin: 0 15px 15px 15px;
+      }
+
+      #notification-log p {
+        margin: 1px 0;
+        padding: 4px 6px;
+        border-bottom: 1px dotted #f0f0f0;
+        word-wrap: break-word;
+      }
+      .notification-start { color: #5a5a5a; }
+      .notification-finish-success { color: #28a745; }
+      .notification-finish-fail { color: #dc3545; }
+      .notification-win { color: #0056b3; font-weight: bold; }
+      .notification-loss { color: #dc3545; }
+      .notification-info { color: #444; }
+      .notification-mom { color: #fd7e14; font-style: italic; }
+      .notification-mom-rant { color: #e85d04; font-style: italic; font-size: 0.95em; border: 1px solid #ffba8a; padding: 6px; margin: 6px 0; background-color: #fff3e0; border-radius: 4px; }
+      .notification-debt { color: #8b0000; font-weight: bold; }
+      .notification-muggability { color: #6f42c1; }
+
+
+      .collapsible-container h4 {
+        cursor: pointer;
+        user-select: none;
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        color: #343a40;
+      }
+
+      .toggle-indicator {
+        font-size: 0.8em;
+        margin-left: 10px;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .collapsible-content {
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        margin-top: 5px;
+        transition: max-height 0.3s ease-out, opacity 0.2s ease-out, padding-top 0.3s ease-out, margin-top 0.3s ease-out;
+        overflow: hidden;
+        max-height: 1500px; /* Increased max-height */
+        opacity: 1;
+      }
+
+      .collapsible-content.collapsed {
+        max-height: 0;
+        padding-top: 0;
+        margin-top: 0;
+        border-top: none;
+        opacity: 0;
+      }
+
+      .shopping-box {
+        background-color: #f8f9fa;
+      }
+      .shop-section { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e9ecef; }
+      .shop-section:last-child { border-bottom: none; margin-bottom: 0; }
+      .shop-section h5 { margin-top: 0; margin-bottom: 10px; color: #495057; }
+      .shop-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+      .shop-grid button { flex: 1 1 180px; font-size: 0.85em; padding: 6px 8px; background-color: #fff; border: 1px solid #ced4da; text-align: left; line-height: 1.3; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+      .shop-grid button:hover { background-color: #f1f3f5; border-color: #adb5bd; }
+      .shop-grid button:disabled { background-color: #e9ecef; color: #adb5bd; border-color: #dee2e6; opacity: 0.8; cursor: default; box-shadow: none; }
+
+      .equipment-select { margin-top: 8px; }
+      .equipment-select label { margin-right: 8px; font-weight: bold; font-size: 0.9em; color: #495057; display: inline-block; width: 80px; }
+      .equipment-select select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ced4da; min-width: 160px; background-color: #fff; font-size: 0.9em; }
+
+      .actions-box button {
+        margin: 4px;
+        padding: 8px 15px;
+        border: 1px solid #adb5bd;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        color: #343a40;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        font-size: 0.95em;
+      }
+      .actions-box button:hover:not(:disabled) { background-color: #e9ecef; border-color: #6c757d; } /* Added :not(:disabled) */
+      .actions-box button:disabled { cursor: not-allowed; opacity: 0.65; background-color: #e9ecef; color: #adb5bd; box-shadow: none; border-color: #ced4da; }
+      #roll-dice-btn { background-color: #cfe2ff; border-color: #b6d4fe; }
+      #roll-dice-btn:hover:not(:disabled) { background-color: #b6d4fe; }
+      #commit-btn { background-color: #d1e7dd; border-color: #badbcc; }
+      #commit-btn:hover:not(:disabled) { background-color: #badbcc; }
+
+
+      #bankruptcy-reset-btn {
+        border: none;
+        font-size: 0.9em;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s, opacity 0.3s; /* Added opacity transition */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        margin-left: 15px;
+        padding: 6px 12px;
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+      }
+      #bankruptcy-reset-btn:hover:not(:disabled) { background-color: #c82333; border-color: #c82333; transform: translateY(-1px); box-shadow: 0 3px 5px rgba(0,0,0,0.25); }
+      #bankruptcy-reset-btn:active:not(:disabled) { transform: translateY(0px); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+      /* No longer need a :disabled style if it's always enabled */
+      /* #bankruptcy-reset-btn:disabled { ... } */
+
+      #message-display {
+        position: fixed;
+        bottom: 70px; /* Raised slightly to avoid footer overlap */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(44, 62, 80, 0.9);
+        color: white;
+        padding: 12px 22px;
+        border-radius: 5px;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        font-size: 1.05em;
+        text-align: center;
+        max-width: 80%;
+      }
+
+      footer {
+          background-color: #e9ecef;
+          border-top: 1px solid #dee2e6;
+          padding: 10px 20px;
+          text-align: center;
+          font-size: 0.9em;
+          color: #495057;
+          width: 100%;
+          box-sizing: border-box;
+          flex-shrink: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 60px; /* Explicit height */
+          position: relative; /* Ensure it's part of flow */
+          z-index: 10; /* Keep above main content if absolutely needed, but likely fine */
+      }
+      footer span {
+          margin-right: 15px;
+      }
+      /* --- END OF CSS --- */
+    </style>
+    <audio src="../../../../mp3 and mp4/Office2.wav" autoplay loop></audio>
+</head>
+<body>
+    <div class="page-wrapper">
+
+        <!-- Left Sidebar: Quote Marquee -->
+        <div class="sidebar left-sidebar">
+            <h4>Inspirational Gableisms</h4>
+            <div class="quote-marquee">
+                <div class="quote-content">
+                    <!-- Quotes remain the same -->
+                    <p>All dreams come, if have courage pursue.</p>
+                    <p>5It never late be you have.</p>
+                    <p>Try to a of, but try become man value.</p>
+                    <p>Keep face toward sunshine, shadows fall you.</p>
+                    <p>Either run day, the runs you.</p>
+                    <p>Every brings closer the home.</p>
+                    <p>Nothing impossible, word says possible.</p>
+                    <p>Success of from to without of.</p>
+                    <p>If dont the youre, start another.</p>
+                    <p>He conquers is mightiest.</p>
+                    <p>One with makes majority.</p>
+                    <p>The adventure can take to the of dreams.</p>
+                    <p>The Preparation tomorrow doing best.</p>
+                    <p>Be you you in right, stand.</p>
+                    <p>Life no, except ones make.</p>
+                    <p>Everyone is taken.</p>
+                    <p>Nothing impossible is possible.</p>
+                    <p>The belongs those in the of dreams.</p>
+                    <p>Keep face always the, and will behind you.</p>
+                    <p>If can it, you can.</p>
+                    <p>Keep eyes, and feet ground.</p>
+                    <p>We must get rid the of life, so as to have the life.</p>
+                    <p>I'd rather I've done than I haven't done.</p>
+                    <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
+                    <p>Those who, you.</p>
+                    <p>Being in the was, tomato pursued.</p>
+                    <p>If you soup, do not floor.</p>
+                    <p>When you acquire, burn trash.</p>
+                    <p>Get the new Ford F-120, then you Ernn Graph.</p>
+                    <p>Grandma? Why do these cookies taste like ash?</p>
+                    <p>Failure, an opportunity for Failure.</p>
+                    <p>Do not Failure success.</p>
+                    <p>I found a toad.</p>
+                    <p>If tall, don’t short people too.</p>
+                    <p>Help I having a heatstroke.</p>
+                    <p>Are do flooring tiles? No.</p>
+                    <p>Nehhhh WEHHHH.</p>
+                    <p>People of types, there are two. You the flu.</p>
+                    <p>Sir Ver once said “What would you like to order?”</p>
+                    <p>Snake with two tails, thats why hats.</p>
+                    <p>If at first you don’t succeed, quit and blame others.</p>
+                    <p>If you forgot, just forget you forgot.</p>
+                    <p>If you go bankrupt, take out a loan.</p>
+                    <p>If you are in debt, take out a loan.</p>
+                    <p>If you are breaking the national debt limit, take out a loan.</p>
+                    <p>One must, you find.</p>
+                    <p>Therein you shall find, The all new FORD F-120.</p>
+                    <p>If lost your, just your.</p>
+                    <p>"The life is living." -Play Dough.</p>
+                    <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
+                    <p>Whys the the gone?</p>
+                    <p>“And thats why they don’t build roads with toads.”</p>
+                    <p>Wasing in the doing, being in the not.</p>
+                    <p>The mind not, but fire should be kindled.</p>
+                    <p>Every beginning comes, some beginning.</p>
+                    <p>Wealth in having great, but having few.</p>
+                    <p>The greatest lies in falling, but in rising every we fall.</p>
+                    <p>No great, without great your.</p>
+                    <p>No Taxation without Representation!</p>
+                    <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
+                    <p>Your dream is, follow and will.</p>
+                    <p>Failure 99%, still 1.</p>
+                    <p>If you are in soup, do not in floor.</p>
+                    <p>Gulping Gerberium.</p>
+                    <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
+                    <p>When Anthropology, you have.</p>
+                    <p>If are ever that are good, remember Abraham hair.</p>
+                    <p>Are do lightbulbs? Seven hundred men.</p>
+                    <p>I have severe lung damage.</p>
+                    <p>[cookie clicker reference]</p>
+                    <p>Work and fun what do I that's more. have choose do.</p>
+                    <p>Failure the that success flavor.</p>
+                    <p>At one woke, morning the.</p>
+                    <p>What's money? A is success he up the and to at and between what wants do.</p>
+                    <!-- DUPLICATE THE ENTIRE LIST ABOVE FOR SEAMLESS SCROLLING -->
+                    <p>All dreams come, if have courage pursue.</p>
+                    <p>5It never late be you have.</p>
+                    <p>Try to a of, but try become man value.</p>
+                    <p>Keep face toward sunshine, shadows fall you.</p>
+                    <p>Either run day, the runs you.</p>
+                    <p>Every brings closer the home.</p>
+                    <p>Nothing impossible, word says possible.</p>
+                    <p>Success of from to without of.</p>
+                    <p>If dont the youre, start another.</p>
+                    <p>He conquers is mightiest.</p>
+                    <p>One with makes majority.</p>
+                    <p>The adventure can take to the of dreams.</p>
+                    <p>The Preparation tomorrow doing best.</p>
+                    <p>Be you you in right, stand.</p>
+                    <p>Life no, except ones make.</p>
+                    <p>Everyone is taken.</p>
+                    <p>Nothing impossible is possible.</p>
+                    <p>The belongs those in the of dreams.</p>
+                    <p>Keep face always the, and will behind you.</p>
+                    <p>If can it, you can.</p>
+                    <p>Keep eyes, and feet ground.</p>
+                    <p>We must get rid the of life, so as to have the life.</p>
+                    <p>I'd rather I've done than I haven't done.</p>
+                    <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
+                    <p>Those who, you.</p>
+                    <p>Being in the was, tomato pursued.</p>
+                    <p>If you soup, do not floor.</p>
+                    <p>When you acquire, burn trash.</p>
+                    <p>Get the new Ford F-120, then you Ernn Graph.</p>
+                    <p>Grandma? Why do these cookies taste like ash?</p>
+                    <p>Failure, an opportunity for Failure.</p>
+                    <p>Do not Failure success.</p>
+                    <p>I found a toad.</p>
+                    <p>If tall, don’t short people too.</p>
+                    <p>Help I having a heatstroke.</p>
+                    <p>Are do flooring tiles? No.</p>
+                    <p>Nehhhh WEHHHH.</p>
+                    <p>People of types, there are two. You the flu.</p>
+                    <p>Sir Ver once said “What would you like to order?”</p>
+                    <p>Snake with two tails, thats why hats.</p>
+                    <p>If at first you don’t succeed, quit and blame others.</p>
+                    <p>If you forgot, just forget you forgot.</p>
+                    <p>If you go bankrupt, take out a loan.</p>
+                    <p>If you are in debt, take out a loan.</p>
+                    <p>If you are breaking the national debt limit, take out a loan.</p>
+                    <p>One must, you find.</p>
+                    <p>Therein you shall find, The all new FORD F-120.</p>
+                    <p>If lost your, just your.</p>
+                    <p>"The life is living." -Play Dough.</p>
+                    <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
+                    <p>Whys the the gone?</p>
+                    <p>“And thats why they don’t build roads with toads.”</p>
+                    <p>Wasing in the doing, being in the not.</p>
+                    <p>The mind not, but fire should be kindled.</p>
+                    <p>Every beginning comes, some beginning.</p>
+                    <p>Wealth in having great, but having few.</p>
+                    <p>The greatest lies in falling, but in rising every we fall.</p>
+                    <p>No great, without great your.</p>
+                    <p>No Taxation without Representation!</p>
+                    <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
+                    <p>Your dream is, follow and will.</p>
+                    <p>Failure 99%, still 1.</p>
+                    <p>If you are in soup, do not in floor.</p>
+                    <p>Gulping Gerberium.</p>
+                    <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
+                    <p>When Anthropology, you have.</p>
+                    <p>If are ever that are good, remember Abraham hair.</p>
+                    <p>Are do lightbulbs? Seven hundred men.</p>
+                    <p>I have severe lung damage.</p>
+                    <p>[cookie clicker reference]</p>
+                    <p>Work and fun what do I that's more. have choose do.</p>
+                    <p>Failure the that success flavor.</p>
+                    <p>At one woke, morning the.</p>
+                    <p>What's money? A is success he up the and to at and between what wants do.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="header-section">
+                <h1>Tower of Gable</h1> <!-- VERSION UPDATE - Web version: 14.6 -->
+                <p>About Tower of Gable. You are a four year old gambling addict named Gabel. The IRS has been hunting you for the last 4 years, can you finally escape financial ruin? Find out in Tower of Gable</p>
+            </div>
+
+            <div class="box stats-box">
+                 <!-- Updated Labels for clarity -->
+                <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span> | <strong>Bonus Points:</strong> <span id="bonus-points">0</span> | <strong>Total Points:</strong> <span id="total-points">-</span></p>
+                <p><strong>Wins:</strong> <span id="wins">0</span> | <strong>Rolls:</strong> <span id="total-rolls">0</span></p>
+                <p><strong>Earned:</strong> $<span id="money-earned">0.00</span> | <strong>Lost:</strong> $<span id="money-lost">0.00</span> | <strong>Net:</strong> $<span id="net-money">0.00</span></p>
+                <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Location:</strong> <span id="location-display">North Carolina</span> | <strong>Sleep:</strong> <span id="sleep-level">100</span></p>
+                 <p id="muggability-info">
+                    <strong>Muggability:</strong> <!-- Label no longer styled red -->
+                    Base: <span id="muggability-base-display">50</span> |
+                    Effective: <span id="muggability-effective-display">50</span>
+                </p>
+            </div>
+
+            <div class="box actions-box">
+                <button id="roll-dice-btn">Roll Dice ($1)</button>
+                <button id="commit-btn">Commit</button>
+                <button id="work-in-mines-btn">Work: In Mines (15s)</button>
+                <button id="work-in-office-btn">Work: In Office (12s)</button>
+                <button id="work-staple-tables-btn">Work: Staples Tables (4s)</button>
+                <button id="work-dog-walker-btn">Work: Walk Dogs (5s)</button>
+                <button id="take-nap-btn">Nap (5s)</button>
+                <button id="sleep-hobby-btn">Sleep (10s)</button>
+            </div>
+
+            <div class="box shopping-box collapsible-container">
+                 <h4 id="shop-toggle">Shopping & Equipment <span class="toggle-indicator">▼</span></h4>
+                 <div class="collapsible-content">
+                    <!-- Helms -->
+                    <div class="shop-section">
+                        <h5>Helms</h5>
+                        <div id="hat-shop-grid" class="shop-grid"></div>
+                        <div class="equipment-select">
+                            <label for="equip-hat-select">Equip Helm:</label>
+                            <select id="equip-hat-select"><option value="">-- None --</option></select>
+                        </div>
+                    </div>
+                    <!-- Coats -->
+                    <div class="shop-section">
+                        <h5>Coats</h5>
+                        <div id="jacket-shop-grid" class="shop-grid"></div>
+                        <div class="equipment-select">
+                            <label for="equip-jacket-select">Equip Coat:</label>
+                            <select id="equip-jacket-select"><option value="">-- None --</option></select>
+                        </div>
+                    </div>
+                    <!-- Shirts -->
+                    <div class="shop-section">
+                        <h5>Shirts</h5>
+                        <div id="shirt-shop-grid" class="shop-grid"></div>
+                        <div class="equipment-select">
+                            <label for="equip-shirt-select">Equip Shirt:</label>
+                            <select id="equip-shirt-select"><option value="genericShirt">Generic Shirt</option></select>
+                        </div>
+                    </div>
+                    <!-- Pants -->
+                    <div class="shop-section">
+                        <h5>Pants</h5>
+                        <div id="pants-shop-grid" class="shop-grid"></div>
+                        <div class="equipment-select">
+                            <label for="equip-pants-select">Equip Pants:</label>
+                            <select id="equip-pants-select"><option value="genericPants">Generic Pants</option></select>
+                        </div>
+                    </div>
+                    <!-- Shoes -->
+                    <div class="shop-section">
+                        <h5>Shoes</h5>
+                        <div id="shoes-shop-grid" class="shop-grid"></div>
+                        <div class="equipment-select">
+                            <label for="equip-shoes-select">Equip Shoes:</label>
+                            <select id="equip-shoes-select"><option value="">-- None --</option></select>
+                        </div>
+                    </div>
+                    <!-- Socks -->
+                    <div class="shop-section">
+                        <h5>Socks</h5>
+                        <div id="socks-shop-grid" class="shop-grid"></div>
+                        <div class="equipment-select">
+                            <label for="equip-socks-select">Equip Socks:</label>
+                            <select id="equip-socks-select"><option value="">-- None --</option></select>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+        </div>
+
+        <!-- Right Sidebar: Notification Log Area -->
+        <div class="sidebar right-sidebar notification-box">
+            <h4>Notificatiary</h4>
+            <div id="notification-log"></div>
+        </div>
+
+    </div>
+
+    <div id="message-display" style="display: none;"></div>
+
+    <footer>
+        <span>Tower of Gable v14.6 (DLC 2.8)</span> <!-- VERSION UPDATE -->
+        <button id="bankruptcy-reset-btn">Reset Game</button> <!-- No longer starts disabled -->
+    </footer>
+
+    <script type="module">
+      // --- START OF CONSOLIDATED JAVASCRIPT ---
+
+      // --- Configuration Constants ---
+      const SIGNIFICANT_DEBT_THRESHOLD = -200;
+      const BANKRUPTCY_THRESHOLD = -10000;
+      const MISSED_WIN_PENALTY = 125;
+      const COMMIT_FAIL_PENALTY = 75;
+      const WIN_STREAK_BONUS_MULTIPLIER = 300;
+      const BASE_WIN_AMOUNT = 1000;
+      const NAP_GAIN_AMOUNT = 85;
+      const NAP_LOSS_AMOUNT = 65;
+      const SAVE_GAME_KEY = 'towerOfGableData_v14_6'; // VERSION UPDATE for bonus point reset logic
+      const GAME_VERSION_STRING = "WebV14.6"; // VERSION UPDATE
+
+      // Muggability Constants
+      const MUGGABILITY_FLUCTUATION_INTERVAL = 10000;
+      const MAJOR_MUGGING_CHECK_INTERVAL = 7 * 60 * 1000;
+      const MUGGING_SUCCESS_RATE = 0.65;
+      const MONEY_LOSS_PERCENTAGE = 0.30;
+      const MUGGABILITY_RESET_REDUCTION = 30;
+      const SLEEP_MUGGABILITY_THRESHOLD_LOW = 25;
+      const SLEEP_MUGGABILITY_THRESHOLD_HIGH = 75;
+      const SLEEP_MUGGABILITY_PENALTY = 5;
+      const SLEEP_MUGGABILITY_BONUS = -3;
+
+      // --- Content from game_state.js ---
+      const gameState = {
+        // Core Game Stats
+        wins: 0, consecutiveWins: 0, missedWins: 0,
+        bonusPoints: 0, // Accumulates, resets on commit OR if roll yields 0 bonus.
+        totalRolls: 0, dice: [], alreadyCounted: false,
+        // Money
+        moneyEarned: 0, moneyLost: 0, netMoney: 0,
+        // Work/Action Flags
+        isWorkingMines: false, isWorkingOffice: false, isWorkingStaples: false, isTakingNap: false, isWorkingDog: false, isSleepingHobby: false,
+        // Special Effects
+        nextRollChance: null,
+        // Player Progression/Status
+        age: 4, clothesPrice: 15 + (4 * 5), lastClothingChange: Date.now(), currentLocation: "North Carolina",
+        sleepLevel: 100, slaves: 0, momNagCount: 0,
+        // Muggability & Equipment
+        baseMuggability: 50, lastSleepOrNapTime: Date.now(),
+        ownedItems: { genericShirt: true, genericPants: true },
+        equippedHat: null, equippedJacket: null, equippedShirt: 'genericShirt',
+        equippedPants: 'genericPants', equippedShoes: null, equippedSocks: null,
+      };
+      window.gameState = gameState; // Make globally accessible for debug/potential extensions
+
+      // --- Content from items.js ---
+      const calculateCost = (base) => base * 8 + 25;
+      const itemDefinitions = {
+          // Helms
+          knightHelm: { name: "Knight Helm", cost: calculateCost(15), type: 'hat', effects: { muggability: -10 } },
+          constructionHelm: { name: "Hard Hat", cost: calculateCost(8), type: 'hat', effects: { muggability: -4 } },
+          hophatHelm: { name: "Bunny Ears", cost: calculateCost(5), type: 'hat', effects: { muggability: -2 } },
+          potHelm: { name: "Pot Lid", cost: calculateCost(2), type: 'hat', effects: { muggability: -1 } },
+          footballHelm: { name: "Football Helmet", cost: calculateCost(12), type: 'hat', effects: { muggability: -6 } },
+          vikingHelm: { name: "Viking Helmet (Horns)", cost: calculateCost(14), type: 'hat', effects: { muggability: -7 } },
+          spaceHelm: { name: "Space Helmet", cost: calculateCost(20), type: 'hat', effects: { muggability: -10 } },
+          divingHelm: { name: "Old Diving Helmet", cost: calculateCost(18), type: 'hat', effects: { muggability: -9 } },
+          basicCap: { name: "Basic Cap", cost: calculateCost(3), type: 'hat', effects: {} },
+          beanie: { name: "Beanie", cost: calculateCost(4), type: 'hat', effects: { muggability: +1 } },
+          fedora: { name: "Fedora", cost: calculateCost(7), type: 'hat', effects: { muggability: +2 } },
+          topHat: { name: "Top Hat", cost: calculateCost(10), type: 'hat', effects: { muggability: +3 } },
+          cowboyHat: { name: "Cowboy Hat", cost: calculateCost(9), type: 'hat', effects: { muggability: -1 } },
+          propellerHat: { name: "Propeller Hat", cost: calculateCost(6), type: 'hat', effects: { muggability: -1 } },
+          wizardHat: { name: "Wizard Hat", cost: calculateCost(13), type: 'hat', effects: { muggability: +2 } },
+          chefHat: { name: "Chef Hat", cost: calculateCost(5), type: 'hat', effects: {} },
+          ushanka: { name: "Ushanka", cost: calculateCost(11), type: 'hat', effects: {} },
+          sombrero: { name: "Sombrero", cost: calculateCost(10), type: 'hat', effects: { muggability: -1 } },
+          partyHat: { name: "Party Hat", cost: calculateCost(1), type: 'hat', effects: {} },
+          bowlerHat: { name: "Bowler Hat", cost: calculateCost(8), type: 'hat', effects: { muggability: +1 } },
+          crown: { name: "Plastic Crown", cost: calculateCost(4), type: 'hat', effects: {} },
+          santaHat: { name: "Santa Hat", cost: calculateCost(6), type: 'hat', effects: {} },
+          pirateHat: { name: "Pirate Hat", cost: calculateCost(12), type: 'hat', effects: { muggability: +3 } },
+          // Jackets
+          cloak: { name: "Mysterious Cloak", cost: calculateCost(12), type: 'jacket', effects: { muggability: -5 } },
+          trenchCoat: { name: "Shady Trench Coat", cost: calculateCost(10), type: 'jacket', effects: { muggability: +5 } },
+          leatherJacket: { name: "Leather Jacket", cost: calculateCost(15), type: 'jacket', effects: { muggability: +3 } },
+          denimJacket: { name: "Denim Jacket", cost: calculateCost(8), type: 'jacket', effects: {} },
+          hoodie: { name: "Hoodie", cost: calculateCost(7), type: 'jacket', effects: { muggability: +2 } },
+          blazer: { name: "Blazer", cost: calculateCost(14), type: 'jacket', effects: { muggability: +1 } },
+          puffyJacket: { name: "Puffy Jacket", cost: calculateCost(11), type: 'jacket', effects: { muggability: +1 } },
+          rainCoat: { name: "Rain Coat", cost: calculateCost(9), type: 'jacket', effects: {} },
+          labCoat: { name: "Lab Coat", cost: calculateCost(13), type: 'jacket', effects: { muggability: -2 } },
+          vest: { name: "Vest", cost: calculateCost(6), type: 'jacket', effects: { muggability: -1 } },
+          bomberJacket: { name: "Bomber Jacket", cost: calculateCost(16), type: 'jacket', effects: { muggability: +2 } },
+          trackJacket: { name: "Track Jacket", cost: calculateCost(8), type: 'jacket', effects: {} },
+          cardigan: { name: "Cardigan", cost: calculateCost(9), type: 'jacket', effects: { muggability: -1 } },
+          poncho: { name: "Poncho", cost: calculateCost(7), type: 'jacket', effects: { muggability: -1 } },
+          straitjacket: { name: "Straitjacket", cost: calculateCost(20), type: 'jacket', effects: { muggability: -10 } },
+          highVisJacket: { name: "High-Vis Jacket", cost: calculateCost(5), type: 'jacket', effects: { muggability: -3 } },
+          tuxedoJacket: { name: "Tuxedo Jacket", cost: calculateCost(25), type: 'jacket', effects: { muggability: +6 } },
+          furCoat: { name: "Fake Fur Coat", cost: calculateCost(22), type: 'jacket', effects: { muggability: +7 } },
+          motorcycleJacket: { name: "Motorcycle Jacket", cost: calculateCost(17), type: 'jacket', effects: { muggability: -4 } },
+          // Shirts
+          genericShirt: { name: "Generic Shirt", cost: 0, type: 'shirt', effects: { muggability: +2 }, nonBuyable: true },
+          plainTee: { name: "Plain T-Shirt", cost: calculateCost(3), type: 'shirt', effects: { muggability: +1 } },
+          graphicTee: { name: "Graphic T-Shirt", cost: calculateCost(5), type: 'shirt', effects: { muggability: +2 } },
+          poloShirt: { name: "Polo Shirt", cost: calculateCost(8), type: 'shirt', effects: { muggability: 0 } },
+          buttonDown: { name: "Button-Down Shirt", cost: calculateCost(12), type: 'shirt', effects: { muggability: -1 } },
+          flannelShirt: { name: "Flannel Shirt", cost: calculateCost(10), type: 'shirt', effects: { muggability: 0 } },
+          hawaiianShirt: { name: "Hawaiian Shirt", cost: calculateCost(9), type: 'shirt', effects: { muggability: -10 } },
+          flanal: {name: "Flanal", cost: calculateCost(6), type: 'shirt', effects: { muggability: +3 }},
+          turtleneck: { name: "Turtleneck", cost: calculateCost(11), type: 'shirt', effects: { muggability: -2 } },
+          // Pants
+          genericPants: { name: "Generic Pants", cost: 0, type: 'pants', effects: { muggability: +2 }, nonBuyable: true },
+          jeans: { name: "Jeans", cost: calculateCost(10), type: 'pants', effects: { muggability: 0 } },
+          khakis: { name: "Khakis", cost: calculateCost(12), type: 'pants', effects: { muggability: -1 } },
+          cargoPants: { name: "Cargo Pants", cost: calculateCost(11), type: 'pants', effects: { muggability: +1 } },
+          sweatpants: { name: "Sweatpants", cost: calculateCost(8), type: 'pants', effects: { muggability: +2 } },
+          dressPants: { name: "Dress Pants", cost: calculateCost(15), type: 'pants', effects: { muggability: -2 } },
+          shorts: { name: "Shorts", cost: calculateCost(7), type: 'pants', effects: { muggability: +3 } },
+          overalls: { name: "Overalls", cost: calculateCost(13), type: 'pants', effects: { muggability: -4 } },
+          trackPants: { name: "Track Pants", cost: calculateCost(9), type: 'pants', effects: { muggability: +1 } },
+          // Shoes
+          sneakers: { name: "Sneakers", cost: calculateCost(9), type: 'shoes', effects: { muggability: 0 } },
+          dressShoes: { name: "Dress Shoes", cost: calculateCost(14), type: 'shoes', effects: { muggability: +1 } },
+          boots: { name: "Work Boots", cost: calculateCost(12), type: 'shoes', effects: { muggability: -2 } },
+          sandals: { name: "Sandals", cost: calculateCost(5), type: 'shoes', effects: { muggability: +3 } },
+          flipFlops: { name: "Flip Flops", cost: calculateCost(3), type: 'shoes', effects: { muggability: +4 } },
+          runningShoes: { name: "Running Shoes", cost: calculateCost(11), type: 'shoes', effects: { muggability: -1 } },
+          clogs: { name: "Clogs", cost: calculateCost(7), type: 'shoes', effects: { muggability: +2 } },
+          steelToeBoots: { name: "Steel Toe Boots", cost: calculateCost(16), type: 'shoes', effects: { muggability: -4 } },
+          // Socks
+          ankleSocks: { name: "Ankle Socks", cost: calculateCost(2), type: 'socks', effects: { muggability: +1 } },
+          crewSocks: { name: "Crew Socks", cost: calculateCost(3), type: 'socks', effects: { muggability: 0 } },
+          kneeHighSocks: { name: "Knee High Socks", cost: calculateCost(4), type: 'socks', effects: { muggability: -1 } },
+          woolSocks: { name: "Wool Socks", cost: calculateCost(5), type: 'socks', effects: { muggability: -1 } },
+          patternedSocks: { name: "Patterned Socks", cost: calculateCost(4), type: 'socks', effects: { muggability: +1 } },
+          noShowSocks: { name: "No-Show Socks", cost: calculateCost(2), type: 'socks', effects: { muggability: +2 } },
+          socksWithSandals: { name: "Socks WITH Sandals", cost: calculateCost(1), type: 'socks', effects: { muggability: -5 } },
+      };
+
+      // --- Content from utils.js ---
+      function updateElementText(id, text) {
+          const element = document.getElementById(id);
+          if (element) element.textContent = text;
+          else console.warn(`Element with ID ${id} not found for update.`);
+      }
+      function showMessage(message, duration = 3000) {
+          const messageDisplay = document.getElementById("message-display");
+          if (!messageDisplay || !message) return;
+          messageDisplay.textContent = message;
+          messageDisplay.style.display = "block";
+          if (window.messageTimeout) clearTimeout(window.messageTimeout);
+          if (duration > 0) {
+            window.messageTimeout = setTimeout(() => {
+              if (messageDisplay) messageDisplay.style.display = "none";
+            }, duration);
+          }
+      }
+      function addNotification(message, type = 'info') {
+          const log = document.getElementById('notification-log');
+          if (!log) { console.error("Notification log element not found!"); return; }
+          const entry = document.createElement('p');
+          entry.textContent = message;
+          entry.className = `notification-${type}`;
+          log.insertBefore(entry, log.firstChild); // Add to top
+          const MAX_LOG_ENTRIES = 100;
+          while (log.children.length > MAX_LOG_ENTRIES) {
+              log.removeChild(log.lastChild);
+          }
+      }
+      function updateMoneyDisplay() {
+          gameState.netMoney = gameState.moneyEarned - gameState.moneyLost - gameState.totalRolls;
+          updateElementText("money-earned", gameState.moneyEarned.toFixed(2));
+          updateElementText("money-lost", gameState.moneyLost.toFixed(2));
+          updateElementText("net-money", gameState.netMoney.toFixed(2));
+          checkBankruptcy(); // Check if bankrupt state is triggered
+          updateButtonStates(); // Update button enabled/disabled states
+      }
+      function isInSignificantDebt() {
+          return gameState.netMoney < SIGNIFICANT_DEBT_THRESHOLD;
+      }
+      function updateButtonStates() {
+          const isAnyJobRunning = gameState.isWorkingMines || gameState.isWorkingOffice || gameState.isWorkingStaples || gameState.isTakingNap || gameState.isWorkingDog || gameState.isSleepingHobby;
+          const inDebt = isInSignificantDebt();
+          const isBankrupt = gameState.netMoney <= BANKRUPTCY_THRESHOLD;
+
+          const safelySetDisabled = (id, isDisabled) => {
+              const element = document.getElementById(id);
+              if (element && element.id !== 'bankruptcy-reset-btn') { // Exclude reset button
+                 element.disabled = isDisabled;
+              } else if (!element && id !== 'bankruptcy-reset-btn') {
+                 console.warn(`Button with ID ${id} not found for disabling.`);
+              }
+          };
+
+          // Handle bankruptcy first - disable almost everything except reset
+          if (isBankrupt) {
+              const actionButtons = document.querySelectorAll('.actions-box button, .shop-grid button');
+              actionButtons.forEach(btn => safelySetDisabled(btn.id, true));
+              const equipSelects = document.querySelectorAll('.equipment-select select');
+              equipSelects.forEach(sel => safelySetDisabled(sel.id, true));
+              // Reset button remains enabled (handled elsewhere)
+              return; // Stop further processing if bankrupt
+          }
+
+          // Handle Debt Restrictions
+          if (inDebt) {
+              // Only notify if the state *changes* to debt? Or is continuous reminder ok? Continuous for now.
+              // addNotification(`Significant Debt! ($${gameState.netMoney.toFixed(2)}). Only Dice, Tables, and Dogs available.`, "debt");
+              safelySetDisabled('roll-dice-btn', false); // Always allowed (costs money)
+              safelySetDisabled('commit-btn', true); // Cannot commit in debt
+              safelySetDisabled('work-in-mines-btn', true); // Restricted
+              safelySetDisabled('work-in-office-btn', true); // Restricted
+              safelySetDisabled('work-staple-tables-btn', gameState.isWorkingStaples); // Allowed if not running
+              safelySetDisabled('work-dog-walker-btn', gameState.isWalkingDog); // Allowed if not running
+              safelySetDisabled('take-nap-btn', true); // Restricted
+              safelySetDisabled('sleep-hobby-btn', true); // Restricted
+          } else {
+              // Normal Operation - Enable/disable based on running jobs
+              safelySetDisabled('work-in-mines-btn', gameState.isWorkingMines);
+              safelySetDisabled('work-in-office-btn', gameState.isWorkingOffice);
+              safelySetDisabled('work-staple-tables-btn', gameState.isWorkingStaples);
+              safelySetDisabled('take-nap-btn', gameState.isTakingNap);
+              safelySetDisabled('work-dog-walker-btn', gameState.isWalkingDog);
+              safelySetDisabled('sleep-hobby-btn', gameState.isSleepingHobby);
+
+              // Roll/Commit depend on other jobs running
+              const canRollOrCommit = !isAnyJobRunning;
+              safelySetDisabled('roll-dice-btn', !canRollOrCommit);
+              safelySetDisabled('commit-btn', !canRollOrCommit || gameState.dice.length === 0);
+          }
+
+          // Update buy buttons based on ownership (applies regardless of debt, unless bankrupt)
+          updateOwnedItemButtons();
+          // Ensure equip selects are enabled (unless bankrupt)
+          const equipSelects = document.querySelectorAll('.equipment-select select');
+          equipSelects.forEach(sel => safelySetDisabled(sel.id, false));
+      }
+
+      // --- Content from muggability.js (Revamped) ---
+      function initMuggability() {
+          gameState.lastSleepOrNapTime = gameState.lastSleepOrNapTime || Date.now();
+          gameState.baseMuggability = Math.max(0, Math.min(100, Math.round(gameState.baseMuggability ?? 50)));
+          updateMuggabilityDisplay();
+          setInterval(updateMuggabilityFluctuation, MUGGABILITY_FLUCTUATION_INTERVAL);
+          setInterval(checkMajorMuggingEvent, MAJOR_MUGGING_CHECK_INTERVAL);
+          // addNotification("Muggability system initialized.", "info"); // Less verbose
+      }
+      function calculateEffectiveMuggability() {
+          let effectiveMuggability = gameState.baseMuggability;
+          // 1. Sleep Effect
+          if (gameState.sleepLevel < SLEEP_MUGGABILITY_THRESHOLD_LOW) {
+              effectiveMuggability += SLEEP_MUGGABILITY_PENALTY;
+          } else if (gameState.sleepLevel > SLEEP_MUGGABILITY_THRESHOLD_HIGH) {
+              effectiveMuggability += SLEEP_MUGGABILITY_BONUS;
+          }
+          // 2. Equipment Effect (All Slots)
+          const equippedItems = [ gameState.equippedHat, gameState.equippedJacket, gameState.equippedShirt, gameState.equippedPants, gameState.equippedShoes, gameState.equippedSocks ];
+          equippedItems.forEach(key => {
+              if (key && itemDefinitions[key]?.effects?.muggability) {
+                  effectiveMuggability += itemDefinitions[key].effects.muggability;
+              }
+          });
+          // 3. Clamp between 0 and 100
+          return Math.max(0, Math.min(100, Math.round(effectiveMuggability)));
+      }
+      function updateMuggabilityFluctuation() {
+          const change = (Math.random() * 3) - 1.5; // +/- 1.5 drift
+          gameState.baseMuggability += change;
+          gameState.baseMuggability = Math.max(0, Math.min(100, Math.round(gameState.baseMuggability)));
+          updateMuggabilityDisplay(); // Update both base and effective display
+      }
+      function updateMuggabilityDisplay() {
+          const effectiveMuggability = calculateEffectiveMuggability();
+          updateElementText("muggability-base-display", gameState.baseMuggability);
+          updateElementText("muggability-effective-display", effectiveMuggability);
+      }
+      function checkMajorMuggingEvent() {
+          const effectiveMuggability = calculateEffectiveMuggability();
+          addNotification(`Performing 7-minute mugging check. Effective Muggability: ${effectiveMuggability}%...`, "muggability");
+          if (Math.random() * 100 < effectiveMuggability) {
+              triggerMugging();
+          } else {
+              addNotification("You avoided any trouble this time.", "muggability");
+          }
+      }
+      function recalculateAndDisplayMuggability() {
+          // This function is called whenever something *might* change the effective muggability (equip, sleep change)
+          updateMuggabilityDisplay();
+      }
+      function triggerMugging() {
+          addNotification("Someone menacing approaches you!", "loss");
+          // Reduce base muggability immediately
+          gameState.baseMuggability = Math.max(0, gameState.baseMuggability - MUGGABILITY_RESET_REDUCTION);
+          updateMuggabilityDisplay(); // Show the reduced base value right away
+
+          setTimeout(() => {
+              if (Math.random() < MUGGING_SUCCESS_RATE) {
+                  let moneyToLose = 0;
+                  if (gameState.netMoney > 0) {
+                      moneyToLose = Math.floor(gameState.netMoney * MONEY_LOSS_PERCENTAGE);
+                  }
+                  if (moneyToLose > 0) {
+                      gameState.moneyLost += moneyToLose;
+                      addNotification(`MUGGED! They took $${moneyToLose.toFixed(2)}! (${(MONEY_LOSS_PERCENTAGE * 100).toFixed(0)}% of your cash)`, "loss");
+                      updateMoneyDisplay(); // Update money and potentially trigger bankruptcy/debt states
+                  } else {
+                      addNotification("They tried to mug you... but you're broke! They left disgusted.", "info");
+                  }
+              } else {
+                  addNotification("You fought them off! The mugger ran away!", "finish-success");
+              }
+          }, 1500); // Delay for confrontation message
+      }
+      function recordSleepOrNap() {
+          gameState.lastSleepOrNapTime = Date.now();
+          recalculateAndDisplayMuggability(); // Update display based on potential sleep level change effect
+      }
+
+      // --- Content from shopping.js (Expanded) ---
+      const hatShopGrid = document.getElementById('hat-shop-grid');
+      const jacketShopGrid = document.getElementById('jacket-shop-grid');
+      const shirtShopGrid = document.getElementById('shirt-shop-grid');
+      const pantsShopGrid = document.getElementById('pants-shop-grid');
+      const shoesShopGrid = document.getElementById('shoes-shop-grid');
+      const socksShopGrid = document.getElementById('socks-shop-grid');
+      const equipHatSelect = document.getElementById('equip-hat-select');
+      const equipJacketSelect = document.getElementById('equip-jacket-select');
+      const equipShirtSelect = document.getElementById('equip-shirt-select');
+      const equipPantsSelect = document.getElementById('equip-pants-select');
+      const equipShoesSelect = document.getElementById('equip-shoes-select');
+      const equipSocksSelect = document.getElementById('equip-socks-select');
+
+      function initShopping() {
+          // Check elements exist (simplified)
+          if (!hatShopGrid || !equipHatSelect /* ... add others if needed */ ) { console.error("Shop DOM elements missing!"); return; }
+          populateShopGrids();
+          addEquipmentListeners();
+          updateEquipmentSelectors(); // Load initial selections
+          updateOwnedItemButtons(); // Update initial button states
+      }
+      function populateShopGrids() {
+          hatShopGrid.innerHTML = ''; jacketShopGrid.innerHTML = ''; shirtShopGrid.innerHTML = '';
+          pantsShopGrid.innerHTML = ''; shoesShopGrid.innerHTML = ''; socksShopGrid.innerHTML = '';
+          Object.entries(itemDefinitions).forEach(([key, item]) => {
+              if (item.nonBuyable) return;
+              const button = document.createElement('button');
+              button.textContent = `${item.name} - $${item.cost.toFixed(2)}`;
+              button.dataset.itemKey = key; button.id = `buy-${key}`;
+              button.onclick = () => buyItem(key);
+              switch (item.type) {
+                  case 'hat': hatShopGrid.appendChild(button); break;
+                  case 'jacket': jacketShopGrid.appendChild(button); break;
+                  case 'shirt': shirtShopGrid.appendChild(button); break;
+                  case 'pants': pantsShopGrid.appendChild(button); break;
+                  case 'shoes': shoesShopGrid.appendChild(button); break;
+                  case 'socks': socksShopGrid.appendChild(button); break;
+              }
+          });
+      }
+      function addEquipmentListeners() {
+          equipHatSelect.onchange = (event) => equipItem(event.target.value, 'hat');
+          equipJacketSelect.onchange = (event) => equipItem(event.target.value, 'jacket');
+          equipShirtSelect.onchange = (event) => equipItem(event.target.value, 'shirt');
+          equipPantsSelect.onchange = (event) => equipItem(event.target.value, 'pants');
+          equipShoesSelect.onchange = (event) => equipItem(event.target.value, 'shoes');
+          equipSocksSelect.onchange = (event) => equipItem(event.target.value, 'socks');
+      }
+      function buyItem(itemKey) {
+          const item = itemDefinitions[itemKey];
+          if (!item) { console.error(`Item not found: ${itemKey}`); return; }
+          if (gameState.ownedItems[itemKey]) { addNotification(`Already own ${item.name}.`, 'info'); return; }
+          if (gameState.netMoney >= item.cost) {
+              gameState.moneyLost += item.cost;
+              gameState.ownedItems[itemKey] = true;
+              addNotification(`Purchased ${item.name} for $${item.cost.toFixed(2)}!`, 'info');
+              updateMoneyDisplay(); // Update money & buttons
+              updateEquipmentSelectors(); // Add to dropdown
+              updateOwnedItemButtons(); // Disable buy button
+          } else {
+              addNotification(`Not enough money for ${item.name}. Need $${item.cost.toFixed(2)}, have $${gameState.netMoney.toFixed(2)}.`, 'loss');
+          }
+      }
+      function updateEquipmentSelectors() {
+          const selects = { hat: equipHatSelect, jacket: equipJacketSelect, shirt: equipShirtSelect, pants: equipPantsSelect, shoes: equipShoesSelect, socks: equipSocksSelect };
+          const equipped = { hat: gameState.equippedHat, jacket: gameState.equippedJacket, shirt: gameState.equippedShirt, pants: gameState.equippedPants, shoes: gameState.equippedShoes, socks: gameState.equippedSocks };
+
+          Object.entries(selects).forEach(([type, selectElement]) => {
+              selectElement.innerHTML = ''; // Clear
+              const defaultOption = document.createElement('option');
+              const isMandatory = type === 'shirt' || type === 'pants';
+              const defaultKey = isMandatory ? (type === 'shirt' ? 'genericShirt' : 'genericPants') : null;
+
+              if (isMandatory) {
+                  defaultOption.value = defaultKey;
+                  defaultOption.textContent = itemDefinitions[defaultKey].name;
+              } else {
+                  defaultOption.value = ""; defaultOption.textContent = "-- None --";
+              }
+              selectElement.appendChild(defaultOption);
+          });
+
+          Object.keys(gameState.ownedItems).forEach(key => {
+              if (gameState.ownedItems[key] && itemDefinitions[key]) {
+                  const item = itemDefinitions[key];
+                  const selectElement = selects[item.type];
+                  if (selectElement) {
+                      const isMandatory = item.type === 'shirt' || item.type === 'pants';
+                      const defaultKey = isMandatory ? (item.type === 'shirt' ? 'genericShirt' : 'genericPants') : null;
+                      // Don't add the generic item again if it was the default placeholder
+                      if (!isMandatory || key !== defaultKey) {
+                          const option = document.createElement('option');
+                          option.value = key; option.textContent = item.name;
+                          selectElement.appendChild(option);
+                      }
+                  }
+              }
+          });
+
+          Object.entries(equipped).forEach(([type, currentKey]) => {
+               const selectElement = selects[type];
+               const isMandatory = type === 'shirt' || type === 'pants';
+               const defaultKey = isMandatory ? (type === 'shirt' ? 'genericShirt' : 'genericPants') : null;
+
+               if (currentKey && gameState.ownedItems[currentKey] && selectElement.querySelector(`option[value="${currentKey}"]`)) {
+                   selectElement.value = currentKey; // Select the owned item
+               } else {
+                   // Item not owned or was null
+                   if (isMandatory) {
+                       // If mandatory item is somehow not owned/selected, force generic
+                       if (selectElement.value !== defaultKey) {
+                           equipItem(defaultKey, type); // This updates state AND calls muggability recalc
+                           selectElement.value = defaultKey; // Ensure UI matches
+                       }
+                   } else {
+                       // Optional item unequipped or lost
+                       if (currentKey) equipItem(null, type); // Unequip in state if it was equipped
+                       selectElement.value = ""; // Select '-- None --'
+                   }
+               }
+          });
+      }
+      function updateOwnedItemButtons() {
+           Object.keys(itemDefinitions).forEach(key => {
+               const buyButton = document.getElementById(`buy-${key}`);
+               const item = itemDefinitions[key];
+               if (buyButton && item && !item.nonBuyable) {
+                   const owned = gameState.ownedItems[key];
+                   buyButton.disabled = owned; // Disable if owned
+                   buyButton.textContent = owned ? `${item.name} (Owned)` : `${item.name} - $${item.cost.toFixed(2)}`;
+               }
+           });
+           // Hide default item buttons if they exist
+           ['buy-genericShirt', 'buy-genericPants'].forEach(id => {
+               const btn = document.getElementById(id); if (btn) btn.style.display = 'none';
+           });
+      }
+      function equipItem(itemKey, itemType) {
+          itemKey = itemKey || null; // Handle empty string from select
+          const isMandatory = itemType === 'shirt' || itemType === 'pants';
+          const stateKey = `equipped${capitalizeFirstLetter(itemType)}`;
+
+          if (!itemKey && isMandatory) {
+              addNotification(`You must wear ${itemType === 'shirt' ? 'a shirt' : 'pants'}!`, "loss");
+              const selectElement = (itemType === 'shirt') ? equipShirtSelect : equipPantsSelect;
+              selectElement.value = gameState[stateKey]; // Revert UI select
+              return;
+          }
+
+          if (itemKey === gameState[stateKey]) return; // No change
+
+          const newItem = itemKey ? itemDefinitions[itemKey] : null;
+          const newItemName = newItem ? newItem.name : "nothing";
+
+          gameState[stateKey] = itemKey; // Update state
+          addNotification(`Equipped ${newItemName} as ${itemType}.`, 'info');
+          recalculateAndDisplayMuggability(); // Update effective muggability
+      }
+       function capitalizeFirstLetter(string) { return string.charAt(0).toUpperCase() + string.slice(1); }
+
+      // --- Content from ageing.js ---
+      const AGE_INTERVAL = 5 * 60 * 1000;
+      const MOM_NAG_INTERVAL = 5 * 60 * 1000;
+      const MOM_RANT_THRESHOLD = 12;
+      function initAgeing() {
+        updateElementText("age-display", gameState.age);
+        setInterval(increaseAge, AGE_INTERVAL);
+        setInterval(momNag, MOM_NAG_INTERVAL);
+      }
+      function increaseAge() {
+        gameState.age++;
+        gameState.clothesPrice = 15 + (gameState.age * 5); // Update price internally
+        updateElementText("age-display", gameState.age);
+        addNotification(`Happy Birthday! You are now ${gameState.age}.`, 'info');
+        calculateAndApplyTaxes(); // Trigger taxes on birthday
+      }
+      function momNag() { /* ... (no changes needed) ... */
+          gameState.momNagCount++;
+          if (gameState.momNagCount < MOM_RANT_THRESHOLD) {
+              const nags = ["Mom: Go shower.", "Mom: you showered recently?", "Don't forget you need to shower...", "Mom: You need to shower."];
+              addNotification(nags[Math.floor(Math.random() * nags.length)], "mom");
+          } else {
+              const hours = Math.floor(gameState.momNagCount * 5 / 60);
+              // Note: 'age' variable is not defined here, should use gameState.age
+              const rant = `Mom: Okay, listen here! PLEASE, for the towers sake! GO TAKE A SHOWER! The neighbors are complaining! The dog DIED because you walked in the room! It has been ${gameState.age - 4} Years! Just... shower! PLEASE!`;
+              addNotification(rant, "mom-rant");
+          }
+      }
+
+      // --- Content from work_enhancements.js ---
+      const DOG_WALKER_JOB_DURATION = 5000;
+      function workAsDogWalker() { /* ... (no changes needed) ... */
+        if (gameState.isWalkingDog || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start this job due to significant debt.", "loss"); return; }
+        gameState.isWalkingDog = true; updateButtonStates(); addNotification("Started walking dogs.", "start");
+        setTimeout(() => {
+          const outcomes = [ { value: 120, message: "Walked a pack of happy pups!" }, { value: 0, message: "A dog tried to run away, but you caught it! Wasted time." }, { value: 200, message: "Found a lost wallet!" }, { value: 80, message: "Just a normal day." }, { value: 10, message: "Stepped in poop... but found a dollar!" }, { value: 50, message: "Taught a dog a new trick." } ];
+          const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; gameState.moneyEarned += outcome.value;
+          let notificationType = outcome.value > 0 ? 'finish-success' : 'info';
+          addNotification(`Finished walking dogs. ${outcome.message} (+ $${outcome.value.toFixed(2)})`, notificationType);
+          updateMoneyDisplay(); gameState.isWalkingDog = false; updateButtonStates();
+        }, DOG_WALKER_JOB_DURATION);
+      }
+
+      // --- Content from location_taxes.js ---
+      const locations = { "North Carolina": { totalTaxRate: 0.10, name: "North Carolina" } };
+      function initLocationTaxes() {
+        gameState.currentLocation = gameState.currentLocation || "North Carolina";
+        updateElementText("location-display", locations[gameState.currentLocation]?.name || "Unknown");
+      }
+      function calculateAndApplyTaxes() { // Called by increaseAge
+        const locationData = locations[gameState.currentLocation] || locations["North Carolina"];
+        if (gameState.netMoney > 0) {
+            const taxAmount = Math.floor(gameState.netMoney * locationData.totalTaxRate);
+            if (taxAmount > 0) {
+                gameState.moneyLost += taxAmount;
+                addNotification(`Paid $${taxAmount.toFixed(2)} in yearly taxes for ${locationData.name}. Happy Birthday?`, 'loss');
+                updateMoneyDisplay();
+            }
+        }
+      }
+
+      // --- Content from hobbies.js ---
+      const SLEEP_DURATION = 10000;
+      const SLEEP_RECOVERY = 50;
+      const SLEEP_UPDATE_INTERVAL = 60 * 100; // Should be 1 minute (60 * 1000)
+      const FAINT_PENALTY = 50;
+      function initHobbies() {
+        updateElementText("sleep-level", gameState.sleepLevel);
+        setInterval(updateSleepPassive, SLEEP_UPDATE_INTERVAL);
+      }
+      function sleepHobby() { /* ... (no changes needed) ... */
+        if (gameState.isSleepingHobby || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot sleep properly due to debt stress.", "loss"); return; }
+        gameState.isSleepingHobby = true; updateButtonStates(); addNotification("Going to sleep for a while...", "start");
+        recordSleepOrNap();
+        setTimeout(() => {
+          gameState.sleepLevel = Math.min(gameState.sleepLevel + SLEEP_RECOVERY, 100);
+          updateElementText("sleep-level", gameState.sleepLevel);
+          addNotification("You feel well-rested after sleeping!", "finish-success");
+          gameState.isSleepingHobby = false; updateButtonStates();
+          recalculateAndDisplayMuggability();
+        }, SLEEP_DURATION);
+      }
+      function updateSleepPassive() { /* ... (no changes needed) ... */
+        if (!gameState.isSleepingHobby && !gameState.isTakingNap) {
+          gameState.sleepLevel = Math.max(gameState.sleepLevel - 1, 0);
+          updateElementText("sleep-level", gameState.sleepLevel);
+          recalculateAndDisplayMuggability();
+          if (gameState.sleepLevel === 20) addNotification("Feeling tired...", "info");
+          else if (gameState.sleepLevel === 5) addNotification("Barely keeping your eyes open...", "info");
+          else if (gameState.sleepLevel <= 0) { faint(); }
+        }
+      }
+       function faint() { /* ... (no changes needed) ... */
+        if (gameState.sleepLevel > 0 || gameState.isTakingNap || gameState.isSleepingHobby ) return;
+        addNotification(`You fainted from exhaustion! Lost $${FAINT_PENALTY.toFixed(2)}.`, "loss");
+        gameState.moneyLost += FAINT_PENALTY; gameState.sleepLevel = 15;
+        updateElementText("sleep-level", gameState.sleepLevel); updateMoneyDisplay();
+        recalculateAndDisplayMuggability();
+       }
+
+      // --- Content from ui_enhancements.js ---
+      function initUIEnhancements() { initCollapsibleShop(); }
+      function initCollapsibleShop() { /* ... (no changes needed) ... */
+          const shopToggle = document.getElementById('shop-toggle');
+          const shopContent = document.querySelector('.shopping-box .collapsible-content');
+          const toggleIndicator = document.querySelector('#shop-toggle .toggle-indicator');
+          if (shopToggle && shopContent && toggleIndicator) {
+              const isCollapsed = localStorage.getItem('shopCollapsed') === 'true';
+              shopContent.classList.toggle('collapsed', isCollapsed);
+              toggleIndicator.textContent = isCollapsed ? '►' : '▼';
+              shopToggle.addEventListener('click', () => {
+                  const currentlyCollapsed = shopContent.classList.toggle('collapsed');
+                  toggleIndicator.textContent = currentlyCollapsed ? '►' : '▼';
+                  localStorage.setItem('shopCollapsed', currentlyCollapsed);
+              });
+          } else { console.error("Collapsible shop elements not found!"); }
+      }
+
+      // --- START: UPDATED Dice/Commit Logic with Reset Rule & Chiller Notifications ---
+      const bankruptcyResetBtn = document.getElementById('bankruptcy-reset-btn'); // Keep reference
+
+      function rollDice() {
+        if (document.getElementById('roll-dice-btn').disabled) return;
+        if (gameState.nextRollChance) handleNextRoll(); // Handle nap effects first
+
+        // Check for penalty BEFORE rolling new dice if a win was available from the PREVIOUS roll state
+        const potentialPointsBeforeRoll = gameState.dice.length === 4 ? gameState.dice.reduce((a, b) => a + b, 0) + gameState.bonusPoints : 0;
+        if (potentialPointsBeforeRoll === 24 && !gameState.alreadyCounted) {
+             gameState.missedWins++;
+             gameState.moneyLost += MISSED_WIN_PENALTY;
+             // Chiller notification for penalty
+             addNotification(`Penalty: -$${MISSED_WIN_PENALTY.toFixed(2)} for not committing previous 24!`, "loss");
+             gameState.alreadyCounted = true; // Mark penalty as applied FOR THE PREVIOUS POTENTIAL WIN
+        }
+
+        gameState.dice = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
+        gameState.totalRolls++;
+        gameState.alreadyCounted = false; // Reset for the new roll's potential win state
+        gameState.moneyLost += 1; // Cost to roll
+
+        updateElementText("dice-rolls", gameState.dice.join(", "));
+        updateElementText("total-rolls", gameState.totalRolls);
+
+        const bonusThisRoll = calculateBonus(); // This now handles the reset logic internally
+        const potentialTotal = updateTotalPoints(); // Update display
+
+        // Chiller notification for roll result
+        let rollMsg = `Rolled: ${gameState.dice.join(", ")}.`;
+        if (bonusThisRoll > 0) {
+            rollMsg += ` (+${bonusThisRoll} bonus this roll).`;
+        }
+        rollMsg += ` Total Bonus: ${gameState.bonusPoints}.`;
+        rollMsg += ` Potential Score: ${potentialTotal}.`; // Keep potential score shown
+        addNotification(rollMsg, "info");
+
+        updateMoneyDisplay(); // Update money and button states
+      }
+
+      function calculateBonus() {
+        // Calculates bonus for the CURRENT gameState.dice.
+        // If this roll yields 0 bonus, resets accumulated bonusPoints to 0.
+        // Otherwise, adds this roll's bonus to the accumulated total.
+        if (gameState.dice.length !== 4) return 0;
+
+        const counts = {};
+        let matchBonus = 0;
+        let hasMatch = false;
+        gameState.dice.forEach(num => {
+            if (num !== 6) { counts[num] = (counts[num] || 0) + 1; }
+        });
+        Object.values(counts).forEach(count => {
+            if (count >= 2) { matchBonus += (count - 1); hasMatch = true; }
+        });
+
+        const sortedUniqueDice = [...new Set(gameState.dice)].sort((a, b) => a - b);
+        let runBonus = 0;
+        let maxRunLength = 0;
+        let currentRunLength = 0;
+        for (let i = 0; i < sortedUniqueDice.length; i++) {
+            if (i > 0 && sortedUniqueDice[i] === sortedUniqueDice[i - 1] + 1) { currentRunLength++; }
+            else { currentRunLength = 1; }
+            maxRunLength = Math.max(maxRunLength, currentRunLength);
+        }
+        if (maxRunLength >= 3) { runBonus = maxRunLength - 2; }
+
+        const currentRollBonus = (hasMatch || runBonus > 0) ? (matchBonus + runBonus) : 0;
+
+        // --- NEW RESET LOGIC ---
+        if (currentRollBonus === 0) {
+            // If no bonus points were generated this roll, reset the accumulated total.
+            if (gameState.bonusPoints > 0) { // Only notify if there *was* a bonus to lose
+                 addNotification("No bonus gained this roll. Accumulated bonus reset.", "info");
+            }
+            gameState.bonusPoints = 0;
+        } else {
+            // Otherwise, add this roll's bonus to the accumulated total.
+            gameState.bonusPoints += currentRollBonus;
+        }
+        // --- END NEW RESET LOGIC ---
+
+        // Update the display AFTER applying the logic
+        updateElementText("bonus-points", gameState.bonusPoints);
+
+        return currentRollBonus; // Return bonus generated *this* roll for logging
+      }
+
+      function updateTotalPoints() {
+        // Updates the "Potential Total" display based on current dice and accumulated bonus
+        if (gameState.dice.length !== 4) {
+            updateElementText("total-points", "-");
+            return 0; // Return 0 or some indicator if no dice
+        }
+        const diceSum = gameState.dice.reduce((a, b) => a + b, 0);
+        const totalPoints = diceSum + gameState.bonusPoints;
+        updateElementText("total-points", totalPoints);
+
+        // Chiller notification for potential win
+        if (totalPoints === 24 && !gameState.alreadyCounted) {
+          addNotification(`Score is 24 (${diceSum} + ${gameState.bonusPoints} bonus)! Commit now?`, "win");
+        }
+        return totalPoints; // Return the calculated total for logging
+      }
+
+      function commit() {
+         if (document.getElementById('commit-btn').disabled) return;
+         if (gameState.dice.length === 0) {
+             addNotification("Roll the dice first!", "info");
+             return;
+         }
+
+         const diceSum = gameState.dice.reduce((a, b) => a + b, 0);
+         // Use the accumulated bonus points for the final check
+         const totalPoints = diceSum + gameState.bonusPoints;
+
+         // Chiller commit notifications
+         if (totalPoints === 24) {
+           gameState.consecutiveWins++;
+           const streakBonus = gameState.consecutiveWins * WIN_STREAK_BONUS_MULTIPLIER;
+           const winnings = BASE_WIN_AMOUNT + streakBonus;
+           gameState.moneyEarned += winnings;
+           gameState.wins++;
+           updateElementText("wins", gameState.wins);
+           addNotification(`COMMIT SUCCESS! Score: 24 (${diceSum} + ${gameState.bonusPoints}). Streak: ${gameState.consecutiveWins}x. Earned $${winnings.toFixed(2)}.`, "win");
+         } else {
+           gameState.moneyLost += COMMIT_FAIL_PENALTY;
+           gameState.consecutiveWins = 0; // Reset streak on fail
+           addNotification(`COMMIT FAILED! Score: ${totalPoints} (${diceSum} + ${gameState.bonusPoints}). Needed 24. Lost $${COMMIT_FAIL_PENALTY.toFixed(2)}. Streak reset.`, "loss");
+         }
+
+         // --- CRITICAL: Reset accumulated bonus points AFTER commit ---
+         gameState.bonusPoints = 0;
+         updateElementText("bonus-points", gameState.bonusPoints); // Update display to 0
+
+         updateMoneyDisplay(); // Update money totals & button states
+         resetDiceAfterCommit(); // Clear the dice display
+      }
+
+      function resetDiceAfterCommit() {
+        // Clears dice display and related flags after a commit attempt
+        gameState.dice = [];
+        gameState.alreadyCounted = false; // Reset penalty flag as the commit resolved the situation
+        updateElementText("dice-rolls", "-");
+        updateElementText("total-points", "-"); // Clear potential total display until next roll
+        updateButtonStates(); // Re-enable/disable buttons as needed
+      }
+
+      function handleNextRoll() {
+        // This function remains the same, handling nap results before a roll
+        if (!gameState.nextRollChance) return;
+        if (gameState.nextRollChance === "gain") {
+            gameState.moneyEarned += NAP_GAIN_AMOUNT;
+            addNotification(`Well Rested bonus applied: +$${NAP_GAIN_AMOUNT.toFixed(2)}`, "finish-success");
+        } else if (gameState.nextRollChance === "lose") {
+            gameState.moneyLost += NAP_LOSS_AMOUNT;
+            addNotification(`Poor Nap penalty applied: -$${NAP_LOSS_AMOUNT.toFixed(2)}`, "finish-fail");
+        }
+        gameState.nextRollChance = null;
+        // updateMoneyDisplay() will be called by rollDice shortly after
+      }
+      // --- END: UPDATED Dice/Commit Logic ---
+
+      function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+      // --- Job Functions ---
+      function workInMines() { /* ... (no changes needed) ... */
+          if (gameState.isWorkingMines || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start mining job due to significant debt.", "loss"); return; }
+          gameState.isWorkingMines = true; updateButtonStates(); addNotification("Started working in the mines.", "start"); const duration = 15000;
+          setTimeout(() => {
+               const outcomes = [ { value: 150, message: "Found some decent copper." }, { value: 600, message: "Struck a vein of silver!" }, { value: 1200, message: "GOLD! Found a hefty nugget!" }, { value: -100, message: "Minor injury, patched yourself up." }, { value: getRandomInt(900, 4000), message: "Unbelievable! Found a rare gem!" }, { value: 50, message: "Found plenty of coal." }, { value: -75, message: "Small cave-in, lost some time and tools." }, { value: -50, message: "Lamp flickered out, had to replace filament." } ];
+               const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; let notificationType = 'info';
+               if (outcome.value < 0) { gameState.moneyLost -= outcome.value; notificationType = 'finish-fail'; } else { gameState.moneyEarned += outcome.value; notificationType = 'finish-success'; }
+               addNotification(`Finished mining. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
+               updateMoneyDisplay(); gameState.isWorkingMines = false; updateButtonStates();
+          }, duration);
+      }
+      function workInOfficeJob() { /* ... (no changes needed) ... */
+           if (gameState.isWorkingOffice || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start office job due to significant debt.", "loss"); return; }
+           gameState.isWorkingOffice = true; updateButtonStates(); addNotification("Started working in the office.", "start"); const duration = 12000;
+           setTimeout(() => {
+               const outcomes = [ { value: 250, message: "Completed assigned tasks efficiently." }, { value: 350, message: "Received a small performance bonus!" }, { value: 180, message: "Filed all TPS reports correctly. Barely." }, { value: 450, message: "Achieved maximum synergy!" }, { value: -10, message: "Nasty paper cut. Required a band-aid." }, { value: 0, message: "Attended a long, pointless meeting about meetings." }, { value: 75, message: "Fixed the perpetually broken coffee machine." }, { value: -50, message: "Accidentally hit 'Reply All' on a sensitive email. Oops." }, { value: 300, message: "Successfully upsold a major client." } ];
+               const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; let notificationType = 'info';
+               if (outcome.value < 0) { gameState.moneyLost -= outcome.value; notificationType = 'finish-fail'; } else { gameState.moneyEarned += outcome.value; notificationType = 'finish-success'; }
+               addNotification(`Finished office work. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
+               updateMoneyDisplay(); gameState.isWorkingOffice = false; updateButtonStates();
+           }, duration);
+      }
+      function workInStapleTables() { /* ... (no changes needed) ... */
+           if (gameState.isWorkingStaples) return; // Check if already running
+           // No debt check here, it's allowed
+           gameState.isWorkingStaples = true; updateButtonStates(); addNotification("Started stapling tables.", "start"); const duration = 4000;
+           setTimeout(() => {
+               const outcomes = [ { value: 70, message: "Stapled 10 tables securely." }, { value: 90, message: "Got into a good stapling rhythm." }, { value: 120, message: "Staple Master! Set a new personal best." }, { value: 0, message: "Stapler malfunctioned! Wasted time fixing it." }, { value: 150, message: "Found a lost gift card under a table!" }, { value: 10, message: "Ran out of staples, had to find more." }, { value: 0, message: "Ouch! Stapled thumb. Lost time." }, { value: 100, message: "Developed an innovative new stapling technique!" } ];
+               const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; let notificationType = outcome.value > 0 ? 'finish-success' : 'info';
+               gameState.moneyEarned += outcome.value; // Always earn or 0
+               addNotification(`Finished stapling. ${outcome.message} (+ $${outcome.value.toFixed(2)})`, notificationType);
+               updateMoneyDisplay(); gameState.isWorkingStaples = false; updateButtonStates();
+           }, duration);
+      }
+      function takeNap() { /* ... (no changes needed) ... */
+           if (gameState.isTakingNap || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot nap properly due to debt stress.", "loss"); return; }
+           gameState.isTakingNap = true; updateButtonStates(); addNotification("Taking a power nap.", "start");
+           recordSleepOrNap();
+           const duration = 5000;
+           setTimeout(() => {
+               gameState.nextRollChance = Math.random() < 0.55 ? "gain" : "lose";
+               const resultMessage = gameState.nextRollChance === "gain" ? `Refreshed! Expect +$${NAP_GAIN_AMOUNT.toFixed(2)} on next roll.` : `Stressful dream... Expect -$${NAP_LOSS_AMOUNT.toFixed(2)} on next roll.`;
+               addNotification(`Finished nap. ${resultMessage}`, "info");
+               gameState.isTakingNap = false; updateButtonStates();
+           }, duration);
+      }
+
+      // --- Bankruptcy Check ---
+      function checkBankruptcy() {
+        const isBankrupt = gameState.netMoney <= BANKRUPTCY_THRESHOLD;
+        if (isBankrupt) {
+          if (!window.bankruptcyDeclared) {
+              addNotification("BANKRUPTCY! The IRS has seized everything! GAME OVER. You can reset to play again.", "loss");
+              window.bankruptcyDeclared = true;
+          }
+          // Disabling other buttons is handled in updateButtonStates
+        } else {
+            window.bankruptcyDeclared = false;
+        }
+      }
+
+      // --- Save/Load/Reset ---
+      function saveGame() {
+        try {
+             const stateToSave = { ...gameState };
+             localStorage.setItem(SAVE_GAME_KEY, JSON.stringify(stateToSave));
+             // console.log("Game saved."); // Optional debug
+        } catch (e) { console.error("Could not save game state:", e); addNotification("Error saving game!", "loss"); }
+      }
+      function loadGame() {
+        try {
+          const savedData = localStorage.getItem(SAVE_GAME_KEY);
+          if (savedData) {
+            const loadedState = JSON.parse(savedData);
+            // Restore state carefully
+            Object.keys(gameState).forEach(key => {
+                if (loadedState.hasOwnProperty(key)) {
+                    gameState[key] = loadedState[key];
+                }
+            });
+            // Ensure defaults for potentially missing new fields
+            gameState.baseMuggability = gameState.baseMuggability ?? 50;
+            gameState.lastSleepOrNapTime = gameState.lastSleepOrNapTime || Date.now();
+            gameState.ownedItems = gameState.ownedItems || { genericShirt: true, genericPants: true };
+            if (!gameState.ownedItems.genericShirt) gameState.ownedItems.genericShirt = true;
+            if (!gameState.ownedItems.genericPants) gameState.ownedItems.genericPants = true;
+            gameState.equippedShirt = gameState.equippedShirt || 'genericShirt';
+            gameState.equippedPants = gameState.equippedPants || 'genericPants';
+            gameState.sleepLevel = gameState.sleepLevel ?? 100;
+            gameState.clothesPrice = 15 + (gameState.age * 5);
+            gameState.bonusPoints = gameState.bonusPoints ?? 0; // Crucial for loading saved bonus points
+
+            // Update Full UI from loaded state
+            updateElementText("wins", gameState.wins); updateElementText("total-rolls", gameState.totalRolls);
+            updateMoneyDisplay();
+            updateElementText("age-display", gameState.age); updateElementText("location-display", gameState.currentLocation);
+            updateElementText("sleep-level", gameState.sleepLevel);
+            updateMuggabilityDisplay();
+            updateElementText("bonus-points", gameState.bonusPoints); // Display loaded accumulated bonus
+            updateElementText("dice-rolls", gameState.dice.length > 0 ? gameState.dice.join(", ") : "-");
+            updateTotalPoints(); // Recalculate potential total based on loaded dice and bonus
+            updateEquipmentSelectors();
+            updateOwnedItemButtons();
+
+            addNotification("Game loaded from previous session.", "info");
+          } else {
+             addNotification("No save data found. Starting fresh.", "info");
+             initializeNewGameUI();
+          }
+        } catch (e) {
+          console.error("Could not load saved game:", e); addNotification("Failed to load save data. Resetting game.", "loss");
+          resetGameAll();
+        }
+      }
+       // Helper to set UI for a brand new game start (called by loadGame if no save found or on reset)
+       function initializeNewGameUI() {
+             updateMoneyDisplay();
+             updateElementText("age-display", gameState.age);
+             updateElementText("location-display", gameState.currentLocation);
+             updateElementText("sleep-level", gameState.sleepLevel);
+             updateMuggabilityDisplay();
+             updateOwnedItemButtons();
+             updateEquipmentSelectors();
+             updateElementText("wins", '0');
+             updateElementText("total-rolls", '0');
+             updateElementText("bonus-points", '0');
+             updateElementText("dice-rolls", '-');
+             updateElementText("total-points", '-');
+             // Ensure core game state vars are explicitly reset for UI consistency
+             gameState.dice = [];
+             gameState.alreadyCounted = false;
+             gameState.bonusPoints = 0;
+       }
+
+      function resetGameAll(notify = true) {
+        console.log("Resetting game state...");
+        // Define initial state clearly
+        const initialState = {
+            wins: 0, consecutiveWins: 0, missedWins: 0, bonusPoints: 0, totalRolls: 0, dice: [], alreadyCounted: false,
+            moneyEarned: 0, moneyLost: 0, netMoney: 0,
+            isWorkingMines: false, isWorkingOffice: false, isWorkingStaples: false, isTakingNap: false, isWorkingDog: false, isSleepingHobby: false,
+            nextRollChance: null, age: 4, clothesPrice: 15 + (4 * 5), lastClothingChange: Date.now(), currentLocation: "North Carolina",
+            sleepLevel: 100, slaves: 0, momNagCount: 0,
+            baseMuggability: 50, lastSleepOrNapTime: Date.now(),
+            ownedItems: { genericShirt: true, genericPants: true },
+            equippedHat: null, equippedJacket: null, equippedShirt: 'genericShirt', equippedPants: 'genericPants', equippedShoes: null, equippedSocks: null,
+        };
+        // Assign initial state to gameState
+        Object.assign(gameState, initialState);
+
+        // Update UI elements to reflect reset state
+        initializeNewGameUI(); // Use helper to reset UI consistently
+
+        // Clear notification log only if explicitly resetting via button
+        if (notify && notificationLog) notificationLog.innerHTML = '';
+
+        // Clear saved data
+        try { localStorage.removeItem(SAVE_GAME_KEY); console.log("Cleared saved game data."); }
+        catch (e) { console.error("Error clearing saved game data:", e); if(notify) addNotification("Failed to clear saved game data!", "loss"); }
+
+        window.bankruptcyDeclared = false; // Reset bankruptcy flag
+
+        if (notify) addNotification("Game Reset to Beginning!", "info");
+        console.log("Game reset complete.");
+        updateButtonStates(); // Ensure buttons are in correct state after reset
+      }
+
+      // --- Game Initialization ---
+      function initGame() {
+        console.log(`Initializing Game ${GAME_VERSION_STRING}...`);
+        loadGame(); // Load or initialize new game state & UI
+
+        // Initialize systems
+        initAgeing();
+        initLocationTaxes();
+        initHobbies();
+        initShopping();
+        initMuggability();
+        initUIEnhancements();
+
+        // Attach button listeners
+        const buttonMappings = {
+          "roll-dice-btn": rollDice, "commit-btn": commit, "work-in-mines-btn": workInMines, "work-in-office-btn": workInOfficeJob,
+          "work-staple-tables-btn": workInStapleTables, "take-nap-btn": takeNap, "work-dog-walker-btn": workAsDogWalker, "sleep-hobby-btn": sleepHobby,
+          "bankruptcy-reset-btn": () => resetGameAll(true) // Pass true to clear log on manual reset
+        };
+        Object.entries(buttonMappings).forEach(([id, func]) => {
+          const button = document.getElementById(id);
+          if (button) button.onclick = func;
+          else console.warn(`Button with ID "${id}" not found during init.`);
+        });
+
+        // Ensure reset button is enabled from the start
+        const resetButton = document.getElementById('bankruptcy-reset-btn');
+        if (resetButton) resetButton.disabled = false;
+
+        // Autosave interval
+        setInterval(saveGame, 60 * 1000); // Save every 60 seconds
+
+        // Initial bankruptcy check
+        checkBankruptcy();
+
+        addNotification(`Welcome to the Tower of Gable - ${GAME_VERSION_STRING}`, "info");
+        console.log("Game Initialized.");
+      }
+
+      // --- Start the game ---
+      window.addEventListener("load", initGame);
+
+      // --- END OF CONSOLIDATED JAVASCRIPT ---
+    </script>
+</body>
+</html>

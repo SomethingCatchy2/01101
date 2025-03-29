@@ -1,236 +1,699 @@
 // je.js
+// Main game logic, initialization, event handling, core mechanics.
 import { gameState } from './game_state.js';
-import { initAgeing, buyClothes } from './ageing.js';
-import { workAsDogWalker, initWorkEnhancements } from './work_enhancements.js';
-import { initLocationTaxes } from './location_taxes.js';
-import { initHobbies, sleepHobby } from './hobbies.js';
-import { initFashionMuggability, buySunglasses } from './fashion_muggability.js'; // Can remove buySunglasses if done via shop now
-// --- NEW IMPORTS ---
 import { itemDefinitions } from './items.js';
-import { initShopping, updateEquipmentSelectors, updateOwnedItemButtons } from './shopping.js';
-import { initMuggability, recordSleepOrNap, recalculateMuggability } from './muggability.js';
-// -------------------
 import { updateElementText, showMessage, updateMoneyDisplay, addNotification, updateButtonStates } from './utils.js';
+import { initMuggability, recordSleepOrNap, recalculateMuggability } from './muggability.js';
+import { initShopping, updateEquipmentSelectors, updateOwnedItemButtons, buyItem } from './shopping.js';
+import { initAgeing } from './ageing.js'; // Removed buyClothes import as button is gone
+import { initWorkEnhancements, workAsDogWalker } from './work_enhancements.js';
+import { initLocationTaxes, changeLocation } from './location_taxes.js';
+import { initHobbies, sleepHobby } from './hobbies.js';
+import { initUIEnhancements } from './ui_enhancements.js'; // <<<--- IMPORT NEW MODULE
 
-// DOM elements
+
+// --- DOM Element References ---
 const notificationLog = document.getElementById('notification-log');
 const bankruptcyResetBtn = document.getElementById('bankruptcy-reset-btn');
+// Make messageTimeout global for utils.js clear function
 window.messageTimeout = null;
 
-// --- Update Work/Nap/Sleep functions to record time ---
-function takeNap() {
-     if (gameState.isTakingNap || isInDebt()) return;
-    gameState.isTakingNap = true;
+// --- Core Game Mechanics ---
+
+/**
+ * Rolls 4 dice, applies cost, calculates points, updates UI.
+ * Restricted based on certain ongoing actions.
+ */
+function rollDice() {
+  // Rule: Can roll unless doing Mines, Staples, Nap, Dog Walk, Sleep Hobby. Office OK.
+  const canRoll = !gameState.isWorkingMines && !gameState.isWorkingStaples && !gameState.isTakingNap && !gameState.isWalkingDog && !gameState.isSleepingHobby;
+  if (!canRoll) {
+    addNotification("Cannot roll dice while doing that job!", "info");
+    return;
+  }
+
+  // Apply nap effect if pending from previous nap
+  if (gameState.nextRollChance) {
+    handleNextRoll(); // Applies effect and clears chance
+  }
+
+  // Roll dice and update state
+  gameState.dice = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
+  gameState.totalRolls++;
+  gameState.alreadyCounted = false; // Reset missed win check for this roll
+  gameState.moneyLost += 1; // Cost $1 to roll (track as positive loss)
+
+  // Update UI and calculations
+  updateElementText("dice-rolls", gameState.dice.join(", "));
+  updateElementText("total-rolls", gameState.totalRolls);
+  calculateBonus(); // Recalculates and updates bonus points display
+  updateTotalPoints(); // Calculates and updates total points, checks for missed win
+
+  addNotification(`Rolled: ${gameState.dice.join(", ")}. Cost $1. Total: ${gameState.dice.reduce((a,b)=>a+b,0) + gameState.bonusPoints}, Bonus: ${gameState.bonusPoints}`, "info");
+  updateMoneyDisplay(); // Update money display after cost and potential missed win penalty
+  updateButtonStates(); // Update button enabled/disabled states
+}
+
+/**
+ * Calculates bonus points based on current dice roll.
+ * Excludes matches of 6s. Includes 6s in runs.
+ * Adds to existing bonus unless no bonus condition met this round.
+ */
+function calculateBonus() {
+  if (gameState.dice.length !== 4) return; // Ensure we have 4 dice
+
+  const counts = {};
+  let matchBonus = 0;
+
+  // 1. Calculate Match Bonus (excluding 6s)
+  gameState.dice.forEach(num => {
+    if (num !== 6) { // *** CRITICAL: Ignore 6s for match bonus ***
+        counts[num] = (counts[num] || 0) + 1;
+    }
+  });
+
+  let hasMatch = false;
+  Object.values(counts).forEach(count => {
+    if (count >= 2) { // Pairs, 3-of-a-kind, 4-of-a-kind (of non-sixes)
+      matchBonus += (count - 1); // +1 for pair, +2 for triple, +3 for quad
+      hasMatch = true;
+    }
+  });
+
+  // 2. Calculate Run Bonus (including 6s)
+  // Use Set to get unique values, then sort for easier run checking
+  const sortedUniqueDice = [...new Set(gameState.dice)].sort((a, b) => a - b);
+  let runBonus = 0;
+  let maxRunLength = 0;
+  let currentRunLength = 0;
+
+  for (let i = 0; i < sortedUniqueDice.length; i++) {
+      if (i > 0 && sortedUniqueDice[i] === sortedUniqueDice[i - 1] + 1) {
+          currentRunLength++; // Increment run if consecutive
+      } else {
+          currentRunLength = 1; // Reset run if not consecutive or it's the first die
+      }
+      maxRunLength = Math.max(maxRunLength, currentRunLength); // Track longest run found
+  }
+
+  // Award bonus points for runs of 3 or 4
+  if (maxRunLength >= 3) {
+      runBonus = maxRunLength - 2; // Run of 3 -> +1 point, Run of 4 -> +2 points
+  }
+
+  // 3. Update Total Bonus Points
+  // If NO match AND NO run occurred this specific round, reset bonus points to 0
+  if (!hasMatch && runBonus === 0) {
+      gameState.bonusPoints = 0;
+  } else {
+      // Otherwise, add the bonus earned this round to the existing total
+      gameState.bonusPoints += (matchBonus + runBonus);
+  }
+
+  // Update UI
+  updateElementText("bonus-points", gameState.bonusPoints);
+}
+
+/**
+ * Calculates and updates the total points display (Dice Sum + Bonus).
+ * Checks for a "missed win" (rolling 24 but not committing).
+ */
+function updateTotalPoints() {
+  if (gameState.dice.length !== 4) {
+    updateElementText("total-points", "-");
+    return;
+  }
+
+  const diceSum = gameState.dice.reduce((a, b) => a + b, 0);
+  const totalPoints = diceSum + gameState.bonusPoints;
+  updateElementText("total-points", totalPoints);
+
+  // Check for missed win (only if 24 rolled AND not already penalized this roll)
+  if (totalPoints === 24 && !gameState.alreadyCounted) {
+    gameState.missedWins++;
+    gameState.moneyLost += 500; // Penalty for not committing on 24
+    // updateElementText("missed-wins", gameState.missedWins); // If element exists
+    addNotification("YOU ROLLED 24! Commit now or face a $500 penalty if you roll again!", "loss");
+    gameState.alreadyCounted = true; // Mark penalized for this roll
+    updateMoneyDisplay(); // Update money immediately due to penalty
+  }
+}
+
+/**
+ * Commits the current dice roll. Awards win if total is 24, penalizes otherwise.
+ * Resets bonus points after every commit.
+ * Restricted based on certain ongoing actions.
+ */
+function commit() {
+  // Rule: Can commit unless doing Mines, Staples, Nap, Dog Walk, Sleep Hobby. Office OK.
+  const canCommit = !gameState.isWorkingMines && !gameState.isWorkingStaples && !gameState.isTakingNap && !gameState.isWalkingDog && !gameState.isSleepingHobby;
+   if (!canCommit) {
+    addNotification("Cannot commit while doing that job!", "info");
+    return;
+  }
+  if (gameState.dice.length === 0) {
+    addNotification("Roll the dice first!", "info");
+    return;
+  }
+
+  const totalPoints = gameState.dice.reduce((a, b) => a + b, 0) + gameState.bonusPoints;
+
+  if (totalPoints === 24) {
+    // --- WIN ---
+    gameState.consecutiveWins++;
+    // Win amount scaling needs review - let's make it less extreme
+    // const winnings = 1500 * gameState.consecutiveWins; // Old scaling
+    const baseWin = 1000; // Base amount for winning
+    const streakBonus = gameState.consecutiveWins * 250; // Bonus per streak item
+    const winnings = baseWin + streakBonus;
+
+    gameState.moneyEarned += winnings;
+    gameState.wins++;
+    updateElementText("wins", gameState.wins);
+    addNotification(`COMMIT SUCCESS! Total is 24! Streak: ${gameState.consecutiveWins}x. Earned $${winnings.toFixed(2)}`, "win");
+  } else {
+    // --- LOSE ---
+    const penalty = 100; // Standard penalty for failed commit
+    gameState.moneyLost += penalty;
+    gameState.consecutiveWins = 0; // Reset streak on failed commit
+    addNotification(`COMMIT FAILED! Total was ${totalPoints} (Needed 24). Lost $${penalty.toFixed(2)}.`, "loss");
+  }
+
+  // Reset bonus points AFTER commit attempt (win or lose)
+  gameState.bonusPoints = 0;
+  updateElementText("bonus-points", gameState.bonusPoints);
+
+  updateMoneyDisplay(); // Update money display
+  resetDiceAfterCommit(); // Resets dice & related UI, updates buttons
+}
+
+/**
+ * Resets dice roll state after a commit or when needed.
+ */
+function resetDiceAfterCommit() {
+  gameState.dice = [];
+  gameState.alreadyCounted = false; // Reset missed win flag
+  updateElementText("dice-rolls", "-");
+  updateElementText("total-points", "-");
+  updateButtonStates(); // Re-enable relevant buttons
+}
+
+/**
+ * Applies the pending effect ('gain' or 'lose') from the last nap.
+ * Called automatically before the next dice roll if an effect is pending.
+ */
+function handleNextRoll() {
+  if (!gameState.nextRollChance) return; // No effect pending
+
+  // Flat bonus/penalty for nap effect
+  const gainAmount = 75;
+  const lossAmount = 75;
+  let effectApplied = false;
+
+  if (gameState.nextRollChance === "gain") {
+    gameState.moneyEarned += gainAmount;
+    addNotification(`Well Rested bonus applied: +$${gainAmount.toFixed(2)}`, "finish-success");
+    effectApplied = true;
+  } else if (gameState.nextRollChance === "lose") {
+    gameState.moneyLost += lossAmount;
+    addNotification(`Poor Nap penalty applied: -$${lossAmount.toFixed(2)}`, "finish-fail");
+    effectApplied = true;
+  }
+
+  gameState.nextRollChance = null; // Clear the pending effect
+
+  if (effectApplied) {
+      updateMoneyDisplay(); // Update money display only if effect was applied
+  }
+}
+
+// --- Work Functions (Defined directly in je.js for simpler scope management for now) ---
+
+/**
+ * Simulates working in the mines. Sets flag, uses timeout, applies random outcome.
+ */
+function workInMines() {
+    if (gameState.isWorkingMines || isInDebt('severe')) return; // Check specific flag & severe debt
+    gameState.isWorkingMines = true;
     updateButtonStates();
-    addNotification("Taking a short nap.", "start");
-    recordSleepOrNap(); // <<< Record time here
-    const duration = 5000;
+    addNotification("Started working in the mines.", "start");
+    const duration = 10000; // 10 seconds
     setTimeout(() => {
-        gameState.nextRollChance = Math.random() < 0.5 ? "gain" : "lose";
-        const resultMessage = gameState.nextRollChance === "gain" ? "You feel rested." : "You had a weird dream.";
-         addNotification(`Finished nap. ${resultMessage} Effect applies on next roll.`, "info");
-        gameState.isTakingNap = false;
+         // Balanced outcomes
+         const outcomes = [
+             { value: 150, message: "Found some copper worth $150." },
+             { value: 600, message: "Found silver ore worth $600." },
+             { value: 1200, message: "You found gold! Earned $1200!" },
+             { value: -200, message: "Minor injury in the mines. Medical bills: $200." },
+             { value: getRandomInt(800, 3500), message: "You found a sparkling rare gem!" }, // Adjusted range
+             { value: 50, message: "Found some coal. Better than nothing. $50." }, // Added low positive
+             { value: -150, message: "Cave-in blocked the main vein. Lost $150 in wasted effort." },
+             { value: -400, message: "Your mining helmet lamp broke! Replacement cost: $400." }
+         ];
+        const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+        let notificationType = 'info';
+
+        if (outcome.value < 0) {
+            gameState.moneyLost -= outcome.value; // moneyLost is positive value of loss
+            notificationType = 'finish-fail';
+        } else {
+            gameState.moneyEarned += outcome.value;
+            notificationType = 'finish-success';
+        }
+
+        addNotification(`Finished mining. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
+        updateMoneyDisplay();
+        gameState.isWorkingMines = false; // Clear flag
         updateButtonStates();
-        recalculateMuggability(); // Update muggability after nap ends
     }, duration);
 }
 
-// Ensure sleepHobby also records sleep time (modify in hobbies.js or call here)
-// Let's modify hobbies.js directly for consistency...
-// (Modification shown below in Section VI)
+/**
+ * Simulates working in the office. Allows dice rolling during work.
+ */
+function workInOfficeJob() {
+     if (gameState.isWorkingOffice || isInDebt('moderate')) return; // Check specific flag & moderate debt
+    gameState.isWorkingOffice = true;
+    updateButtonStates(); // Update button states (dice/commit remain enabled)
+    addNotification("Started working in the office. You can still roll dice!", "start");
+    const duration = 7000; // 7 seconds
+    setTimeout(() => {
+         // Balanced outcomes
+         const outcomes = [
+            { value: 250, message: "Regular office work completed. Earned $250." },
+            { value: 350, message: "Got a bonus for finishing early! Earned $350." },
+            { value: 180, message: "Filed TPS reports. Earned $180." }, // Themed outcome
+            { value: 450, message: "Impressed the boss with your 'synergy'! Earned $450." },
+            { value: -50, message: "Painful paper cut! Medical expense: $50." },
+            { value: 0, message: "Attended a mandatory meeting about meetings. No pay." },
+            { value: 75, message: "Fixed the coffee machine. Got $75 from the petty cash." },
+            { value: -100, message: "Sent an email to the wrong 'reply all'. Docked $100 pay for cleanup." },
+            { value: 300, message: "Successfully upsold a client! Commission: $300." } // Positive outcome
+         ];
+        const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+        let notificationType = 'info';
+
+        if (outcome.value < 0) {
+            gameState.moneyLost -= outcome.value;
+             notificationType = 'finish-fail';
+        } else {
+            gameState.moneyEarned += outcome.value;
+            notificationType = 'finish-success';
+        }
+
+        addNotification(`Finished office work. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
+        updateMoneyDisplay();
+        gameState.isWorkingOffice = false; // Clear flag
+        updateButtonStates(); // Update buttons again
+    }, duration);
+}
+
+/**
+ * Simulates working stapling tables. High risk/reward.
+ */
+function workInStapleTables() {
+     if (gameState.isWorkingStaples || isInDebt('moderate')) return; // Check specific flag & moderate debt
+    gameState.isWorkingStaples = true;
+    updateButtonStates();
+    addNotification("Started the glorious task of stapling tables.", "start");
+    const duration = 5000; // 5 seconds
+    setTimeout(() => {
+         // Balanced outcomes (nerfed big loss)
+         const outcomes = [
+            { value: 70, message: "Stapled 10 tables. Earned $70." },
+            { value: 90, message: "Efficient stapling today! $90." },
+            { value: 120, message: "Staple Master performance! Earned $120." },
+            { value: -5000, message: "Stapler malfunction caused significant damage. -$5000." }, // Nerfed loss amount
+            { value: 200, message: "Found a lost company credit card. Reward: $200." }, // Changed finding
+            { value: 0, message: "Ran out of staples halfway through the shift. No pay." },
+            { value: -300, message: "Stapled your own thumb securely to a table. -$300." }, // Adjusted outcome
+            { value: 150, message: "Invented a new, faster stapling technique! Bonus: $150." }, // Positive outcome
+         ];
+        const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+        let notificationType = 'info';
+
+        if (outcome.value < 0) {
+            gameState.moneyLost -= outcome.value;
+            notificationType = 'finish-fail';
+        } else {
+            gameState.moneyEarned += outcome.value;
+            notificationType = 'finish-success';
+        }
+
+        addNotification(`Finished stapling. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
+        updateMoneyDisplay();
+        gameState.isWorkingStaples = false; // Clear flag
+        updateButtonStates();
+    }, duration);
+}
+
+/**
+ * Simulates taking a short nap. Sets up a potential gain/loss on the next roll.
+ */
+function takeNap() {
+     if (gameState.isTakingNap || isInDebt('any')) return; // Check flag & any debt
+    gameState.isTakingNap = true;
+    updateButtonStates();
+    addNotification("Taking a short power nap.", "start");
+    recordSleepOrNap(); // Record rest time for muggability
+
+    const duration = 5000; // 5 seconds
+    setTimeout(() => {
+        // Determine outcome (gain or lose on next roll)
+        gameState.nextRollChance = Math.random() < 0.55 ? "gain" : "lose"; // Slightly higher chance of gain? 55/45
+        const resultMessage = gameState.nextRollChance === "gain" ? "You feel refreshed." : "You had a stressful dream.";
+        addNotification(`Finished nap. ${resultMessage} Effect applies on next roll.`, "info");
+
+        gameState.isTakingNap = false; // Clear flag
+        updateButtonStates();
+        recalculateMuggability(); // Update muggability after nap
+    }, duration);
+}
+
+/**
+ * Checks if the player is in debt and prevents actions accordingly.
+ * @param {'any' | 'moderate' | 'severe'} level - The level of debt check.
+ * @returns {boolean} True if the player is in debt at the specified level, false otherwise.
+ */
+function isInDebt(level = 'any') {
+  let threshold = 0;
+  let message = "";
+
+  switch (level) {
+    case 'severe':
+      threshold = -5000;
+      message = "SEVERE DEBT: Assets may be seized! Cannot perform high-risk work.";
+      break;
+    case 'moderate':
+      threshold = -500;
+      message = "MODERATE DEBT: Risky ventures restricted.";
+      break;
+    case 'any':
+    default:
+      threshold = -100; // Allow small negative balance for some actions? Let's keep it strict.
+      message = "IN DEBT: Cannot perform this action while in debt.";
+      break;
+  }
+
+  if (gameState.netMoney <= threshold) {
+     addNotification(message, "loss");
+    return true;
+  }
+  return false;
+}
 
 
-// --- Load Game (Add new state properties) ---
+// --- Utility & Lifecycle Functions ---
+
+/**
+ * Generates a random integer between min and max (inclusive).
+ */
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Checks for bankruptcy condition (-10000 net money). Shows reset button if bankrupt.
+ */
+function checkBankruptcy() {
+  const bankruptcyThreshold = -10000;
+  const isBankrupt = gameState.netMoney <= bankruptcyThreshold;
+  const isButtonVisible = bankruptcyResetBtn && bankruptcyResetBtn.style.display !== 'none';
+
+  if (isBankrupt && !isButtonVisible) {
+    // --- Trigger Bankruptcy ---
+    addNotification("BANKRUPTCY! The IRS has seized everything! GAME OVER.", "loss");
+
+    // Disable all action buttons EXCEPT the reset button
+    const actionButtons = document.querySelectorAll('.actions-box button, .shop-grid button'); // Select relevant buttons
+    actionButtons.forEach(btn => {
+        if (btn.id !== 'bankruptcy-reset-btn') {
+             btn.disabled = true;
+        }
+    });
+    // Also disable equip selects
+    const equipSelects = document.querySelectorAll('.equipment-select select');
+    equipSelects.forEach(sel => sel.disabled = true);
+
+
+    // Stop all ongoing work timers forcefully? Not easily possible without storing timer IDs.
+    // For simplicity, just disable buttons. Work will finish but yield no result if bankruptcy hit mid-work.
+
+    // Show the reset button
+    if (bankruptcyResetBtn) bankruptcyResetBtn.style.display = 'inline-block';
+
+  } else if (!isBankrupt && isButtonVisible) {
+     // If somehow net money becomes positive again, hide the button and re-enable others (unlikely scenario)
+     if (bankruptcyResetBtn) bankruptcyResetBtn.style.display = 'none';
+     updateButtonStates(); // Re-enable based on current state
+     // Re-enable equip selects
+     const equipSelects = document.querySelectorAll('.equipment-select select');
+     equipSelects.forEach(sel => sel.disabled = false);
+  }
+}
+
+/**
+ * Saves the current game state to localStorage.
+ */
+function saveGame() {
+  try {
+    // gameState now holds all persistent state, including flags and equipment
+    localStorage.setItem('towerOfGableData_v14_2', JSON.stringify(gameState)); // Versioned key
+    // console.log("Game saved."); // Optional debug message
+  } catch (e) {
+    console.error("Could not save game state:", e);
+    addNotification("Error saving game!", "loss");
+  }
+}
+
+/**
+ * Loads the game state from localStorage. Updates UI accordingly.
+ * Includes error handling and defaults for missing properties in old saves.
+ */
 function loadGame() {
   try {
-    const savedData = localStorage.getItem('towerOfGableData');
+    const savedData = localStorage.getItem('towerOfGableData_v14_2'); // Use versioned key
     if (savedData) {
       const loadedState = JSON.parse(savedData);
-      // Use Object.assign for cleaner merging, ensuring defaults
-      Object.assign(gameState, loadedState);
 
-      // Ensure defaults for potentially missing newer properties in old saves
-      gameState.muggability = gameState.muggability ?? 50;
-      gameState.lastSleepOrNapTime = gameState.lastSleepOrNapTime || Date.now();
-      gameState.ownedItems = gameState.ownedItems || {};
-      gameState.equippedHat = gameState.equippedHat || null;
-      gameState.equippedJacket = gameState.equippedJacket || null;
-      gameState.momNagCount = gameState.momNagCount || 0;
-      // Ensure work flags default to false if missing
-      gameState.isWorkingMines = gameState.isWorkingMines || false;
-      gameState.isWorkingOffice = gameState.isWorkingOffice || false;
-      gameState.isWorkingStaples = gameState.isWorkingStaples || false;
-      gameState.isTakingNap = gameState.isTakingNap || false;
-      gameState.isWalkingDog = gameState.isWalkingDog || false;
-      gameState.isSleepingHobby = gameState.isSleepingHobby || false;
+      // Merge loaded state into gameState, ensuring defaults for any missing keys
+      // This handles adding new properties in future versions gracefully.
+      for (const key in gameState) {
+          if (loadedState.hasOwnProperty(key)) {
+              gameState[key] = loadedState[key];
+          } else {
+              // If a key exists in default gameState but not save, keep the default
+              console.warn(`Save data missing key: ${key}. Using default value.`);
+          }
+      }
+       // Explicitly ensure muggability starts correctly if save is corrupt/missing it
+       gameState.muggability = gameState.muggability ?? 50;
+       gameState.lastSleepOrNapTime = gameState.lastSleepOrNapTime || Date.now();
 
 
-      // Update UI based on loaded state
+      // --- Update All UI Elements After Loading ---
       updateElementText("wins", gameState.wins);
       updateElementText("total-rolls", gameState.totalRolls);
-      updateMoneyDisplay(); // Handles money earned/lost/net
+      updateMoneyDisplay(); // Handles earned/lost/net display
       updateElementText("age-display", gameState.age);
       updateElementText("clothes-price", gameState.clothesPrice.toFixed(2));
       updateElementText("location-display", gameState.currentLocation);
       updateElementText("sleep-level", gameState.sleepLevel);
-      updateElementText("muggability-display", gameState.muggability); // Update muggability display
+      updateElementText("muggability-display", gameState.muggability);
       updateElementText("slaves", gameState.slaves);
       updateElementText("bonus-points", gameState.bonusPoints);
       updateElementText("dice-rolls", gameState.dice.length > 0 ? gameState.dice.join(", ") : "-");
-      updateElementText("total-points", gameState.dice.length > 0 ? (gameState.dice.reduce((a,b)=>a+b,0) + gameState.bonusPoints) : "-");
+      updateTotalPoints(); // Recalculate and display total points based on loaded dice/bonus
 
+      // Update shop/equipment UI based on loaded owned/equipped items
+      updateEquipmentSelectors(); // Populates dropdowns based on gameState.ownedItems
+      updateOwnedItemButtons(); // Disables buy buttons for owned items
 
       addNotification("Game loaded from previous session.", "info");
 
-      // Update shop UI AFTER main load
-      // Need to ensure shopping elements are ready - maybe delay slightly or ensure initShopping runs after load completes fully
-      // For simplicity, call directly here. If issues arise, use setTimeout(..., 0)
-      updateEquipmentSelectors();
-      updateOwnedItemButtons();
-      recalculateMuggability(); // Ensure muggability reflects loaded equipment/state
-
     } else {
-       // Update UI for initial state if no save
+       // No save data found - Update UI to reflect initial default state
+       addNotification("No save data found. Starting fresh.", "info");
        updateMoneyDisplay();
+       updateElementText("age-display", gameState.age);
+       updateElementText("clothes-price", gameState.clothesPrice.toFixed(2));
+       updateElementText("location-display", gameState.currentLocation);
+       updateElementText("sleep-level", gameState.sleepLevel);
        updateElementText("muggability-display", gameState.muggability);
-       // ... update other initial UI elements ...
+       updateElementText("slaves", gameState.slaves);
+       updateOwnedItemButtons(); // Ensure shop buttons are correctly enabled/disabled
+       updateEquipmentSelectors();
     }
   } catch (e) {
     console.error("Could not load saved game:", e);
-    resetGameAll();
+    addNotification("Failed to load save data. Resetting game.", "loss");
+    resetGameAll(); // Reset if loading fails
   }
 }
 
-// --- Reset Game (Add new state properties) ---
+
+/**
+ * Resets the entire game state to its initial values. Clears save data, updates UI.
+ */
 function resetGameAll() {
-    // Reset gameState to initial values including new ones
-     Object.assign(gameState, {
-        wins: 0, consecutiveWins: 0, missedWins: 0, bonusPoints: 0, totalRolls: 0,
-        moneyEarned: 0, moneyLost: 0, netMoney: 0, dice: [], alreadyCounted: false,
-        isWorkingMines: false, isWorkingOffice: false, isWorkingStaples: false,
-        isTakingNap: false, isWalkingDog: false, isSleepingHobby: false,
-        nextRollChance: null, age: 4, clothesPrice: 10 + (4 * 4),
-        lastClothingChange: Date.now(), currentLocation: "North Carolina",
-        muggability: 50, lastSleepOrNapTime: Date.now(), // Reset muggability state
-        ownedItems: {}, equippedHat: null, equippedJacket: null, // Reset items/equipment
-        sleepLevel: 100, slaves: 0, momNagCount: 0
-    });
+  console.log("Resetting game state..."); // Log when reset starts
 
-    // Update all UI elements
-    updateElementText("wins", gameState.wins);
-    updateElementText("total-rolls", gameState.totalRolls);
-    updateMoneyDisplay();
-    updateElementText("dice-rolls", "-");
-    updateElementText("bonus-points", "0");
-    updateElementText("total-points", "-");
-    updateElementText("age-display", gameState.age);
-    updateElementText("clothes-price", gameState.clothesPrice.toFixed(2));
-    updateElementText("location-display", gameState.currentLocation);
-    updateElementText("sleep-level", gameState.sleepLevel);
-    updateElementText("muggability-display", gameState.muggability); // Reset display
-    updateElementText("slaves", gameState.slaves);
+  // --- 1. Reset gameState Object to Initial Values ---
+  Object.assign(gameState, {
+      // Core Game
+      wins: 0,
+      consecutiveWins: 0,
+      missedWins: 0,
+      bonusPoints: 0,
+      totalRolls: 0,
+      dice: [],
+      alreadyCounted: false,
+      // Money
+      moneyEarned: 0,
+      moneyLost: 0,
+      netMoney: 0, // Will be recalculated by updateMoneyDisplay shortly
+      // Work Flags
+      isWorkingMines: false,
+      isWorkingOffice: false,
+      isWorkingStaples: false,
+      isTakingNap: false,
+      isWorkingDog: false,
+      isSleepingHobby: false,
+      // Effects
+      nextRollChance: null,
+      // Player Status
+      age: 4,
+      clothesPrice: 10 + (4 * 4), // Recalculate initial price
+      lastClothingChange: Date.now(),
+      currentLocation: "North Carolina",
+      sleepLevel: 100,
+      slaves: 0,
+      momNagCount: 0,
+      // Muggability & Equipment
+      muggability: 50, // Reset to starting value
+      lastSleepOrNapTime: Date.now(),
+      ownedItems: {}, // Clear owned items
+      equippedHat: null, // Unequip hat
+      equippedJacket: null, // Unequip jacket
+  });
 
-    // Clear notification log
-    if (notificationLog) notificationLog.innerHTML = '';
+  // --- 2. Update All Corresponding UI Elements ---
+  // Core Game UI
+  updateElementText("wins", gameState.wins);
+  updateElementText("total-rolls", gameState.totalRolls);
+  updateElementText("dice-rolls", "-");
+  updateElementText("bonus-points", "0");
+  updateElementText("total-points", "-");
 
-    // Reset Shop UI
-    updateEquipmentSelectors(); // Clear and reset dropdowns
-    populateShopGrids(); // Re-enable all buy buttons (done by initShopping/populateShopGrids)
-    updateOwnedItemButtons(); // Ensure buttons reflect fresh state (none owned)
+  // Money UI (Call the dedicated function)
+  updateMoneyDisplay(); // This handles earned, lost, and net based on reset values
+
+  // Player Status UI
+  updateElementText("age-display", gameState.age);
+  updateElementText("clothes-price", gameState.clothesPrice.toFixed(2));
+  updateElementText("location-display", gameState.currentLocation);
+  updateElementText("sleep-level", gameState.sleepLevel);
+  updateElementText("slaves", gameState.slaves);
+
+  // Muggability UI
+  updateElementText("muggability-display", gameState.muggability);
+
+  // --- 3. Reset Specific UI Components ---
+  // Clear Notification Log
+  if (notificationLog) {
+      notificationLog.innerHTML = '';
+  } else {
+      console.warn("Notification log element not found during reset.");
+  }
+
+  // Hide Bankruptcy Reset Button
+  if (bankruptcyResetBtn) {
+      bankruptcyResetBtn.style.display = 'none';
+  } else {
+      console.warn("Bankruptcy reset button element not found during reset.");
+  }
+
+  // Reset Shop UI (Dropdowns and Buy Buttons)
+  // These functions read the now-empty gameState.ownedItems/equipped items
+  updateOwnedItemButtons(); // Re-enables buy buttons for non-owned items
+  updateEquipmentSelectors(); // Resets dropdowns to "-- None --"
+
+  // --- 4. Update Action Button States ---
+  // Ensure buttons like Roll, Work, etc., are enabled based on the fresh state
+  updateButtonStates();
+  // Also re-enable equip selects
+  const equipSelects = document.querySelectorAll('.equipment-select select');
+  equipSelects.forEach(sel => sel.disabled = false);
+
+  // --- 5. Clear Save Data ---
+  try {
+      localStorage.removeItem('towerOfGableData_v14_2'); // Use the correct versioned key
+      console.log("Cleared saved game data.");
+  } catch (e) {
+      console.error("Error clearing saved game data:", e);
+      addNotification("Failed to clear saved game data!", "loss");
+  }
 
 
-    // Hide bankruptcy button, ensure others are potentially enabled
-    if(bankruptcyResetBtn) bankruptcyResetBtn.style.display = 'none';
-    updateButtonStates();
-
-    // Clear saved game data
-    localStorage.removeItem('towerOfGableData');
-
-    addNotification("Game Reset to Beginning!", "info");
+  // --- 6. Final Notification ---
+  addNotification("Game Reset to Beginning!", "info");
+  console.log("Game reset complete.");
 }
 
-
-// --- Initialize Game (Add new inits) ---
+/**
+ * Initializes the game on page load. Loads data, sets up modules, attaches listeners.
+ */
 function initGame() {
-  loadGame(); // Load state first
+  console.log("Initializing Game V14.2...");
+  loadGame(); // Load saved state first (or set defaults)
 
-  // Initialize modules
+  // Initialize subsystems
   initAgeing();
   initWorkEnhancements();
   initLocationTaxes();
   initHobbies();
-  // initFashionMuggability(); // Can be removed if sunglasses are bought via shop now
-  initShopping(); // <<< Initialize Shopping UI
-  initMuggability(); // <<< Initialize Muggability System
+  initShopping(); // Populates shop, sets equip listeners
+  initMuggability();
+  initUIEnhancements(); // <<<--- INITIALIZE NEW UI MODULE
 
-  // Add event listeners (Ensure work functions are accessible)
-  // Temporary fix: Make work functions global for button mapping
-   window.workInMines = workInMines;
-   window.workInOfficeJob = workInOfficeJob;
-   window.workInStapleTables = workInStapleTables;
-   // window.takeNap = takeNap; // takeNap is defined within je.js
-   window.buyClothes = buyClothes; // Assuming from ageing.js
-
+  // Add event listeners to buttons
   const buttonMappings = {
     "roll-dice-btn": rollDice,
     "commit-btn": commit,
-    "work-in-mines-btn": window.workInMines,
-    "work-in-office-btn": window.workInOfficeJob,
-    "work-staple-tables-btn": window.workInStapleTables,
-    "take-nap-btn": takeNap, // Use local function
-    "work-dog-walker-btn": workAsDogWalker, // Imported
-    "sleep-hobby-btn": sleepHobby, // Imported
-    "buy-clothes-btn": window.buyClothes, // Assuming global from ageing.js for now
-    "buy-sunglasses-btn": () => buyItem('sunglasses'), // Use buyItem directly if sunglasses in items.js
-    "bankruptcy-reset-btn": resetGameAll
+    "work-in-mines-btn": workInMines,
+    "work-in-office-btn": workInOfficeJob,
+    "work-staple-tables-btn": workInStapleTables,
+    "take-nap-btn": takeNap,
+    "work-dog-walker-btn": workAsDogWalker,
+    "sleep-hobby-btn": sleepHobby,
+    // "buy-clothes-btn": buyClothes, // Button removed from HTML
+    "bankruptcy-reset-btn": resetGameAll // Listener for the bankruptcy button
   };
-
-   // Remove sunglasses button if it's part of the main shop now
-    const sunglassesBtn = document.getElementById('buy-sunglasses-btn');
-    if (sunglassesBtn && itemDefinitions['sunglasses']) { // Check if sunglasses defined in items.js
-       sunglassesBtn.style.display = 'none'; // Hide the dedicated button
-       delete buttonMappings['buy-sunglasses-btn']; // Remove mapping
-   } else if (sunglassesBtn) {
-       // Keep old sunglasses button if not in items.js
-       buttonMappings['buy-sunglasses-btn'] = buySunglasses; // Assuming imported
-   }
-
 
   Object.entries(buttonMappings).forEach(([id, func]) => {
     const button = document.getElementById(id);
     if (button) {
+      // Use onclick for simplicity, ensuring only one listener is attached
       button.onclick = func;
-    } else if (id !== 'buy-sunglasses-btn') { // Don't warn if sunglasses button was intentionally removed
-       console.error(`Button with ID "${id}" not found`);
+    } else {
+       console.warn(`Button with ID "${id}" not found during init.`); // Less aggressive warning
     }
   });
 
-  updateButtonStates(); // Set initial button states
+  // Set initial button states based on loaded/default game state
+  updateButtonStates();
 
-  // Start intervals
-  setInterval(saveGame, 60000);
-  setInterval(checkBankruptcy, 1000);
-  setInterval(momNag, 5 * 60 * 1000);
+  // Start periodic background tasks
+  setInterval(saveGame, 60 * 1000); // Save every 60 seconds
+  setInterval(checkBankruptcy, 1 * 1000); // Check bankruptcy every second
+  // Mom Nag interval is started in initAgeing()
   // Muggability interval is started in initMuggability()
 
-  addNotification("Welcome to the Tower of Gable - WebV14.1", "info");
+  addNotification("Welcome to the Tower of Gable - WebV14.2", "info");
+  console.log("Game Initialized.");
 }
 
-// --- Keep necessary functions defined globally or ensure imports ---
-// (workInMines, workInOfficeJob, workInStapleTables, isInDebt, etc. definitions from previous response go here)
-// ...
-function workInMines() { /* ... implementation ... */ }
-function workInOfficeJob() { /* ... implementation ... */ }
-function workInStapleTables() { /* ... implementation ... */ }
-function isInDebt() { /* ... implementation ... */ }
-function handleNextRoll() { /* ... implementation ... */ }
-function momNag() { /* ... implementation ... */ }
-function checkBankruptcy() { /* ... implementation ... */ }
-function rollDice() { /* ... implementation ... */ }
-function calculateBonus() { /* ... implementation ... */ }
-function commit() { /* ... implementation ... */ }
-function resetDice() { /* ... implementation ... */ }
-function updateTotalPoints() { /* ... implementation ... */ }
-// ... and any other functions previously defined directly in je.js that are still needed
-
-window.addEventListener("load", initGame); // Start the game
+// --- Start the game ---
+window.addEventListener("load", initGame);
