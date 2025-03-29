@@ -188,7 +188,7 @@
         color: #3e3b33;
       }
     </style>
-    <audio src="../../../../mp3 and mp4/Office2.wav" autoplay loop></audio>
+   
 </head>
 <body>
     <!-- The .page-wrapper now handles the main content area -->
@@ -452,7 +452,101 @@
     <div id="message-display" style="display: none;"></div>
 
     <footer> <!-- Footer is now outside page-wrapper, directly under body -->
-        <span>Tower of Gable v14.6 (DLC 2.8)</span> <!-- VERSION UPDATE -->
+      <div class="audio-player">
+     
+        <div class="audio-controls">
+            <button onclick="playAudio()">Play</button>
+            <button onclick="stopAudio()">Stop</button>
+            <input type="range" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)">
+        </div>
+    </div>
+    <audio id="myAudio" src="../../../../mp3 and mp4/Office2.wav" autoplay loop></audio>
+    
+    <script>
+    var audio = document.getElementById('myAudio');
+    
+    function playAudio() {
+        audio.play();
+    }
+    
+    function pauseAudio() {
+        audio.pause();
+    }
+    
+    function stopAudio() {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+    
+    function setVolume(value) {
+        audio.volume = value;
+    }
+    </script>
+    
+    <style>
+    /* .audio-player {
+        border: 2px solid black;
+        padding: 10px;
+        background-color: #aaaaaa;
+        width: 300px;
+        margin: 0 auto;
+    } */
+    
+    .audio-player .title {
+        font-family: 'Times New Roman', Times, serif;
+      
+        text-align: center;
+        /* margin-bottom: 10px; */
+    }
+    
+    .audio-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .audio-controls button {
+        /* background-color: #cccccc; */
+        /* border: 2px solid; */
+        /* border-color: #ffffff #000000 #000000 #ffffff; */
+        /* padding: 5px 10px; */
+        margin: 0 1px;
+        font-family: 'Times New Roman', Times, serif;
+ 
+        cursor: pointer;
+    }
+    
+    /* .audio-controls button:active {
+        border-color: #000000 #ffffff #ffffff #000000;
+    } */
+    
+    .audio-controls input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: #cccccc;
+        height: 10px;
+        border: 1px solid rgb(240, 240, 240);
+        width: 100px;
+        margin-left: 10px;
+    }
+    
+    .audio-controls input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background-color: #000000;
+        border: 2px solid rgb(255, 255, 255);
+    }
+    
+    .audio-controls input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background-color: #ffffff;
+        border: 2px solid rgb(255, 255, 255);
+    }
+    </style>      
+      <span>Tower of Gable v14.6 (DLC 2.8)</span> <!-- VERSION UPDATE -->
         <button id="bankruptcy-reset-btn">Reset Game</button> <!-- No longer starts disabled -->
     </footer>
 
@@ -633,7 +727,7 @@
           updateElementText("money-lost", gameState.moneyLost.toFixed(2));
           updateElementText("net-money", gameState.netMoney.toFixed(2));
           checkBankruptcy(); // Check if bankrupt state is triggered
-          updateButtonStates(); // Update button enabled/disabled states
+          updateButtonStates(); // Update <audio src="../../../../mp3 and mp4/Office2.wav" autoplay loop controls></audio> button enabled/disabled states
       }
       function isInSignificantDebt() {
           return gameState.netMoney < SIGNIFICANT_DEBT_THRESHOLD;
