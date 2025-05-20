@@ -32,12 +32,12 @@
         flex: 0 0 280px;
         padding: 15px;
         background-color: #ffffff;
-        border-right: 1px solid #dee2e6;
+        /* border-right: 1px solid #dee2e6; */ /* Removed as left sidebar is gone */
       }
 
       .right-sidebar {
         border-left: 1px solid #dee2e6;
-        
+        /* flex: 0 0 280px; */ /* Already defined in .sidebar */
       }
 
       .main-content {
@@ -96,10 +96,11 @@
         background-color: #e9ecef;
       }
 
-      .actions-box button {
-        margin: 1px;
-        cursor: pointer;
-      }
+      /* .actions-box button { */ /* This class is being removed/restructured */
+      /*   margin: 1px; */
+      /*   cursor: pointer; */
+      /* } */
+      /* Individual buttons within new boxes will rely on default button styling or more specific rules if needed */
 
       footer {
         border-top: 1px solid #dee2e6;
@@ -187,6 +188,37 @@
       .notification-box p.notification-finish-fail {
         color: #3e3b33;
       }
+
+      /* --- START: CSS for Tabs --- */
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 15px;
+      }
+      .tab-button {
+        padding: 10px 15px;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        font-size: 1em;
+        font-family: 'Times New Roman', Times, serif;
+        border-bottom: 3px solid transparent; /* For active indicator */
+        margin-right: 5px; /* Spacing between tab buttons */
+      }
+      .tab-button:hover {
+        background-color: #f0f0f0;
+      }
+      .tab-button.active {
+        border-bottom-color: #2c3e50; 
+        font-weight: bold;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      /* --- END: CSS for Tabs --- */
     </style>
    
 </head>
@@ -194,247 +226,198 @@
     <!-- The .page-wrapper now handles the main content area -->
     <div class="page-wrapper">
 
-        <!-- Left Sidebar: Quote Marquee -->
-        <div class="sidebar left-sidebar">
-            <h4>Inspirational Gableisms</h4>
-            <div class="box quote-marquee">
-                <div class="quote-content">
-                    <p>All dreams come, if have courage pursue.</p>
-                    <p>5It never late be you have.</p>
-                    <p>Try to a of, but try become man value.</p>
-                    <p>Keep face toward sunshine, shadows fall you.</p>
-                    <p>Either run day, the runs you.</p>
-                    <p>Every brings closer the home.</p>
-                    <p>Nothing impossible, word says possible.</p>
-                    <p>Success of from to without of.</p>
-                    <p>If dont the youre, start another.</p>
-                    <p>He conquers is mightiest.</p>
-                    <p>One with makes majority.</p>
-                    <p>The adventure can take to the of dreams.</p>
-                    <p>The Preparation tomorrow doing best.</p>
-                    <p>Be you you in right, stand.</p>
-                    <p>Life no, except ones make.</p>
-                    <p>Everyone is taken.</p>
-                    <p>Nothing impossible is possible.</p>
-                    <p>The belongs those in the of dreams.</p>
-                    <p>Keep face always the, and will behind you.</p>
-                    <p>If can it, you can.</p>
-                    <p>Keep eyes, and feet ground.</p>
-                    <p>We must get rid the of life, so as to have the life.</p>
-                    <p>I'd rather I've done than I haven't done.</p>
-                    <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
-                    <p>Those who, you.</p>
-                    <p>Being in the was, tomato pursued.</p>
-                    <p>If you soup, do not floor.</p>
-                    <p>When you acquire, burn trash.</p>
-                    <p>Get the new Ford F-120, then you Ernn Graph.</p>
-                    <p>Grandma? Why do these cookies taste like ash?</p>
-                    <p>Failure, an opportunity for Failure.</p>
-                    <p>Do not Failure success.</p>
-                    <p>I found a toad.</p>
-                    <p>If tall, don’t short people too.</p>
-                    <p>Help I having a heatstroke.</p>
-                    <p>Are do flooring tiles? No.</p>
-                    <p>Nehhhh WEHHHH.</p>
-                    <p>People of types, there are two. You the flu.</p>
-                    <p>Sir Ver once said “What would you like to order?”</p>
-                    <p>Snake with two tails, thats why hats.</p>
-                    <p>If at first you don’t succeed, quit and blame others.</p>
-                    <p>If you forgot, just forget you forgot.</p>
-                    <p>If you go bankrupt, take out a loan.</p>
-                    <p>If you are in debt, take out a loan.</p>
-                    <p>If you are breaking the national debt limit, take out a loan.</p>
-                    <p>One must, you find.</p>
-                    <p>Therein you shall find, The all new FORD F-120.</p>
-                    <p>If lost your, just your.</p>
-                    <p>"The life is living." -Play Dough.</p>
-                    <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
-                    <p>Whys the the gone?</p>
-                    <p>“And thats why they don’t build roads with toads.”</p>
-                    <p>Wasing in the doing, being in the not.</p>
-                    <p>The mind not, but fire should be kindled.</p>
-                    <p>Every beginning comes, some beginning.</p>
-                    <p>Wealth in having great, but having few.</p>
-                    <p>The greatest lies in falling, but in rising every we fall.</p>
-                    <p>No great, without great your.</p>
-                    <p>No Taxation without Representation!</p>
-                    <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
-                    <p>Your dream is, follow and will.</p>
-                    <p>Failure 99%, still 1.</p>
-                    <p>If you are in soup, do not in floor.</p>
-                    <p>Gulping Gerberium.</p>
-                    <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
-                    <p>When Anthropology, you have.</p>
-                    <p>If are ever that are good, remember Abraham hair.</p>
-                    <!-- Repeat quotes for continuous marquee effect -->
-                    <p>All dreams come, if have courage pursue.</p>
-                    <p>5It never late be you have.</p>
-                    <p>Try to a of, but try become man value.</p>
-                    <p>Keep face toward sunshine, shadows fall you.</p>
-                    <p>Either run day, the runs you.</p>
-                    <p>Every brings closer the home.</p>
-                    <p>Nothing impossible, word says possible.</p>
-                    <p>Success of from to without of.</p>
-                    <p>If dont the youre, start another.</p>
-                    <p>He conquers is mightiest.</p>
-                    <p>One with makes majority.</p>
-                    <p>The adventure can take to the of dreams.</p>
-                    <p>The Preparation tomorrow doing best.</p>
-                    <p>Be you you in right, stand.</p>
-                    <p>Life no, except ones make.</p>
-                    <p>Everyone is taken.</p>
-                    <p>Nothing impossible is possible.</p>
-                    <p>The belongs those in the of dreams.</p>
-                    <p>Keep face always the, and will behind you.</p>
-                    <p>If can it, you can.</p>
-                    <p>Keep eyes, and feet ground.</p>
-                    <p>We must get rid the of life, so as to have the life.</p>
-                    <p>I'd rather I've done than I haven't done.</p>
-                    <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
-                    <p>Those who, you.</p>
-                    <p>Being in the was, tomato pursued.</p>
-                    <p>If you soup, do not floor.</p>
-                    <p>When you acquire, burn trash.</p>
-                    <p>Get the new Ford F-120, then you Ernn Graph.</p>
-                    <p>Grandma? Why do these cookies taste like ash?</p>
-                    <p>Failure, an opportunity for Failure.</p>
-                    <p>Do not Failure success.</p>
-                    <p>I found a toad.</p>
-                    <p>If tall, don’t short people too.</p>
-                    <p>Help I having a heatstroke.</p>
-                    <p>Are do flooring tiles? No.</p>
-                    <p>Nehhhh WEHHHH.</p>
-                    <p>People of types, there are two. You the flu.</p>
-                    <p>Sir Ver once said “What would you like to order?”</p>
-                    <p>Snake with two tails, thats why hats.</p>
-                    <p>If at first you don’t succeed, quit and blame others.</p>
-                    <p>If you forgot, just forget you forgot.</p>
-                    <p>If you go bankrupt, take out a loan.</p>
-                    <p>If you are in debt, take out a loan.</p>
-                    <p>If you are breaking the national debt limit, take out a loan.</p>
-                    <p>One must, you find.</p>
-                    <p>Therein you shall find, The all new FORD F-120.</p>
-                    <p>If lost your, just your.</p>
-                    <p>"The life is living." -Play Dough.</p>
-                    <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
-                    <p>Whys the the gone?</p>
-                    <p>“And thats why they don’t build roads with toads.”</p>
-                    <p>Wasing in the doing, being in the not.</p>
-                    <p>The mind not, but fire should be kindled.</p>
-                    <p>Every beginning comes, some beginning.</p>
-                    <p>Wealth in having great, but having few.</p>
-                    <p>The greatest lies in falling, but in rising every we fall.</p>
-                    <p>No great, without great your.</p>
-                    <p>No Taxation without Representation!</p>
-                    <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
-                    <p>Your dream is, follow and will.</p>
-                    <p>Failure 99%, still 1.</p>
-                    <p>If you are in soup, do not in floor.</p>
-                    <p>Gulping Gerberium.</p>
-                    <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
-                    <p>When Anthropology, you have.</p>
-                    <p>If are ever that are good, remember Abraham hair.</p>
-                    <p>Are do lightbulbs? Seven hundred men.</p>
-                    <p> I have severe lung damage.</p>
-                    <p> [cookie clicker reference]</p>
-                    <p>Work and fun what do I that's more. have choose do.</p>
-                    <p>Failure the that success flavor.</p>
-                    <p>At one woke, morning the.</p>
-                    <p>What's money? A is success he up the and to at and between what wants do.</p>
-
-                </div>
-            </div>
-        </div>
+        <!-- Left Sidebar: Quote Marquee - REMOVED, content moved to tab -->
 
         <!-- Main Content Area -->
         <div class="main-content">
             <div class="header-section">
-                <h1>Tower of Gable</h1> <!-- VERSION UPDATE - Web version: 14.6 -->
+                <h1>Tower of Gable</h1> <!-- VERSION UPDATE - Web version: 15.1 -->
                 <p>About Tower of Gable. You are a four year old gambling addict named Gabel. The IRS has been hunting you for the last 4 years, can you finally escape financial ruin? Find out in Tower of Gable</p>
             </div>
 
-            <div class="box stats-box">
-                 <!-- Updated Labels for clarity -->
-                <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span> | <strong>Bonus Points:</strong> <span id="bonus-points">0</span> | <strong>Total Points:</strong> <span id="total-points">-</span></p>
-                <p><strong>Wins:</strong> <span id="wins">0</span> | <strong>Rolls:</strong> <span id="total-rolls">0</span></p>
-                <p><strong>Earned:</strong> $<span id="money-earned">0.00</span> | <strong>Lost:</strong> $<span id="money-lost">0.00</span> | <strong>Net:</strong> $<span id="net-money">0.00</span></p>
-                <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Location:</strong> <span id="location-display">North Carolina</span> | <strong>Sleep:</strong> <span id="sleep-level">100</span></p>
-                 <p id="muggability-info">
-                    <strong>Muggability:</strong> <!-- Label no longer styled red -->
-                    Base: <span id="muggability-base-display">50</span> |
-                    Effective: <span id="muggability-effective-display">50</span>
-                </p>
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" data-tab="gamble">Gamble</button>
+                <button class="tab-button" data-tab="status">Status & Actions</button>
+                <button class="tab-button" data-tab="shop">Shop</button>
+                <button class="tab-button" data-tab="gableisms">Gableisms</button>
             </div>
 
-            <div class="box actions-box">
-                <button id="roll-dice-btn">Roll Dice ($1)</button>
-                <button id="commit-btn">Commit</button>
-                <button id="work-in-mines-btn">Work: In Mines (15s)</button>
-                <button id="work-in-office-btn">Work: In Office (12s)</button>
-                <button id="work-staple-tables-btn">Work: Staples Tables (4s)</button>
-                <button id="work-dog-walker-btn">Work: Walk Dogs (5s)</button>
-                <button id="take-nap-btn">Nap (5s)</button>
-                <button id="sleep-hobby-btn">Sleep (10s)</button>
+            <!-- Tab Content Panels -->
+            <div id="gamble-tab" class="tab-content active">
+                <div class="box"> <!-- Gamble Stats -->
+                    <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span> | <strong>Bonus Points:</strong> <span id="bonus-points">0</span> | <strong>Total Points:</strong> <span id="total-points">-</span></p>
+                    <p><strong>Wins:</strong> <span id="wins">0</span> | <strong>Rolls:</strong> <span id="total-rolls">0</span></p>
+                    <p><strong>Earned:</strong> $<span id="money-earned">0.00</span> | <strong>Lost:</strong> $<span id="money-lost">0.00</span> | <strong>Net:</strong> $<span id="net-money">0.00</span></p>
+                </div>
+                <div class="box"> <!-- Gamble Actions -->
+                    <button id="roll-dice-btn">Roll Dice ($1)</button>
+                    <button id="commit-btn">Commit</button>
+                </div>
             </div>
 
-            <div class="box shopping-box collapsible-container">
-                 <h4 id="shop-toggle">Shopping & Equipment <span class="toggle-indicator">▼</span></h4>
-                 <div class="collapsible-content">
-                    <!-- Helms -->
-                    <div class="shop-section">
-                        <h5>Helms</h5>
-                        <div id="hat-shop-grid" class="shop-grid"></div>
-                        <div class="equipment-select">
-                            <label for="equip-hat-select">Equip Helm:</label>
-                            <select id="equip-hat-select"><option value="">-- None --</option></select>
+            <div id="status-tab" class="tab-content">
+                <div class="box"> <!-- Status Stats -->
+                    <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Location:</strong> <span id="location-display">North Carolina</span> | <strong>Sleep:</strong> <span id="sleep-level">100</span></p>
+                    <p id="muggability-info">
+                        <strong>Muggability:</strong>
+                        Base: <span id="muggability-base-display">50</span> |
+                        Effective: <span id="muggability-effective-display">50</span>
+                    </p>
+                </div>
+                <div class="box"> <!-- Status Actions -->
+                    <button id="work-in-mines-btn">Work: In Mines (15s)</button>
+                    <button id="work-in-office-btn">Work: In Office (12s)</button>
+                    <button id="work-staple-tables-btn">Work: Staples Tables (4s)</button>
+                    <button id="work-dog-walker-btn">Work: Walk Dogs (5s)</button>
+                    <button id="take-nap-btn">Nap (5s)</button>
+                    <button id="sleep-hobby-btn">Sleep (10s)</button>
+                </div>
+            </div>
+            
+            <div id="shop-tab" class="tab-content">
+                <!-- Original shopping-box content moved here -->
+                <div class="box shopping-box collapsible-container">
+                     <h4 id="shop-toggle">Shopping & Equipment <span class="toggle-indicator">▼</span></h4>
+                     <div class="collapsible-content">
+                        <!-- Helms -->
+                        <div class="shop-section">
+                            <h5>Helms</h5>
+                            <div id="hat-shop-grid" class="shop-grid"></div>
+                            <div class="equipment-select">
+                                <label for="equip-hat-select">Equip Helm:</label>
+                                <select id="equip-hat-select"><option value="">-- None --</option></select>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Coats -->
-                    <div class="shop-section">
-                        <h5>Coats</h5>
-                        <div id="jacket-shop-grid" class="shop-grid"></div>
-                        <div class="equipment-select">
-                            <label for="equip-jacket-select">Equip Coat:</label>
-                            <select id="equip-jacket-select"><option value="">-- None --</option></select>
+                        <!-- Coats -->
+                        <div class="shop-section">
+                            <h5>Coats</h5>
+                            <div id="jacket-shop-grid" class="shop-grid"></div>
+                            <div class="equipment-select">
+                                <label for="equip-jacket-select">Equip Coat:</label>
+                                <select id="equip-jacket-select"><option value="">-- None --</option></select>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Shirts -->
-                    <div class="shop-section">
-                        <h5>Shirts</h5>
-                        <div id="shirt-shop-grid" class="shop-grid"></div>
-                        <div class="equipment-select">
-                            <label for="equip-shirt-select">Equip Shirt:</label>
-                            <select id="equip-shirt-select"><option value="genericShirt">Generic Shirt</option></select>
+                        <!-- Shirts -->
+                        <div class="shop-section">
+                            <h5>Shirts</h5>
+                            <div id="shirt-shop-grid" class="shop-grid"></div>
+                            <div class="equipment-select">
+                                <label for="equip-shirt-select">Equip Shirt:</label>
+                                <select id="equip-shirt-select"><option value="genericShirt">Generic Shirt</option></select>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Pants -->
-                    <div class="shop-section">
-                        <h5>Pants</h5>
-                        <div id="pants-shop-grid" class="shop-grid"></div>
-                        <div class="equipment-select">
-                            <label for="equip-pants-select">Equip Pants:</label>
-                            <select id="equip-pants-select"><option value="genericPants">Generic Pants</option></select>
+                        <!-- Pants -->
+                        <div class="shop-section">
+                            <h5>Pants</h5>
+                            <div id="pants-shop-grid" class="shop-grid"></div>
+                            <div class="equipment-select">
+                                <label for="equip-pants-select">Equip Pants:</label>
+                                <select id="equip-pants-select"><option value="genericPants">Generic Pants</option></select>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Shoes -->
-                    <div class="shop-section">
-                        <h5>Shoes</h5>
-                        <div id="shoes-shop-grid" class="shop-grid"></div>
-                        <div class="equipment-select">
-                            <label for="equip-shoes-select">Equip Shoes:</label>
-                            <select id="equip-shoes-select"><option value="">-- None --</option></select>
+                        <!-- Shoes -->
+                        <div class="shop-section">
+                            <h5>Shoes</h5>
+                            <div id="shoes-shop-grid" class="shop-grid"></div>
+                            <div class="equipment-select">
+                                <label for="equip-shoes-select">Equip Shoes:</label>
+                                <select id="equip-shoes-select"><option value="">-- None --</option></select>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Socks -->
-                    <div class="shop-section">
-                        <h5>Socks</h5>
-                        <div id="socks-shop-grid" class="shop-grid"></div>
-                        <div class="equipment-select">
-                            <label for="equip-socks-select">Equip Socks:</label>
-                            <select id="equip-socks-select"><option value="">-- None --</option></select>
+                        <!-- Socks -->
+                        <div class="shop-section">
+                            <h5>Socks</h5>
+                            <div id="socks-shop-grid" class="shop-grid"></div>
+                            <div class="equipment-select">
+                                <label for="equip-socks-select">Equip Socks:</label>
+                                <select id="equip-socks-select"><option value="">-- None --</option></select>
+                            </div>
                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <div id="gableisms-tab" class="tab-content">
+                <h4>Inspirational Gableisms</h4>
+                <div class="box quote-marquee"> <!-- Content from former left sidebar -->
+                    <div class="quote-content">
+                        <p>All dreams come, if have courage pursue.</p>
+                        <p>5It never late be you have.</p>
+                        <p>Try to a of, but try become man value.</p>
+                        <p>Keep face toward sunshine, shadows fall you.</p>
+                        <p>Either run day, the runs you.</p>
+                        <p>Every brings closer the home.</p>
+                        <p>Nothing impossible, word says possible.</p>
+                        <p>Success of from to without of.</p>
+                        <p>If dont the youre, start another.</p>
+                        <p>He conquers is mightiest.</p>
+                        <p>One with makes majority.</p>
+                        <p>The adventure can take to the of dreams.</p>
+                        <p>The Preparation tomorrow doing best.</p>
+                        <p>Be you you in right, stand.</p>
+                        <p>Life no, except ones make.</p>
+                        <p>Everyone is taken.</p>
+                        <p>Nothing impossible is possible.</p>
+                        <p>The belongs those in the of dreams.</p>
+                        <p>Keep face always the, and will behind you.</p>
+                        <p>If can it, you can.</p>
+                        <p>Keep eyes, and feet ground.</p>
+                        <p>We must get rid the of life, so as to have the life.</p>
+                        <p>I'd rather I've done than I haven't done.</p>
+                        <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
+                        <p>Those who, you.</p>
+                        <p>Being in the was, tomato pursued.</p>
+                        <p>If you soup, do not floor.</p>
+                        <p>When you acquire, burn trash.</p>
+                        <p>Get the new Ford F-120, then you Ernn Graph.</p>
+                        <p>Grandma? Why do these cookies taste like ash?</p>
+                        <p>Failure, an opportunity for Failure.</p>
+                        <p>Do not Failure success.</p>
+                        <p>I found a toad.</p>
+                        <p>If tall, don’t short people too.</p>
+                        <p>Help I having a heatstroke.</p>
+                        <p>Are do flooring tiles? No.</p>
+                        <p>Nehhhh WEHHHH.</p>
+                        <p>People of types, there are two. You the flu.</p>
+                        <p>Sir Ver once said “What would you like to order?”</p>
+                        <p>Snake with two tails, thats why hats.</p>
+                        <p>If at first you don’t succeed, quit and blame others.</p>
+                        <p>If you forgot, just forget you forgot.</p>
+                        <p>If you go bankrupt, take out a loan.</p>
+                        <p>If you are in debt, take out a loan.</p>
+                        <p>If you are breaking the national debt limit, take out a loan.</p>
+                        <p>One must, you find.</p>
+                        <p>Therein you shall find, The all new FORD F-120.</p>
+                        <p>If lost your, just your.</p>
+                        <p>"The life is living." -Play Dough.</p>
+                        <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
+                        <p>Whys the the gone?</p>
+                        <p>“And thats why they don’t build roads with toads.”</p>
+                        <p>Wasing in the doing, being in the not.</p>
+                        <p>The mind not, but fire should be kindled.</p>
+                        <p>Every beginning comes, some beginning.</p>
+                        <p>Wealth in having great, but having few.</p>
+                        <p>The greatest lies in falling, but in rising every we fall.</p>
+                        <p>No great, without great your.</p>
+                        <p>No Taxation without Representation!</p>
+                        <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
+                        <p>Your dream is, follow and will.</p>
+                        <p>Failure 99%, still 1.</p>
+                        <p>If you are in soup, do not in floor.</p>
+                        <p>Gulping Gerberium.</p>
+                        <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
+                        <p>When Anthropology, you have.</p>
+                        <p>If are ever that are good, remember Abraham hair.</p>
+                        <p>Are do lightbulbs? Seven hundred men.</p>
+                        <p> I have severe lung damage.</p>
+                        <p> [cookie clicker reference]</p>
+                        <p>Work and fun what do I that's more. have choose do.</p>
+                        <p>Failure the that success flavor.</p>
+                        <p>At one woke, morning the.</p>
+                        <p>What's money? A is success he up the and to at and between what wants do.</p>
                     </div>
-                 </div>
+                </div>
             </div>
 
         </div>
@@ -546,7 +529,7 @@
         border: 2px solid rgb(255, 255, 255);
     }
     </style>      
-      <span>Tower of Gable v14.6 (DLC 2.8)</span> <!-- VERSION UPDATE -->
+      <span>Tower of Gable v15.1 (DLC 2.8)</span> <!-- VERSION UPDATE -->
         <button id="bankruptcy-reset-btn">Reset Game</button> <!-- No longer starts disabled -->
     </footer>
 
@@ -562,8 +545,8 @@
       const BASE_WIN_AMOUNT = 1000;
       const NAP_GAIN_AMOUNT = 85;
       const NAP_LOSS_AMOUNT = 65;
-      const SAVE_GAME_KEY = 'towerOfGableData_v14_6'; // VERSION UPDATE for bonus point reset logic
-      const GAME_VERSION_STRING = "WebV14.6"; // VERSION UPDATE
+      const SAVE_GAME_KEY = 'towerOfGableData_v15_1'; // VERSION UPDATE
+      const GAME_VERSION_STRING = "WebV15.1"; // VERSION UPDATE
 
       // Muggability Constants
       const MUGGABILITY_FLUCTUATION_INTERVAL = 10000;
@@ -1157,7 +1140,10 @@
        }
 
       // --- Content from ui_enhancements.js ---
-      function initUIEnhancements() { initCollapsibleShop(); }
+      function initUIEnhancements() {
+        initTabs(); // Initialize tabs first
+        initCollapsibleShop();
+      }
       function initCollapsibleShop() { /* ... (no changes needed, relies on CSS now) ... */
           const shopToggle = document.getElementById('shop-toggle');
           const shopContent = document.querySelector('.shopping-box .collapsible-content');
@@ -1176,6 +1162,46 @@
               });
           } else { console.error("Collapsible shop elements not found!"); }
       }
+
+      // --- START: Tabbed Interface Logic ---
+      function initTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const defaultTab = 'gamble'; // Default tab
+        let activeTabId = localStorage.getItem('activeTabId_v15_1') || defaultTab; // Use versioned key
+
+        function switchTab(tabId) {
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === tabId + '-tab') {
+                    content.classList.add('active');
+                }
+            });
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.tab === tabId) {
+                    button.classList.add('active');
+                }
+            });
+            localStorage.setItem('activeTabId_v15_1', tabId); // Use versioned key
+            activeTabId = tabId;
+        }
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchTab(button.dataset.tab);
+            });
+        });
+
+        // Ensure the initially active tab (from localStorage or default) is shown
+        // And fallback if the stored tab ID doesn't correspond to an existing tab button
+        let currentActiveButton = document.querySelector(`.tab-button[data-tab="${activeTabId}"]`);
+        if (!currentActiveButton) {
+            activeTabId = defaultTab; // Fallback to default if stored tab is invalid
+        }
+        switchTab(activeTabId);
+      }
+      // --- END: Tabbed Interface Logic ---
 
       // --- START: UPDATED Dice/Commit Logic with Reset Rule & Chiller Notifications ---
       const bankruptcyResetBtn = document.getElementById('bankruptcy-reset-btn'); // Keep reference
@@ -1520,9 +1546,9 @@
         initAgeing();
         initLocationTaxes();
         initHobbies();
-        initShopping();
+        initShopping(); // Must be after tabs if it relies on elements within tabs being visible/accessible
         initMuggability();
-        initUIEnhancements(); // This now calls initCollapsibleShop
+        initUIEnhancements(); // This now calls initTabs and initCollapsibleShop
 
         // Attach button listeners
         const buttonMappings = {
