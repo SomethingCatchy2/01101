@@ -58,6 +58,89 @@
         /* border-radius: 5px; */
         background-color: #ffffff;
       }
+      
+      /* --- Upgrade System Styles --- */
+      .upgrade-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .upgrade-item {
+        border: 1px solid #000;
+        padding: 15px;
+        background-color: #f9f9f9;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        position: relative;
+      }
+
+      .upgrade-item:hover {
+        background-color: #e9ecef;
+      }
+
+      .upgrade-item.disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .upgrade-item h4 {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .upgrade-item .cost {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .upgrade-item .description {
+        font-size: 0.9em;
+        margin-bottom: 8px;
+      }
+
+      .upgrade-category {
+        margin-bottom: 20px;
+      }
+
+      .upgrade-category h3 {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+      }
+
+      .unlocked-upgrades {
+        margin-top: 20px;
+      }
+
+      .unlocked-upgrades h3 {
+        margin-bottom: 10px;
+      }
+
+      .upgrade-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 0.7em;
+        padding: 2px 5px;
+        border-radius: 10px;
+        background-color: #007bff;
+        color: white;
+      }
+
+      .upgrade-stats {
+        font-size: 0.85em;
+        margin-top: 5px;
+        color: #495057;
+      }
+
+      .no-upgrades-message {
+        font-style: italic;
+        color: #6c757d;
+        text-align: center;
+        padding: 20px;
+      }
 
       .shop-section {
         margin-bottom: 15px;
@@ -237,7 +320,8 @@
 
             <!-- Tab Navigation -->
             <div class="tabs">
-                <button class="tab-button active" data-tab="gamble">Gamble</button>
+                <button class="tab-button active" data-tab="gamble">Gable</button>
+                <button class="tab-button" data-tab="upgrades">Upgrades</button>
                 <button class="tab-button" data-tab="status">Status & Actions</button>
                 <button class="tab-button" data-tab="shop">Shop</button>
                 <button class="tab-button" data-tab="gableisms">Gableisms</button>
@@ -338,87 +422,20 @@
                 </div>
             </div>
 
-            <div id="gableisms-tab" class="tab-content">
-                <h4>Inspirational Gableisms</h4>
-                <div class="box quote-marquee"> <!-- Content from former left sidebar -->
-                    <div class="quote-content">
-                        <p>All dreams come, if have courage pursue.</p>
-                        <p>5It never late be you have.</p>
-                        <p>Try to a of, but try become man value.</p>
-                        <p>Keep face toward sunshine, shadows fall you.</p>
-                        <p>Either run day, the runs you.</p>
-                        <p>Every brings closer the home.</p>
-                        <p>Nothing impossible, word says possible.</p>
-                        <p>Success of from to without of.</p>
-                        <p>If dont the youre, start another.</p>
-                        <p>He conquers is mightiest.</p>
-                        <p>One with makes majority.</p>
-                        <p>The adventure can take to the of dreams.</p>
-                        <p>The Preparation tomorrow doing best.</p>
-                        <p>Be you you in right, stand.</p>
-                        <p>Life no, except ones make.</p>
-                        <p>Everyone is taken.</p>
-                        <p>Nothing impossible is possible.</p>
-                        <p>The belongs those in the of dreams.</p>
-                        <p>Keep face always the, and will behind you.</p>
-                        <p>If can it, you can.</p>
-                        <p>Keep eyes, and feet ground.</p>
-                        <p>We must get rid the of life, so as to have the life.</p>
-                        <p>I'd rather I've done than I haven't done.</p>
-                        <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
-                        <p>Those who, you.</p>
-                        <p>Being in the was, tomato pursued.</p>
-                        <p>If you soup, do not floor.</p>
-                        <p>When you acquire, burn trash.</p>
-                        <p>Get the new Ford F-120, then you Ernn Graph.</p>
-                        <p>Grandma? Why do these cookies taste like ash?</p>
-                        <p>Failure, an opportunity for Failure.</p>
-                        <p>Do not Failure success.</p>
-                        <p>I found a toad.</p>
-                        <p>If tall, don’t short people too.</p>
-                        <p>Help I having a heatstroke.</p>
-                        <p>Are do flooring tiles? No.</p>
-                        <p>Nehhhh WEHHHH.</p>
-                        <p>People of types, there are two. You the flu.</p>
-                        <p>Sir Ver once said “What would you like to order?”</p>
-                        <p>Snake with two tails, thats why hats.</p>
-                        <p>If at first you don’t succeed, quit and blame others.</p>
-                        <p>If you forgot, just forget you forgot.</p>
-                        <p>If you go bankrupt, take out a loan.</p>
-                        <p>If you are in debt, take out a loan.</p>
-                        <p>If you are breaking the national debt limit, take out a loan.</p>
-                        <p>One must, you find.</p>
-                        <p>Therein you shall find, The all new FORD F-120.</p>
-                        <p>If lost your, just your.</p>
-                        <p>"The life is living." -Play Dough.</p>
-                        <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
-                        <p>Whys the the gone?</p>
-                        <p>“And thats why they don’t build roads with toads.”</p>
-                        <p>Wasing in the doing, being in the not.</p>
-                        <p>The mind not, but fire should be kindled.</p>
-                        <p>Every beginning comes, some beginning.</p>
-                        <p>Wealth in having great, but having few.</p>
-                        <p>The greatest lies in falling, but in rising every we fall.</p>
-                        <p>No great, without great your.</p>
-                        <p>No Taxation without Representation!</p>
-                        <p>You kids and your teeth! I won't stand for it! ...mostly because I can't stand. -CrazyOldMan™</p>
-                        <p>Your dream is, follow and will.</p>
-                        <p>Failure 99%, still 1.</p>
-                        <p>If you are in soup, do not in floor.</p>
-                        <p>Gulping Gerberium.</p>
-                        <p>iT seEmS yoU hAVe HaD t0O mUcH Gerberium.</p>
-                        <p>When Anthropology, you have.</p>
-                        <p>If are ever that are good, remember Abraham hair.</p>
-                        <p>Are do lightbulbs? Seven hundred men.</p>
-                        <p> I have severe lung damage.</p>
-                        <p> [cookie clicker reference]</p>
-                        <p>Work and fun what do I that's more. have choose do.</p>
-                        <p>Failure the that success flavor.</p>
-                        <p>At one woke, morning the.</p>
-                        <p>What's money? A is success he up the and to at and between what wants do.</p>
-                    </div>
+            <div id="upgrades-tab" class="tab-content">
+                <h4>Available Upgrades</h4>
+                <div id="available-upgrades" class="box">
+                    <div id="no-upgrades-message" class="no-upgrades-message">No upgrades available yet. Keep playing to unlock more!</div>
+                    <div id="upgrades-container"></div>
+                </div>
+                
+                <h4>Purchased Upgrades</h4>
+                <div id="purchased-upgrades" class="box">
+                    <div id="no-purchased-upgrades-message" class="no-upgrades-message">You haven't purchased any upgrades yet.</div>
+                    <div id="purchased-upgrades-container"></div>
                 </div>
             </div>
+            <!-- --- END: Upgrades Tab Content --- -->
 
         </div>
 
@@ -541,7 +558,8 @@
       const BANKRUPTCY_THRESHOLD = -10000;
       const MISSED_WIN_PENALTY = 125;
       const COMMIT_FAIL_PENALTY = 75;
-      const WIN_STREAK_BONUS_MULTIPLIER = 300;
+      // const WIN_STREAK_BONUS_MULTIPLIER = 300; // Will be replaced by a base and a multiplier in gameState
+      let WIN_STREAK_BONUS_MULTIPLIER_BASE = 300; // Changed to let and renamed
       const BASE_WIN_AMOUNT = 1000;
       const NAP_GAIN_AMOUNT = 85;
       const NAP_LOSS_AMOUNT = 65;
@@ -579,6 +597,24 @@
         ownedItems: { genericShirt: true, genericPants: true },
         equippedHat: null, equippedJacket: null, equippedShirt: 'genericShirt',
         equippedPants: 'genericPants', equippedShoes: null, equippedSocks: null,
+        // Upgrade-related state properties
+        purchasedUpgrades: [],
+        availableUpgrades: [],
+        diceBonusMultiplier: 1,
+        miningEfficiencyMultiplier: 1,
+        staplingSpeedMultiplier: 1,
+        sleepRecoveryMultiplier: 1,
+        winStreakMultiplier: 1, 
+        taxReductionMultiplier: 1,
+        luckyCharmActive: false,
+        mugRepellentActive: false,
+        officeJobMultiplier: 1,
+        dogWalkerMultiplier: 1,
+        napEffectivenessMultiplier: 1,
+        // Counters for prerequisites
+        officeJobsCompleted: 0,
+        dogWalksCompleted: 0,
+        napsTaken: 0,
       };
       window.gameState = gameState; // Make globally accessible for debug/potential extensions
 
@@ -704,6 +740,15 @@
               log.removeChild(log.firstChild);
           }
       }
+      function checkBankruptcy() {
+        if (gameState.netMoney <= BANKRUPTCY_THRESHOLD) {
+          showMessage(`BANKRUPTCY! Your net worth is $${gameState.netMoney.toFixed(2)}. Game Over. You can reset the game.`, 0); // 0 duration = persistent
+          // Most buttons will be disabled by updateButtonStates, which is called by updateMoneyDisplay
+          // Ensure the reset button is explicitly enabled if it's not handled by updateButtonStates logic for bankruptcy
+          const resetButton = document.getElementById('bankruptcy-reset-btn');
+          if (resetButton) resetButton.disabled = false;
+        }
+      }
       function updateMoneyDisplay() {
           gameState.netMoney = gameState.moneyEarned - gameState.moneyLost - gameState.totalRolls;
           updateElementText("money-earned", gameState.moneyEarned.toFixed(2));
@@ -797,7 +842,11 @@
                   effectiveMuggability += itemDefinitions[key].effects.muggability;
               }
           });
-          // 3. Clamp between 0 and 100
+          // 3. Mug Repellent Effect
+          if (gameState.mugRepellentActive) {
+              effectiveMuggability *= 0.85; // 15% reduction
+          }
+          // 4. Clamp between 0 and 100
           return Math.max(0, Math.min(100, Math.round(effectiveMuggability)));
       }
       function updateMuggabilityFluctuation() {
@@ -1069,15 +1118,131 @@
 
       // --- Content from work_enhancements.js ---
       const DOG_WALKER_JOB_DURATION = 5000;
+
+      // --- START: ADDED MISSING WORK FUNCTIONS ---
+      const MINES_JOB_DURATION = 15000;
+      const OFFICE_JOB_DURATION = 12000;
+      const STAPLE_TABLES_JOB_DURATION = 4000;
+      const NAP_DURATION = 5000;
+
+
+      function workInMines() {
+        if (gameState.isWorkingMines || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start this job due to significant debt.", "loss"); return; }
+        gameState.isWorkingMines = true; updateButtonStates(); addNotification("Started working in the mines.", "start");
+        setTimeout(() => {
+          const outcomes = [
+            { value: 300, message: "Found a decent haul of coal!" },
+            { value: 100, message: "Cave-in! Barely escaped with some ore." },
+            { value: 500, message: "Struck a vein of gold!" },
+            { value: 50, message: "Just a bit of dust and rocks today." },
+            { value: 0, message: "Got lost, found nothing." }
+          ];
+          const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+          let finalValue = outcome.value;
+          if (outcome.value > 0) { // Apply multiplier only to positive earnings
+            finalValue = Math.floor(finalValue * (gameState.miningEfficiencyMultiplier || 1));
+          }
+          gameState.moneyEarned += finalValue;
+          let notificationType = finalValue > 0 ? 'finish-success' : 'info';
+          addNotification(`Finished mining. ${outcome.message} (+ $${finalValue.toFixed(2)})`, notificationType);
+          updateMoneyDisplay(); gameState.isWorkingMines = false; updateButtonStates();
+        }, MINES_JOB_DURATION);
+      }
+
+      function workInOfficeJob() {
+        if (gameState.isWorkingOffice || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start this job due to significant debt.", "loss"); return; }
+        gameState.isWorkingOffice = true; updateButtonStates(); addNotification("Started working in the office.", "start");
+        setTimeout(() => {
+          const outcomes = [
+            { value: 250, message: "Filed all the TPS reports!" },
+            { value: 50, message: "Paper jam! Spent an hour fixing the copier." },
+            { value: 400, message: "Impressed the boss with your spreadsheet skills!" },
+            { value: 100, message: "Just another day at the cubicle farm." },
+            { value: 0, message: "Slept at your desk, achieved nothing." }
+          ];
+          const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+          let finalValue = outcome.value;
+          if (outcome.value > 0) { // Apply multiplier only to positive earnings
+            finalValue = Math.floor(finalValue * (gameState.officeJobMultiplier || 1));
+          }
+          gameState.moneyEarned += finalValue;
+          let notificationType = finalValue > 0 ? 'finish-success' : 'info';
+          addNotification(`Finished office work. ${outcome.message} (+ $${finalValue.toFixed(2)})`, notificationType);
+          updateMoneyDisplay(); gameState.isWorkingOffice = false; updateButtonStates();
+          gameState.officeJobsCompleted = (gameState.officeJobsCompleted || 0) + 1; // Increment counter
+        }, OFFICE_JOB_DURATION);
+      }
+
+      function workInStapleTables() {
+        if (gameState.isWorkingStaples) return; // No debt check for this one as per original logic
+        gameState.isWorkingStaples = true; updateButtonStates(); addNotification("Started stapling tables.", "start");
+        setTimeout(() => {
+          const outcomes = [
+            { value: 75, message: "Stapled a wobbly table. It's less wobbly now." },
+            { value: 20, message: "Stapled your thumb. Ouch." },
+            { value: 150, message: "Masterfully stapled a complex table arrangement!" },
+            { value: 40, message: "A few tables stapled, nothing special." },
+            { value: 0, message: "Ran out of staples." }
+          ];
+          const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+          let finalValue = outcome.value;
+          // Assuming staplingSpeedMultiplier affects earnings indirectly by allowing more "jobs"
+          // or directly if we interpret "faster" as "more efficient earning in same time"
+          // For now, let's assume it doesn't directly multiply earnings here, but could be added.
+          // If staplingSpeedMultiplier was meant to increase earnings:
+          // if (outcome.value > 0) {
+          //   finalValue = Math.floor(finalValue * (gameState.staplingSpeedMultiplier || 1));
+          // }
+          gameState.moneyEarned += finalValue;
+          let notificationType = finalValue > 0 ? 'finish-success' : (finalValue < 0 ? 'finish-fail' : 'info');
+          addNotification(`Finished stapling tables. ${outcome.message} (+ $${finalValue.toFixed(2)})`, notificationType);
+          updateMoneyDisplay(); gameState.isWorkingStaples = false; updateButtonStates();
+        }, STAPLE_TABLES_JOB_DURATION / (gameState.staplingSpeedMultiplier || 1)); // Speed multiplier reduces duration
+      }
+
+      function takeNap() {
+        if (gameState.isTakingNap || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot nap due to debt stress.", "loss"); return; }
+        gameState.isTakingNap = true; updateButtonStates(); addNotification("Taking a short nap...", "start");
+        recordSleepOrNap(); // Record nap time for muggability
+        setTimeout(() => {
+          const napOutcome = Math.random();
+          let napMessage = "";
+          if (napOutcome < 0.6) { // 60% chance of good nap
+            gameState.nextRollChance = "gain";
+            napMessage = "Feeling refreshed! Next roll might be lucky.";
+            addNotification(napMessage, "finish-success");
+          } else if (napOutcome < 0.9) { // 30% chance of bad nap
+            gameState.nextRollChance = "lose";
+            napMessage = "Woke up groggy. Next roll might be unlucky.";
+            addNotification(napMessage, "finish-fail");
+          } else { // 10% chance of neutral nap
+            gameState.nextRollChance = null; // No effect
+            napMessage = "Nap was okay. No noticeable effect.";
+            addNotification(napMessage, "info");
+          }
+          gameState.isTakingNap = false; updateButtonStates();
+          gameState.napsTaken = (gameState.napsTaken || 0) + 1; // Increment counter
+          // Note: Sleep level is not directly affected by nap in this version, only nextRollChance
+          recalculateAndDisplayMuggability(); // Recalculate in case sleep level changed passively during nap
+        }, NAP_DURATION);
+      }
+      // --- END: ADDED MISSING WORK FUNCTIONS ---
+
       function workAsDogWalker() { /* ... (no changes needed) ... */
         // if (gameState.isWalkingDog || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start this job due to significant debt.", "loss"); return; }
         gameState.isWalkingDog = true; updateButtonStates(); addNotification("Started walking dogs.", "start");
         setTimeout(() => {
           const outcomes = [ { value: 120, message: "Walked a pack of happy pups!" }, { value: 0, message: "A dog tried to run away, but you caught it! Wasted time." }, { value: 200, message: "Found a lost wallet!" }, { value: 80, message: "Just a normal day." }, { value: 10, message: "Stepped in poop... but found a dollar!" }, { value: 50, message: "Taught a dog a new trick." } ];
-          const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; gameState.moneyEarned += outcome.value;
-          let notificationType = outcome.value > 0 ? 'finish-success' : 'info';
-          addNotification(`Finished walking dogs. ${outcome.message} (+ $${outcome.value.toFixed(2)})`, notificationType);
+          const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; 
+          let finalValue = outcome.value;
+          if (outcome.value > 0) { // Apply multiplier only to positive earnings
+            finalValue = Math.floor(finalValue * (gameState.dogWalkerMultiplier || 1));
+          }
+          gameState.moneyEarned += finalValue;
+          let notificationType = finalValue > 0 ? 'finish-success' : 'info';
+          addNotification(`Finished walking dogs. ${outcome.message} (+ $${finalValue.toFixed(2)})`, notificationType);
           updateMoneyDisplay(); gameState.isWalkingDog = false; updateButtonStates();
+          gameState.dogWalksCompleted = (gameState.dogWalksCompleted || 0) + 1; // Increment counter
         }, DOG_WALKER_JOB_DURATION);
       }
 
@@ -1090,7 +1255,11 @@
       function calculateAndApplyTaxes() { // Called by increaseAge
         const locationData = locations[gameState.currentLocation] || locations["North Carolina"];
         if (gameState.netMoney > 0) {
-            const taxAmount = Math.floor(gameState.netMoney * locationData.totalTaxRate);
+            let currentTaxRate = locationData.totalTaxRate;
+            if (gameState.taxReductionMultiplier && gameState.taxReductionMultiplier !== 1) {
+                currentTaxRate *= gameState.taxReductionMultiplier;
+            }
+            const taxAmount = Math.floor(gameState.netMoney * currentTaxRate);
             if (taxAmount > 0) {
                 gameState.moneyLost += taxAmount;
                 addNotification(`Paid $${taxAmount.toFixed(2)} in yearly taxes for ${locationData.name}. Happy Birthday?`, 'loss');
@@ -1100,8 +1269,9 @@
       }
 
       // --- Content from hobbies.js ---
-      const SLEEP_DURATION = 10000;
-      const SLEEP_RECOVERY = 50;
+      // const SLEEP_DURATION = 10000; // Already defined
+      // const SLEEP_RECOVERY = 50; // Will be replaced
+      let SLEEP_RECOVERY_BASE = 50; // Changed to let and renamed
       const SLEEP_UPDATE_INTERVAL = 60 * 1000; // Corrected interval to 1 minute
       const FAINT_PENALTY = 50;
       function initHobbies() {
@@ -1113,7 +1283,11 @@
         gameState.isSleepingHobby = true; updateButtonStates(); addNotification("Going to sleep for a while...", "start");
         recordSleepOrNap();
         setTimeout(() => {
-          gameState.sleepLevel = Math.min(gameState.sleepLevel + SLEEP_RECOVERY, 100);
+          let currentSleepRecovery = SLEEP_RECOVERY_BASE;
+          if (gameState.sleepRecoveryMultiplier) {
+            currentSleepRecovery = Math.floor(currentSleepRecovery * gameState.sleepRecoveryMultiplier);
+          }
+          gameState.sleepLevel = Math.min(gameState.sleepLevel + currentSleepRecovery, 100);
           updateElementText("sleep-level", gameState.sleepLevel);
           addNotification("You feel well-rested after sleeping!", "finish-success");
           gameState.isSleepingHobby = false; updateButtonStates();
@@ -1270,7 +1444,18 @@
         }
         if (maxRunLength >= 3) { runBonus = maxRunLength - 2; }
 
-        const currentRollBonus = (hasMatch || runBonus > 0) ? (matchBonus + runBonus) : 0;
+        let currentRollBonus = (hasMatch || runBonus > 0) ? (matchBonus + runBonus) : 0;
+
+        // Apply lucky charm: adds +1 to bonus if any bonus was generated
+        if (gameState.luckyCharmActive && currentRollBonus > 0) {
+            currentRollBonus += 1;
+        }
+        
+        // Apply dice bonus multiplier from "Premium Dice" upgrade
+        if (gameState.diceBonusMultiplier && gameState.diceBonusMultiplier !== 1 && currentRollBonus > 0) {
+            currentRollBonus = Math.floor(currentRollBonus * gameState.diceBonusMultiplier);
+        }
+
 
         // --- NEW RESET LOGIC ---
         if (currentRollBonus === 0) {
@@ -1322,7 +1507,8 @@
          // Chiller commit notifications
          if (totalPoints === 24) {
            gameState.consecutiveWins++;
-           const streakBonus = gameState.consecutiveWins * WIN_STREAK_BONUS_MULTIPLIER;
+           const currentWinStreakMultiplier = gameState.winStreakMultiplier || 1;
+           const streakBonus = gameState.consecutiveWins * WIN_STREAK_BONUS_MULTIPLIER_BASE * currentWinStreakMultiplier;
            const winnings = BASE_WIN_AMOUNT + streakBonus;
            gameState.moneyEarned += winnings;
            gameState.wins++;
@@ -1354,188 +1540,526 @@
       function handleNextRoll() {
         // This function remains the same, handling nap results before a roll
         if (!gameState.nextRollChance) return;
+        
+        let gainAmount = NAP_GAIN_AMOUNT;
+        let lossAmount = NAP_LOSS_AMOUNT;
+
+        if (gameState.napEffectivenessMultiplier && gameState.napEffectivenessMultiplier !== 1) {
+            gainAmount = Math.floor(gainAmount * gameState.napEffectivenessMultiplier);
+            lossAmount = Math.floor(lossAmount * gameState.napEffectivenessMultiplier); // Assuming multiplier also makes bad naps worse, or adjust as needed
+        }
+
         if (gameState.nextRollChance === "gain") {
-            gameState.moneyEarned += NAP_GAIN_AMOUNT;
-            addNotification(`Well Rested bonus applied: +$${NAP_GAIN_AMOUNT.toFixed(2)}`, "finish-success");
+            gameState.moneyEarned += gainAmount;
+            addNotification(`Well Rested bonus applied: +$${gainAmount.toFixed(2)}`, "finish-success");
         } else if (gameState.nextRollChance === "lose") {
-            gameState.moneyLost += NAP_LOSS_AMOUNT;
-            addNotification(`Poor Nap penalty applied: -$${NAP_LOSS_AMOUNT.toFixed(2)}`, "finish-fail");
+            gameState.moneyLost += lossAmount;
+            addNotification(`Poor Nap penalty applied: -$${lossAmount.toFixed(2)}`, "finish-fail");
         }
         gameState.nextRollChance = null;
         // updateMoneyDisplay() will be called by rollDice shortly after
       }
       // --- END: UPDATED Dice/Commit Logic ---
 
-      function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-      // --- Job Functions ---
-      function workInMines() { /* ... (no changes needed) ... */
-          if (gameState.isWorkingMines || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start mining job due to significant debt.", "loss"); return; }
-          gameState.isWorkingMines = true; updateButtonStates(); addNotification("Started working in the mines.", "start"); const duration = 15000;
-          setTimeout(() => {
-               const outcomes = [ { value: 150, message: "Found some decent copper." }, { value: 600, message: "Struck a vein of silver!" }, { value: 1200, message: "GOLD! Found a hefty nugget!" }, { value: -100, message: "Minor injury, patched yourself up." }, { value: getRandomInt(900, 4000), message: "Unbelievable! Found a rare gem!" }, { value: 50, message: "Found plenty of coal." }, { value: -75, message: "Small cave-in, lost some time and tools." }, { value: -50, message: "Lamp flickered out, had to replace filament." } ];
-               const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; let notificationType = 'info';
-               if (outcome.value < 0) { gameState.moneyLost -= outcome.value; notificationType = 'finish-fail'; } else { gameState.moneyEarned += outcome.value; notificationType = 'finish-success'; }
-               addNotification(`Finished mining. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
-               updateMoneyDisplay(); gameState.isWorkingMines = false; updateButtonStates();
-          }, duration);
-      }
-      function workInOfficeJob() { /* ... (no changes needed) ... */
-           if (gameState.isWorkingOffice || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot start office job due to significant debt.", "loss"); return; }
-           gameState.isWorkingOffice = true; updateButtonStates(); addNotification("Started working in the office.", "start"); const duration = 12000;
-           setTimeout(() => {
-               const outcomes = [ { value: 250, message: "Completed assigned tasks efficiently." }, { value: 350, message: "Received a small performance bonus!" }, { value: 180, message: "Filed all TPS reports correctly. Barely." }, { value: 450, message: "Achieved maximum synergy!" }, { value: -10, message: "Nasty paper cut. Required a band-aid." }, { value: 0, message: "Attended a long, pointless meeting about meetings." }, { value: 75, message: "Fixed the perpetually broken coffee machine." }, { value: -50, message: "Accidentally hit 'Reply All' on a sensitive email. Oops." }, { value: 300, message: "Successfully upsold a major client." } ];
-               const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; let notificationType = 'info';
-               if (outcome.value < 0) { gameState.moneyLost -= outcome.value; notificationType = 'finish-fail'; } else { gameState.moneyEarned += outcome.value; notificationType = 'finish-success'; }
-               addNotification(`Finished office work. ${outcome.message} (${outcome.value >= 0 ? '+' : ''}$${outcome.value.toFixed(2)})`, notificationType);
-               updateMoneyDisplay(); gameState.isWorkingOffice = false; updateButtonStates();
-           }, duration);
-      }
-      function workInStapleTables() { /* ... (no changes needed) ... */
-           if (gameState.isWorkingStaples) return; // Check if already running
-           // No debt check here, it's allowed
-           gameState.isWorkingStaples = true; updateButtonStates(); addNotification("Started stapling tables.", "start"); const duration = 4000;
-           setTimeout(() => {
-               const outcomes = [ { value: 70, message: "Stapled 10 tables securely." }, { value: 90, message: "Got into a good stapling rhythm." }, { value: 120, message: "Staple Master! Set a new personal best." }, { value: 0, message: "Stapler malfunctioned! Wasted time fixing it." }, { value: 150, message: "Found a lost gift card under a table!" }, { value: 10, message: "Ran out of staples, had to find more." }, { value: 0, message: "Ouch! Stapled thumb. Lost time." }, { value: 100, message: "Developed an innovative new stapling technique!" } ];
-               const outcome = outcomes[Math.floor(Math.random() * outcomes.length)]; let notificationType = outcome.value > 0 ? 'finish-success' : 'info';
-               gameState.moneyEarned += outcome.value; // Always earn or 0
-               addNotification(`Finished stapling. ${outcome.message} (+ $${outcome.value.toFixed(2)})`, notificationType);
-               updateMoneyDisplay(); gameState.isWorkingStaples = false; updateButtonStates();
-           }, duration);
-      }
-      function takeNap() { /* ... (no changes needed) ... */
-           if (gameState.isTakingNap || isInSignificantDebt()) { if(isInSignificantDebt()) addNotification("Cannot nap properly due to debt stress.", "loss"); return; }
-           gameState.isTakingNap = true; updateButtonStates(); addNotification("Taking a power nap.", "start");
-           recordSleepOrNap();
-           const duration = 5000;
-           setTimeout(() => {
-               gameState.nextRollChance = Math.random() < 0.55 ? "gain" : "lose";
-               const resultMessage = gameState.nextRollChance === "gain" ? `Refreshed! Expect +$${NAP_GAIN_AMOUNT.toFixed(2)} on next roll.` : `Stressful dream... Expect -$${NAP_LOSS_AMOUNT.toFixed(2)} on next roll.`;
-               addNotification(`Finished nap. ${resultMessage}`, "info");
-               gameState.isTakingNap = false; updateButtonStates();
-           }, duration);
-      }
-
-      // --- Bankruptcy Check ---
-      function checkBankruptcy() {
-        const isBankrupt = gameState.netMoney <= BANKRUPTCY_THRESHOLD;
-        if (isBankrupt) {
-          if (!window.bankruptcyDeclared) {
-              addNotification("BANKRUPTCY! The IRS has seized everything! GAME OVER. You can reset to play again.", "loss");
-              window.bankruptcyDeclared = true;
+      // --- Upgrades System --- 
+      // Define upgrade categories
+      const UPGRADE_CATEGORIES = {
+        DICE: "Dice Improvements",
+        WORK: "Work Enhancements",
+        SLEEP: "Sleep & Energy",
+        SECURITY: "Security & Protection",
+        SPECIAL: "Special Abilities"
+      };
+      
+      // Define all possible upgrades
+      const upgradeDefinitions = {
+        betterDice: {
+          id: "betterDice",
+          name: "Premium Dice",
+          description: "Higher quality dice that increase your bonus points by 50%",
+          cost: 500,
+          prerequisite: (state) => state.totalRolls >= 25,
+          preReqDescription: "Roll dice 25 times",
+          category: UPGRADE_CATEGORIES.DICE,
+          effect: (state) => {
+            state.diceBonusMultiplier = (state.diceBonusMultiplier || 1) * 1.5;
+            addNotification("Your dice now generate 50% more bonus points!", "win");
           }
-          // Disabling other buttons is handled in updateButtonStates
+        },
+        luckyCharm: {
+          id: "luckyCharm",
+          name: "Lucky Rabbit's Foot",
+          description: "Slightly increases bonus from matches/runs by +1 if any bonus is generated.",
+          cost: 350,
+          prerequisite: (state) => state.wins >= 3,
+          preReqDescription: "Win 3 times",
+          category: UPGRADE_CATEGORIES.DICE,
+          effect: (state) => {
+            state.luckyCharmActive = true;
+            addNotification("Your lucky charm tingles with strange energy!", "win");
+          }
+        },
+        efficientMining: {
+          id: "efficientMining",
+          name: "Mining Efficiency",
+          description: "Increases mining earnings by 25%",
+          cost: 800,
+          prerequisite: (state) => state.moneyEarned >= 1500,
+          preReqDescription: "Earn $1,500 total",
+          category: UPGRADE_CATEGORIES.WORK,
+          effect: (state) => {
+            state.miningEfficiencyMultiplier = (state.miningEfficiencyMultiplier || 1) * 1.25;
+            addNotification("Your mining efficiency has improved!", "win");
+          }
+        },
+        fasterStapling: {
+          id: "fasterStapling",
+          name: "Speed Stapler",
+          description: "Stapling tables is 30% faster",
+          cost: 450,
+          prerequisite: (state) => state.isWorkingStaples !== undefined, 
+          preReqDescription: "Staple tables at least once",
+          category: UPGRADE_CATEGORIES.WORK,
+          effect: (state) => {
+            state.staplingSpeedMultiplier = (state.staplingSpeedMultiplier || 1) * 1.3;
+            addNotification("You can now staple tables faster!", "win");
+          }
+        },
+        deepSleep: {
+          id: "deepSleep",
+          name: "Deep Sleep Technique",
+          description: "Sleeping recovers 30% more energy",
+          cost: 600,
+          prerequisite: (state) => state.sleepLevel !== undefined && state.sleepLevel < 30,
+          preReqDescription: "Experience severe fatigue (sleep below 30)",
+          category: UPGRADE_CATEGORIES.SLEEP,
+          effect: (state) => {
+            state.sleepRecoveryMultiplier = (state.sleepRecoveryMultiplier || 1) * 1.3;
+            addNotification("Your sleep is now much more refreshing!", "win");
+          }
+        },
+        mugRepellent: {
+          id: "mugRepellent",
+          name: "Mug Repellent Spray",
+          description: "Reduces your effective muggability by 15%. You smell awful.",
+          cost: 750,
+          prerequisite: (state) => calculateEffectiveMuggability() > 60, // Use the function directly
+          preReqDescription: "Have high muggability (effective > 60)",
+          category: UPGRADE_CATEGORIES.SECURITY,
+          effect: (state) => {
+            state.mugRepellentActive = true;
+            // state.baseMuggability = Math.max(0, state.baseMuggability - 15); // Old effect
+            addNotification("You smell terrible but muggers might avoid you more often!", "win");
+          }
+        },
+        winStreak: {
+          id: "winStreak",
+          name: "Win Streak Enhancer",
+          description: "Increases consecutive win bonus multiplier by 50%",
+          cost: 1200,
+          prerequisite: (state) => state.consecutiveWins >= 3,
+          preReqDescription: "Get 3 consecutive wins",
+          category: UPGRADE_CATEGORIES.DICE,
+          effect: (state) => {
+            // window.WIN_STREAK_BONUS_MULTIPLIER *= 1.5; // Old way
+            state.winStreakMultiplier = (state.winStreakMultiplier || 1) * 1.5;
+            addNotification("Your consecutive wins are now more valuable!", "win");
+          }
+        },
+        taxEvasion: {
+          id: "taxEvasion",
+          name: "Creative Accounting",
+          description: "Reduces yearly taxes by 30%",
+          cost: 2000,
+          prerequisite: (state) => state.age >= 6,
+          preReqDescription: "Reach age 6 years old",
+          category: UPGRADE_CATEGORIES.SPECIAL,
+          effect: (state) => {
+            state.taxReductionMultiplier = (state.taxReductionMultiplier && state.taxReductionMultiplier !== 1) ? state.taxReductionMultiplier * 0.7 : 0.7;
+            addNotification("Your tax professional found some 'loopholes'!", "win");
+          }
+        },
+        officeProductivitySuite: {
+          id: "officeProductivitySuite",
+          name: "Office Productivity Suite",
+          description: "Increases office job earnings by 20%.",
+          cost: 700,
+          prerequisite: (state) => (state.officeJobsCompleted || 0) >= 3,
+          preReqDescription: "Complete office job 3 times",
+          category: UPGRADE_CATEGORIES.WORK,
+          effect: (state) => {
+            state.officeJobMultiplier = (state.officeJobMultiplier || 1) * 1.20;
+            addNotification("New software makes your office work more profitable!", "win");
+          }
+        },
+        dogTrainingManual: {
+          id: "dogTrainingManual",
+          name: "Dog Training Manual",
+          description: "Increases dog walking earnings by 30%.",
+          cost: 550,
+          prerequisite: (state) => (state.dogWalksCompleted || 0) >= 5,
+          preReqDescription: "Walk dogs 5 times",
+          category: UPGRADE_CATEGORIES.WORK,
+          effect: (state) => {
+            state.dogWalkerMultiplier = (state.dogWalkerMultiplier || 1) * 1.30;
+            addNotification("You've learned to manage dogs more effectively!", "win");
+          }
+        },
+        powerNapTechniques: {
+          id: "powerNapTechniques",
+          name: "Power Nap Techniques",
+          description: "Naps are 25% more effective (both gains and losses are magnified).",
+          cost: 400,
+          prerequisite: (state) => (state.napsTaken || 0) >= 3,
+          preReqDescription: "Take 3 naps",
+          category: UPGRADE_CATEGORIES.SLEEP,
+          effect: (state) => {
+            state.napEffectivenessMultiplier = (state.napEffectivenessMultiplier || 1) * 1.25;
+            addNotification("Your power naps are now supercharged!", "win");
+          }
+        },
+        // Add more upgrades as needed
+      };
+      
+      // Initialize upgrades in gameState
+      function initUpgrades() {
+        gameState.purchasedUpgrades = gameState.purchasedUpgrades || [];
+        gameState.availableUpgrades = gameState.availableUpgrades || [];
+        
+        // Initialize any multipliers needed by upgrades
+        gameState.diceBonusMultiplier = gameState.diceBonusMultiplier || 1;
+        gameState.miningEfficiencyMultiplier = gameState.miningEfficiencyMultiplier || 1;
+        gameState.staplingSpeedMultiplier = gameState.staplingSpeedMultiplier || 1;
+        gameState.sleepRecoveryMultiplier = gameState.sleepRecoveryMultiplier || 1;
+        gameState.winStreakMultiplier = gameState.winStreakMultiplier || 1;
+        gameState.taxReductionMultiplier = gameState.taxReductionMultiplier || 1;
+        gameState.luckyCharmActive = gameState.luckyCharmActive || false;
+        gameState.mugRepellentActive = gameState.mugRepellentActive || false;
+        gameState.officeJobMultiplier = gameState.officeJobMultiplier || 1;
+        gameState.dogWalkerMultiplier = gameState.dogWalkerMultiplier || 1;
+        gameState.napEffectivenessMultiplier = gameState.napEffectivenessMultiplier || 1;
+
+        // Initialize counters if they don't exist from a save
+        gameState.officeJobsCompleted = gameState.officeJobsCompleted || 0;
+        gameState.dogWalksCompleted = gameState.dogWalksCompleted || 0;
+        gameState.napsTaken = gameState.napsTaken || 0;
+        
+        // Do initial check for available upgrades
+        checkForNewUpgrades();
+        
+        // Set up periodic checks (every 10 seconds)
+        setInterval(checkForNewUpgrades, 10000);
+        
+        // Render initial upgrade UI
+        renderUpgrades();
+      }
+      
+      // Check which upgrades should be available based on prerequisites
+      function checkForNewUpgrades() {
+        Object.values(upgradeDefinitions).forEach(upgrade => {
+          // Skip if already purchased or already available
+          if (gameState.purchasedUpgrades.includes(upgrade.id) || 
+              gameState.availableUpgrades.includes(upgrade.id)) {
+            return;
+          }
+          
+          // Check if prerequisites are met
+          if (upgrade.prerequisite(gameState)) {
+            gameState.availableUpgrades.push(upgrade.id);
+            addNotification(`New upgrade available: ${upgrade.name}!`, "win");
+            renderUpgrades(); // Update the UI
+          }
+        });
+      }
+      
+      // Purchase an upgrade
+      function purchaseUpgrade(upgradeId) {
+        const upgrade = upgradeDefinitions[upgradeId];
+        if (!upgrade) return;
+        
+        // Check if player can afford it
+        if (gameState.netMoney < upgrade.cost) {
+          addNotification(`Cannot afford ${upgrade.name}. Need $${upgrade.cost.toFixed(2)}.`, "loss");
+          return;
+        }
+        
+        // Purchase the upgrade
+        gameState.moneyLost += upgrade.cost;
+        gameState.purchasedUpgrades.push(upgradeId);
+        
+        // Remove from available upgrades
+        gameState.availableUpgrades = gameState.availableUpgrades.filter(id => id !== upgradeId);
+        
+        // Apply the effect
+        upgrade.effect(gameState);
+        
+        // Update displays
+        updateMoneyDisplay();
+        renderUpgrades();
+        
+        // Notification
+        addNotification(`Purchased upgrade: ${upgrade.name} for $${upgrade.cost.toFixed(2)}!`, "win");
+      }
+      
+      // Render the upgrades UI
+      function renderUpgrades() {
+        const availableContainer = document.getElementById('upgrades-container');
+        const purchasedContainer = document.getElementById('purchased-upgrades-container');
+        const noUpgradesMsg = document.getElementById('no-upgrades-message');
+        const noPurchasedMsg = document.getElementById('no-purchased-upgrades-message');
+        
+        if (!availableContainer || !purchasedContainer) {
+          console.error("Upgrade containers not found!");
+          return;
+        }
+        
+        // Clear existing content
+        availableContainer.innerHTML = '';
+        purchasedContainer.innerHTML = '';
+        
+        // Group upgrades by category
+        const availableByCategory = {};
+        const purchasedByCategory = {};
+        
+        // Process available upgrades
+        if (gameState.availableUpgrades.length === 0) {
+          noUpgradesMsg.style.display = 'block';
         } else {
-            window.bankruptcyDeclared = false;
+          noUpgradesMsg.style.display = 'none';
+          
+          // Group by category
+          gameState.availableUpgrades.forEach(id => {
+            const upgrade = upgradeDefinitions[id];
+            if (!upgrade) return;
+            
+            if (!availableByCategory[upgrade.category]) {
+              availableByCategory[upgrade.category] = [];
+            }
+            availableByCategory[upgrade.category].push(upgrade);
+          });
+          
+          // Create category sections
+          Object.keys(availableByCategory).forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'upgrade-category';
+            
+            const categoryHeader = document.createElement('h3');
+            categoryHeader.textContent = category;
+            categoryDiv.appendChild(categoryHeader);
+            
+            const upgradeGrid = document.createElement('div');
+            upgradeGrid.className = 'upgrade-grid';
+            
+            // Add upgrades to this category
+            availableByCategory[category].forEach(upgrade => {
+              const canAfford = gameState.netMoney >= upgrade.cost;
+              
+              const upgradeDiv = document.createElement('div');
+              upgradeDiv.className = `upgrade-item ${canAfford ? '' : 'disabled'}`;
+              upgradeDiv.innerHTML = `
+                <h4>${upgrade.name}</h4>
+                <div class="cost">Cost: $${upgrade.cost.toFixed(2)}</div>
+                <div class="description">${upgrade.description}</div>
+                ${!canAfford ? `<div class="upgrade-stats">You need $${(upgrade.cost - gameState.netMoney).toFixed(2)} more</div>` : ''}
+              `;
+              
+              upgradeDiv.addEventListener('click', () => {
+                if (canAfford) {
+                  purchaseUpgrade(upgrade.id);
+                } else {
+                  addNotification(`Cannot afford ${upgrade.name} yet. Need $${upgrade.cost.toFixed(2)}.`, "info");
+                }
+              });
+              
+              upgradeGrid.appendChild(upgradeDiv);
+            });
+            
+            categoryDiv.appendChild(upgradeGrid);
+            availableContainer.appendChild(categoryDiv);
+          });
+        }
+        
+        // Process purchased upgrades
+        if (gameState.purchasedUpgrades.length === 0) {
+          noPurchasedMsg.style.display = 'block';
+        } else {
+          noPurchasedMsg.style.display = 'none';
+          
+          // Group by category
+          gameState.purchasedUpgrades.forEach(id => {
+            const upgrade = upgradeDefinitions[id];
+            if (!upgrade) return;
+            
+            if (!purchasedByCategory[upgrade.category]) {
+              purchasedByCategory[upgrade.category] = [];
+            }
+            purchasedByCategory[upgrade.category].push(upgrade);
+          });
+          
+          // Create category sections
+          Object.keys(purchasedByCategory).forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'upgrade-category';
+            
+            const categoryHeader = document.createElement('h3');
+            categoryHeader.textContent = category;
+            categoryDiv.appendChild(categoryHeader);
+            
+            const upgradeGrid = document.createElement('div');
+            upgradeGrid.className = 'upgrade-grid';
+            
+            // Add upgrades to this category
+            purchasedByCategory[category].forEach(upgrade => {
+              const upgradeDiv = document.createElement('div');
+              upgradeDiv.className = 'upgrade-item';
+              upgradeDiv.innerHTML = `
+                <div class="upgrade-badge">Owned</div>
+                <h4>${upgrade.name}</h4>
+                <div class="description">${upgrade.description}</div>
+              `;
+              upgradeGrid.appendChild(upgradeDiv);
+            });
+            
+            categoryDiv.appendChild(upgradeGrid);
+            purchasedContainer.appendChild(categoryDiv);
+          });
+        }
+      }
+      
+      // Modify the calculateBonus function to use the dice bonus multiplier
+      // const originalCalculateBonus = calculateBonus; // No longer needed, direct modification
+      // calculateBonus = function() { // No longer needed
+      // ...
+      // }; // No longer needed
+      
+      // Modify workInMines to use mining efficiency multiplier
+      // const originalWorkInMines = workInMines; // No longer needed
+      // workInMines = function() { // No longer needed
+      // ...
+      // }; // No longer needed
+      
+      // Add initUpgrades to the game initialization
+      // const originalInitGame = initGame; // This pattern is fine for initGame itself
+      // initGame = function() {
+      //  originalInitGame();
+      //  initUpgrades();
+      // }; // This should be done at the end of the script or where initGame is defined.
+
+      // --- START: Game Persistence (Save/Load/Reset) ---
+      function saveGame() {
+        try {
+          const dataToSave = { ...gameState, gameVersion: GAME_VERSION_STRING };
+          localStorage.setItem(SAVE_GAME_KEY, JSON.stringify(dataToSave));
+          addNotification("Game saved automatically.", "info");
+        } catch (error) {
+          console.error("Error saving game:", error);
+          addNotification("Failed to save game.", "loss");
         }
       }
 
-      // --- Save/Load/Reset ---
-      function saveGame() {
-        try {
-             const stateToSave = { ...gameState };
-             localStorage.setItem(SAVE_GAME_KEY, JSON.stringify(stateToSave));
-             // console.log("Game saved."); // Optional debug
-        } catch (e) { console.error("Could not save game state:", e); addNotification("Error saving game!", "loss"); }
-      }
       function loadGame() {
         try {
           const savedData = localStorage.getItem(SAVE_GAME_KEY);
           if (savedData) {
-            const loadedState = JSON.parse(savedData);
-            // Restore state carefully
-            Object.keys(gameState).forEach(key => {
-                if (loadedState.hasOwnProperty(key)) {
-                    gameState[key] = loadedState[key];
-                }
-            });
-            // Ensure defaults for potentially missing new fields
-            gameState.baseMuggability = gameState.baseMuggability ?? 50;
-            gameState.lastSleepOrNapTime = gameState.lastSleepOrNapTime || Date.now();
-            gameState.ownedItems = gameState.ownedItems || { genericShirt: true, genericPants: true };
-            if (!gameState.ownedItems.genericShirt) gameState.ownedItems.genericShirt = true;
-            if (!gameState.ownedItems.genericPants) gameState.ownedItems.genericPants = true;
-            gameState.equippedShirt = gameState.equippedShirt || 'genericShirt';
-            gameState.equippedPants = gameState.equippedPants || 'genericPants';
-            gameState.sleepLevel = gameState.sleepLevel ?? 100;
-            gameState.clothesPrice = 15 + (gameState.age * 5);
-            gameState.bonusPoints = gameState.bonusPoints ?? 0; // Crucial for loading saved bonus points
-
-            // Update Full UI from loaded state
-            updateElementText("wins", gameState.wins); updateElementText("total-rolls", gameState.totalRolls);
-            updateMoneyDisplay();
-            updateElementText("age-display", gameState.age); updateElementText("location-display", gameState.currentLocation);
-            updateElementText("sleep-level", gameState.sleepLevel);
-            updateMuggabilityDisplay();
-            updateElementText("bonus-points", gameState.bonusPoints); // Display loaded accumulated bonus
-            updateElementText("dice-rolls", gameState.dice.length > 0 ? gameState.dice.join(", ") : "-");
-            updateTotalPoints(); // Recalculate potential total based on loaded dice and bonus
-            updateEquipmentSelectors();
-            updateOwnedItemButtons();
-
-            addNotification("Game loaded from previous session.", "info");
+            const parsedData = JSON.parse(savedData);
+            // Basic version check (can be expanded)
+            if (parsedData.gameVersion !== GAME_VERSION_STRING) {
+              addNotification(`Save data is from a different version (${parsedData.gameVersion || 'older'}). Starting new game.`, "info");
+              resetGameAll(false); // Reset without confirmation if version mismatch
+              return;
+            }
+            Object.assign(gameState, parsedData);
+            addNotification("Game loaded successfully.", "info");
           } else {
-             addNotification("No save data found. Starting fresh.", "info");
-             initializeNewGameUI();
+            // No save data, initialize new game (already handled by default gameState)
+            addNotification("No save data found. Starting a new game.", "info");
+            // Ensure default items are present for a truly new game
+            gameState.ownedItems = { genericShirt: true, genericPants: true };
+            gameState.equippedShirt = 'genericShirt';
+            gameState.equippedPants = 'genericPants';
           }
-        } catch (e) {
-          console.error("Could not load saved game:", e); addNotification("Failed to load save data. Resetting game.", "loss");
-          resetGameAll();
+        } catch (error) {
+          console.error("Error loading game:", error);
+          addNotification("Failed to load saved game. Starting new game.", "loss");
+          resetGameAll(false); // Reset to a clean state on error
         }
+        // Ensure essential UI updates after load or new game start
+        updateMoneyDisplay();
+        updateElementText("age-display", gameState.age);
+        updateElementText("location-display", locations[gameState.currentLocation]?.name || "Unknown");
+        updateElementText("sleep-level", gameState.sleepLevel);
+        recalculateAndDisplayMuggability();
+        // Other UI updates might be needed here depending on loaded state
       }
-       // Helper to set UI for a brand new game start (called by loadGame if no save found or on reset)
-       function initializeNewGameUI() {
-             updateMoneyDisplay();
-             updateElementText("age-display", gameState.age);
-             updateElementText("location-display", gameState.currentLocation);
-             updateElementText("sleep-level", gameState.sleepLevel);
-             updateMuggabilityDisplay();
-             updateOwnedItemButtons();
-             updateEquipmentSelectors();
-             updateElementText("wins", '0');
-             updateElementText("total-rolls", '0');
-             updateElementText("bonus-points", '0');
-             updateElementText("dice-rolls", '-');
-             updateElementText("total-points", '-');
-             // Ensure core game state vars are explicitly reset for UI consistency
-             gameState.dice = [];
-             gameState.alreadyCounted = false;
-             gameState.bonusPoints = 0;
-       }
 
-      function resetGameAll(notify = true) {
-        console.log("Resetting game state...");
-        const notificationLog = document.getElementById('notification-log'); // Get log element here
-        // Define initial state clearly
-        const initialState = {
-            wins: 0, consecutiveWins: 0, missedWins: 0, bonusPoints: 0, totalRolls: 0, dice: [], alreadyCounted: false,
+      function resetGameAll(confirmReset = true) {
+        if (confirmReset) {
+          if (!confirm(`Are you sure you want to reset all game data? This cannot be undone.`)) {
+            return;
+          }
+        }
+        localStorage.removeItem(SAVE_GAME_KEY);
+        // Reset gameState to its initial default values (deep copy if complex defaults)
+        // For now, a simple re-assignment of the initial object structure is okay
+        // but this might need a more robust reset if gameState becomes very complex.
+        // Create a fresh default state:
+        const defaultState = {
+            wins: 0, consecutiveWins: 0, missedWins: 0,
+            bonusPoints: 0, totalRolls: 0, dice: [], alreadyCounted: false,
             moneyEarned: 0, moneyLost: 0, netMoney: 0,
             isWorkingMines: false, isWorkingOffice: false, isWorkingStaples: false, isTakingNap: false, isWorkingDog: false, isSleepingHobby: false,
-            nextRollChance: null, age: 4, clothesPrice: 15 + (4 * 5), lastClothingChange: Date.now(), currentLocation: "North Carolina",
+            nextRollChance: null,
+            age: 4, clothesPrice: 15 + (4 * 5), lastClothingChange: Date.now(), currentLocation: "North Carolina",
             sleepLevel: 100, slaves: 0, momNagCount: 0,
             baseMuggability: 50, lastSleepOrNapTime: Date.now(),
             ownedItems: { genericShirt: true, genericPants: true },
-            equippedHat: null, equippedJacket: null, equippedShirt: 'genericShirt', equippedPants: 'genericPants', equippedShoes: null, equippedSocks: null,
+            equippedHat: null, equippedJacket: null, equippedShirt: 'genericShirt',
+            equippedPants: 'genericPants', equippedShoes: null, equippedSocks: null,
+            purchasedUpgrades: [], availableUpgrades: [],
+            diceBonusMultiplier: 1, miningEfficiencyMultiplier: 1, staplingSpeedMultiplier: 1,
+            sleepRecoveryMultiplier: 1, winStreakMultiplier: 1, taxReductionMultiplier: 1,
+            luckyCharmActive: false, mugRepellentActive: false, officeJobMultiplier: 1,
+            dogWalkerMultiplier: 1, napEffectivenessMultiplier: 1,
+            officeJobsCompleted: 0, dogWalksCompleted: 0, napsTaken: 0,
         };
-        // Assign initial state to gameState
-        Object.assign(gameState, initialState);
+        // Clear current gameState and assign defaults
+        for (const key in gameState) { delete gameState[key]; } // Clear existing
+        Object.assign(gameState, defaultState); // Assign new defaults
 
-        // Update UI elements to reflect reset state
-        initializeNewGameUI(); // Use helper to reset UI consistently
+        addNotification("Game has been reset.", "info");
+        
+        // Re-initialize UI and systems that depend on a fresh state
+        // This is a bit like a mini initGame without the event listeners part
+        updateMoneyDisplay();
+        updateElementText("dice-rolls", "-");
+        updateElementText("bonus-points", "0");
+        updateElementText("total-points", "-");
+        updateElementText("wins", "0");
+        updateElementText("total-rolls", "0");
+        updateElementText("age-display", gameState.age);
+        updateElementText("location-display", locations[gameState.currentLocation]?.name || "Unknown");
+        updateElementText("sleep-level", gameState.sleepLevel);
+        
+        // Re-initialize shop and equipment UI
+        populateShopGrids(); // Repopulate shop buttons
+        updateEquipmentSelectors(); // Reset dropdowns and equipped items
+        updateOwnedItemButtons(); // Update buy button states
 
-        // Clear notification log only if explicitly resetting via button
-        if (notify && notificationLog) notificationLog.innerHTML = '';
+        // Re-initialize upgrades UI
+        checkForNewUpgrades(); // Check for initially available upgrades
+        renderUpgrades();     // Render the upgrade UI
 
-        // Clear saved data
-        try { localStorage.removeItem(SAVE_GAME_KEY); console.log("Cleared saved game data."); }
-        catch (e) { console.error("Error clearing saved game data:", e); if(notify) addNotification("Failed to clear saved game data!", "loss"); }
-
-        window.bankruptcyDeclared = false; // Reset bankruptcy flag
-
-        if (notify) addNotification("Game Reset to Beginning!", "info");
-        console.log("Game reset complete.");
-        updateButtonStates(); // Ensure buttons are in correct state after reset
+        recalculateAndDisplayMuggability();
+        updateButtonStates(); // Ensure buttons are correctly enabled/disabled
+        
+        // If called without confirmation (e.g., version mismatch, load error),
+        // we might not want to reload the page, but ensure a clean start.
+        // If called by user, a reload can be an option to ensure full clean state.
+        if (confirmReset) { // Only reload if user initiated with confirmation
+             // window.location.reload(); // Optionally reload for a full reset
+        }
       }
+      // --- END: Game Persistence ---
 
       // --- Game Initialization ---
       function initGame() {
@@ -1547,14 +2071,17 @@
         initLocationTaxes();
         initHobbies();
         initShopping(); // Must be after tabs if it relies on elements within tabs being visible/accessible
-        initMuggability();
-        initUIEnhancements(); // This now calls initTabs and initCollapsibleShop
-
+        initMuggability(); // Added this call as it was missing from the original initGame
+        initUIEnhancements(); // Calls initTabs and initCollapsibleShop
+        initUpgrades(); // Initialize the upgrade system
+          
         // Attach button listeners
         const buttonMappings = {
-          "roll-dice-btn": rollDice, "commit-btn": commit, "work-in-mines-btn": workInMines, "work-in-office-btn": workInOfficeJob,
-          "work-staple-tables-btn": workInStapleTables, "take-nap-btn": takeNap, "work-dog-walker-btn": workAsDogWalker, "sleep-hobby-btn": sleepHobby,
-          "bankruptcy-reset-btn": () => resetGameAll(true) // Pass true to clear log on manual reset
+          "roll-dice-btn": rollDice, "commit-btn": commit, 
+          "work-in-mines-btn": workInMines, "work-in-office-btn": workInOfficeJob,
+          "work-staple-tables-btn": workInStapleTables, "take-nap-btn": takeNap, 
+          "work-dog-walker-btn": workAsDogWalker, "sleep-hobby-btn": sleepHobby,
+          "bankruptcy-reset-btn": () => resetGameAll(true) 
         };
         Object.entries(buttonMappings).forEach(([id, func]) => {
           const button = document.getElementById(id);
@@ -1569,8 +2096,9 @@
         // Autosave interval
         setInterval(saveGame, 60 * 1000); // Save every 60 seconds
 
-        // Initial bankruptcy check
+        // Initial bankruptcy check & UI update
         checkBankruptcy();
+        updateButtonStates(); // Ensure buttons reflect initial state
 
         addNotification(`Welcome to the Tower of Gable - ${GAME_VERSION_STRING}`, "info");
         console.log("Game Initialized.");
