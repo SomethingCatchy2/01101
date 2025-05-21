@@ -264,7 +264,7 @@
 
       .notification-box p.notification-mom,
       .notification-box p.notification-mom-rant {
-        color: #c3ff0070;
+        color: #7da300;
         font-style: italic;
       }
 
@@ -340,10 +340,13 @@
             <!-- Tab Navigation -->
             <div class="tabs">
                 <button class="tab-button active" data-tab="gable">Gable</button>
-                <button class="tab-button" data-tab="upgrades">Upgrades <span class="upgrade-counter" id="upgrade-counter"></span></button>
-                <button class="tab-button" data-tab="status">Status & Actions</button>
-                <button class="tab-button" data-tab="shop">Shop</button>
-                <button class="tab-button" data-tab="gableisms">Gableisms</button>
+                <button id="upgrades-tab-button" class="tab-button" data-tab="upgrades" style="display: none;">
+                  Upgrades <span class="upgrade-counter" id="upgrade-counter"></span>
+                </button>
+                <button id="status-tab-button" class="tab-button" data-tab="status" style="display: none;">Status & Actions</button>
+                <!-- hide Shop until purchased -->
+                <button id="shop-tab-button" class="tab-button" data-tab="shop" style="display: none;">Shop</button>
+                <button id="gableisms-tab-button" class="tab-button" data-tab="gableisms" style="display: none;">Gableisms</button>
             </div>
 
             <!-- Tab Content Panels -->
@@ -1354,6 +1357,7 @@
             napMessage = "Feeling refreshed! Next roll might be lucky.";
             addNotification(napMessage, "finish-success");
           } else if (napOutcome < 0.9) { // 30% chance of bad nap
+           
             gameState.nextRollChance = "lose";
             napMessage = "Woke up groggy. Next roll might be unlucky.";
             addNotification(napMessage, "finish-fail");
@@ -1657,6 +1661,12 @@
            gameState.wins++;
            updateElementText("wins", gameState.wins);
            addNotification(`COMMIT SUCCESS! Score: 24 (${diceSum} + ${gameState.bonusPoints}). Streak: ${gameState.consecutiveWins}x. Earned $${winnings.toFixed(2)}.`, "win");
+      // unlock Upgrades tab on first win
+         if (gameState.wins === 1) {
+           const upBtn = document.getElementById("upgrades-tab-button");
+          if (upBtn) upBtn.style.display = "";
+          addNotification("Upgrades unlocked!", "win");
+        }
          } else {
            gameState.moneyLost += COMMIT_FAIL_PENALTY;
            gameState.consecutiveWins = 0; // Reset streak on fail
@@ -1745,7 +1755,7 @@
         efficientMining: {
           id: "efficientMining",
           name: "Mining Efficiency",
-          description: "Increases mining earnings by 175%",
+          description: "Increases mining earnings by 175%. You found a stack of dynamite.",
           cost: 1000,
           prerequisite: (state) => state.moneyEarned >= 15000,
           preReqDescription: "Earn $15,000 total",
@@ -1758,7 +1768,7 @@
         fasterStapling: {
           id: "fasterStapling",
           name: "Speed Stapler",
-          description: "Stapling tables is 30% faster",
+          description: "Stapling tables is 30% faster. A Stapling Gun makes every table better.",
           cost: 450,
           prerequisite: (state) => state.isWorkingStaples !== undefined, 
           preReqDescription: "Staple tables at least once",
@@ -1771,7 +1781,7 @@
         deepSleep: {
           id: "deepSleep",
           name: "Deep Sleep Technique",
-          description: "Sleeping recovers 30% more energy",
+          description: "Sleeping recovers 30% more energy. Welcome to the 7 week sleep program!",
           cost: 600,
           prerequisite: (state) => state.sleepLevel !== undefined && state.sleepLevel < 30,
           preReqDescription: "Experience severe fatigue (sleep below 30)",
@@ -1812,7 +1822,7 @@
         taxEvasion: {
           id: "taxEvasion",
           name: "Creative Accounting",
-          description: "Reduces yearly taxes by 10%",
+          description: "Reduces yearly taxes by 10%. You found some 'loopholes'.",
           cost: 2000,
           prerequisite: (state) => state.age >= 6,
           preReqDescription: "Reach age 6 years old",
@@ -1826,7 +1836,7 @@
         taxEvasion2: {
           id: "taxEvasion2",
           name: "Creative Banking",
-          description: "Reduces yearly taxes by an additional 10%",
+          description: "Reduces yearly taxes by an additional 10%. Totaly legal.",
           cost: 2000,
           prerequisite: (state) => state.age >= 13,
           preReqDescription: "Reach age 13 years old",
@@ -1840,7 +1850,7 @@
         taxEvasion3: {
         id: "taxEvasion3",
         name: "Creative Income",
-        description: "Reduces yearly taxes by an additional 10%",
+        description: "Reduces yearly taxes by an additional 10%. Keep is secret, keep it safe.",
         cost: 2000,
         prerequisite: (state) => state.age >= 17,
         preReqDescription: "Reach age 17 years old",
@@ -1854,7 +1864,7 @@
         taxEvasion4: {
         id: "taxEvasion4",
         name: "Creative Spending",
-        description: "Reduces yearly taxes by an additional 10%",
+        description: "Reduces yearly taxes by an additional 10%. That wan't me, that was my twin.",
         cost: 2000,
         prerequisite: (state) => state.age >= 21,
         preReqDescription: "Reach age 21 years old",
@@ -1868,7 +1878,7 @@
         taxEvasion5: {
         id: "taxEvasion5",
         name: "Creative Dividends",
-        description: "Reduces yearly taxes by an additional 10%",
+        description: "Reduces yearly taxes by an additional 10%. It was for a good cause... probably.",
         cost: 2000,
         prerequisite: (state) => state.age >= 43,
         preReqDescription: "Reach age 43 years old",
@@ -1882,7 +1892,7 @@
         officeProductivitySuite: {
           id: "officeProductivitySuite",
           name: "Office Productivity Suite",
-          description: "Increases office job earnings by 20%.",
+          description: "Increases office job earnings by 20%. Finaly upgraded from Winodws 8.1.",
           cost: 700,
           prerequisite: (state) => (state.officeJobsCompleted || 0) >= 3,
           preReqDescription: "Complete office job 3 times",
@@ -1895,7 +1905,7 @@
         dogTrainingManual: {
           id: "dogTrainingManual",
           name: "Dog Training Manual",
-          description: "Increases dog walking earnings by 30%.",
+          description: "Increases dog walking earnings by 30%. Seven dog training manuals.",
           cost: 550,
           prerequisite: (state) => (state.dogWalksCompleted || 0) >= 5,
           preReqDescription: "Walk dogs 5 times",
@@ -1908,17 +1918,59 @@
         powerNapTechniques: {
           id: "powerNapTechniques",
           name: "Power Nap Techniques",
-          description: "Naps are 25% more powerful (both gains and losses).",
+          description: "Naps are 25% more powerful (both gains and losses). Seven week nap program.",
           cost: 400,
           prerequisite: (state) => (state.napsTaken || 0) >= 3,
           preReqDescription: "Take 3 naps",
           category: UPGRADE_CATEGORIES.SLEEP,
           effect: (state) => {
             state.napEffectivenessMultiplier = (state.napEffectivenessMultiplier || 1) * 1.25;
-            addNotification("Your power naps are now supercharged!", "win");
+            addNotification("Your power naps are now supererer!", "win");
           }
         },
-        // Add more upgrades as needed
+        // NEW: unlocks the Shop tab
+        shopAccess: {
+          id: "shopAccess",
+          name: "Shopping Liscense",
+          description: "You discover the local walmart. You could buy things, if you have money.",
+          cost: 5000,
+            prerequisite: state => state.age >= 6 && state.totalRolls >= 50,
+          preReqDescription: "Reach age 6 and roll dice 50 times",
+          category: UPGRADE_CATEGORIES.SPECIAL,
+          effect: state => {
+            const btn = document.getElementById("shop-tab-button");
+            if (btn) btn.style.display = "";
+            addNotification("Shopping!", "win");
+          }
+        },
+        gableismsAccess: {
+          id: "gableismsAccess",
+          name: "Gableisms License",
+          description: "Hello! Are you do need inspiration?",
+          cost: 3000,
+          prerequisite: state => state.wins >= 2,
+          preReqDescription: "Gable properly 2 times",
+          category: UPGRADE_CATEGORIES.SPECIAL,
+          effect: state => {
+            const btn = document.getElementById("gableisms-tab-button");
+            if (btn) btn.style.display = "";
+            addNotification("Hello? Are you do lightbulb?", "win");
+          }
+        },
+        statusAccess: {
+          id: "statusAccess",
+          name: "Stats & Actions Access",
+          description: "So you want to work, eh?",
+          cost: 2500,
+            prerequisite: state => state.age >= 10,
+          preReqDescription: "Reach the age of 10. Its not child labor if you are 10...",
+          category: UPGRADE_CATEGORIES.SPECIAL,
+          effect: state => {
+            const btn = document.getElementById("status-tab-button");
+            if (btn) btn.style.display = "";
+            addNotification("Working.", "win");
+          }
+        },
       };
       
       // Initialize upgrades in gameState
@@ -2246,11 +2298,14 @@
             ownedItems: { genericShirt: true, genericPants: true },
             equippedHat: null, equippedJacket: null, equippedShirt: 'genericShirt',
             equippedPants: 'genericPants', equippedShoes: null, equippedSocks: null,
-            purchasedUpgrades: [], availableUpgrades: [],
+            // Upgrade-related state properties
+            purchasedUpgrades: [],
+            availableUpgrades: [],
             diceBonusMultiplier: 1, miningEfficiencyMultiplier: 1, staplingSpeedMultiplier: 1,
             sleepRecoveryMultiplier: 1, winStreakMultiplier: 1, taxReductionMultiplier: 1,
             luckyCharmActive: false, mugRepellentActive: false, officeJobMultiplier: 1,
             dogWalkerMultiplier: 1, napEffectivenessMultiplier: 1,
+            // Counters for prerequisites
             officeJobsCompleted: 0, dogWalksCompleted: 0, napsTaken: 0,
         };
         // Clear current gameState and assign defaults
@@ -2282,7 +2337,16 @@
         checkForNewUpgrades(); // Check for initially available upgrades
         renderUpgrades();     // Render the upgrade UI
 
-        recalculateAndDisplayMuggability();
+        // hide Shop & Gableisms tabs after reset
+        const shopBtn = document.getElementById("shop-tab-button");
+        if (shopBtn) shopBtn.style.display = "none";
+        const gblBtn = document.getElementById("gableisms-tab-button");
+        if (gblBtn) gblBtn.style.display = "none";
+
+        // hide Upgrades until first win
+        const upgradesBtn = document.getElementById("upgrades-tab-button");
+        if (upgradesBtn) upgradesBtn.style.display = "none";
+
         updateButtonStates(); // Ensure buttons reflect initial state
         
         // If called without confirmation (e.g., version mismatch, load error),
@@ -2298,6 +2362,10 @@
       function initGame() {
         console.log(`Initializing Game ${GAME_VERSION_STRING}...`);
         loadGame(); // Load or initialize new game state & UI
+
+        // persist Upgrades tab visibility after load
+        const upgradesBtn = document.getElementById("upgrades-tab-button");
+        if (upgradesBtn) upgradesBtn.style.display = gameState.wins >= 1 ? "" : "none";
 
         // Initialize systems
         initAgeing();

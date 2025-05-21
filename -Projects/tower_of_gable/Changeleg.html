@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Changelog</title>
+</head>
+<body>
+    
+<h1>🎲 Tower of Gable — Changelog</h1>
+
+<p>All the glitter, bells & whistles added since v14 (ht2.html → ht3.html).</p>
+
+<hr />
+
+<h2>🚀 [v15.2] — New Features</h2>
+<ul>
+    <li><strong>Tabbed Interface</strong>: Split view into <strong>Gable</strong>, <strong>Upgrades</strong>, <strong>Status & Actions</strong>, <strong>Shop</strong>, <strong>Gableisms</strong>.</li>
+    <li><strong>Upgrades System</strong>: Interactive grid, category sections, affordability indicators, purchase logic.</li>
+    <li><strong>Manual Save</strong>: “Save Game” button with flash confirmation.</li>
+    <li><strong>Developer Mode</strong>: Cheat panel to grant upgrades, set age/money.</li>
+</ul>
+
+<h2>✨ Enhancements</h2>
+<ul>
+    <li><strong>Layout</strong>:
+        <ul>
+            <li>Removed left sidebar—quotes moved into <strong>Gableisms</strong> tab.</li>
+            <li>Stats and actions separated into their own <strong>Status</strong> tab.</li>
+            <li>Shop pane becomes collapsible and sits under <strong>Shop</strong> tab.</li>
+        </ul>
+    </li>
+    <li><strong>Footer & Controls</strong>:
+        <ul>
+            <li>Audio <code>&lt;audio&gt;</code> no longer auto-plays (kept <code>loop</code>).</li>
+            <li>Added <strong>Pause</strong> and <strong>Stop</strong> controls; refactored JS audio functions.</li>
+        </ul>
+    </li>
+    <li><strong>Game Keys</strong>:
+        <ul>
+            <li><code>SAVE_GAME_KEY</code> updated to <code>towerOfGableData_v15_2</code>.</li>
+            <li>JS is now loaded as an ES module.</li>
+        </ul>
+    </li>
+</ul>
+
+<h2>🎨 Style & Theming</h2>
+<ul>
+    <li><strong>Tabs CSS</strong>: <code>.tabs</code>, <code>.tab-button</code>, <code>.tab-content</code> with active states.</li>
+    <li><strong>Upgrade Grid</strong>: Responsive grid styling, hover & disabled visuals.</li>
+    <li><strong>Elegant Buttons</strong>: Italic “Save” & “Developer Mode” styling.</li>
+    <li><strong>Notification Colors</strong>: Tweaked notification‐type classes for clarity.</li>
+</ul>
+
+<h2>🐛 Bug Fixes & Under the Hood</h2>
+<ul>
+    <li>Fixed button-disable logic for dog walker & shop toggles.</li>
+    <li>Renamed handler <code>work-in-office-btn → workInOfficeJob</code>.</li>
+    <li>Ensured reset button never gets stuck disabled.</li>
+    <li>Moved collapse state into CSS (<code>.collapsed</code>) and persisted in <code>localStorage</code>.</li>
+</ul>
+
+<p><em>Enjoy the upgrade!</em></p>
+
+</body>
+</html>
