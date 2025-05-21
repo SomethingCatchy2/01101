@@ -205,17 +205,21 @@
       }
 
       .quote-content {
-          /* position: absolute; */
-          width: 100%;
-          /* Set a height that is twice the container height since we're duplicating content */
-          animation: scrollQuotes 200s linear infinite;
-          overflow-wrap: break-word;
-          padding-right: 15px;
-        }
+          padding: 10px 5px;
+          animation: scrollQuotes 250s linear infinite;
+      }
+
+      .quote-content p {
+          margin-bottom: 20px;
+          font-style: italic;
+          line-height: 1.5;
+          padding-left: 15px;
+          border-left: 3px solid #2c3e50;
+      }
 
       @keyframes scrollQuotes {
-          0% { transform: translateY(0%); }
-          100% { transform: translateY(-50%); }
+          0% { transform: translateY(0); }
+          100% { transform: translateY(calc(-100% + 500px)); }
       }
 
       /* --- ADDED RULES FOR COLLAPSIBLE MENU --- */
@@ -241,13 +245,13 @@
 
       .notification-box p {
         margin: 0 0 10px;
-        color: #495057;
+        color: #424242;
         font-size: 0.9em;
         line-height: 1.4;
       }
 
       .notification-box p.notification-info {
-        color: #abaeb1;
+        color: #181818;
       }
 
       .notification-box p.notification-loss {
@@ -255,21 +259,21 @@
       }
 
       .notification-box p.notification-win {
-        color: #88938a;
+        color: #0a035d;
       }
 
       .notification-box p.notification-mom,
       .notification-box p.notification-mom-rant {
-        color: #606060;
+        color: #c3ff0070;
         font-style: italic;
       }
 
       .notification-box p.notification-finish-success {
-        color: #3c4749;
+        color: #006d81;
       }
 
       .notification-box p.notification-finish-fail {
-        color: #3e3b33;
+        color: #483603;
       }
 
       /* --- START: CSS for Tabs --- */
@@ -301,6 +305,21 @@
       .tab-content.active {
         display: block;
       }
+      
+      /* Upgrade counter styling */
+      .upgrade-counter {
+        display: inline-block;
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px;
+        padding: 0 6px;
+        font-size: 0.8em;
+        margin-left: 5px;
+        font-style: italic;
+      }
+      .upgrade-counter:empty {
+        display: none;
+      }
       /* --- END: CSS for Tabs --- */
     </style>
    
@@ -321,7 +340,7 @@
             <!-- Tab Navigation -->
             <div class="tabs">
                 <button class="tab-button active" data-tab="gamble">Gable</button>
-                <button class="tab-button" data-tab="upgrades">Upgrades</button>
+                <button class="tab-button" data-tab="upgrades">Upgrades <span class="upgrade-counter" id="upgrade-counter"></span></button>
                 <button class="tab-button" data-tab="status">Status & Actions</button>
                 <button class="tab-button" data-tab="shop">Shop</button>
                 <button class="tab-button" data-tab="gableisms">Gableisms</button>
@@ -437,6 +456,99 @@
             </div>
             <!-- --- END: Upgrades Tab Content --- -->
 
+            <div id="gableisms-tab" class="tab-content">
+                <h4>Wisdom of Gable</h4>
+                <div class="box quote-marquee">
+                    <div class="quote-content">
+                        <p>"If you can't win big, at least lose with style." - Gable, age 4</p>
+                        <p>All dreams come, if have courage pursue.</p>
+                        <p>"The house always wins, unless it's my house. My floor is Charred." - Gable, age 5</p>
+                        <p>5It never late be you have.</p>
+                        <p>"Sometimes the best dice roll is the one you don't make." - Gable, age 4½</p>
+                        <p>Try to a of, but try become man value.</p>
+                        <p>"Staple tables, not dreams." - Gable, while avoiding the IRS</p>
+                        <p>Keep face toward sunshine, shadows fall you.</p>
+                        <p>"When life gives you debt, take a nap." - Gable's philosophy</p>
+                        <p>Either run day, the runs you.</p>
+                        <p>"The difference between gabling and investing is the paperwork." - Gable to his financial advisor</p>
+                        <p>Every brings closer the home.</p>
+                        <p>"Never shower. It washes away your luck." - Gable's hygiene advice</p>
+                        <p>Nothing impossible, word says possible.</p>
+                        <p>"Dogs are loyal. The odds aren't. Unless you cheat." - Gable on dog walking</p>
+                        <p>Success of from to without of.</p>
+                        <p>"Muggability is just a number, like my credit score... which is 990." - Gable on safety</p>
+                        <p>If dont the youre, start another.</p>
+                        <p>"I'm not in debt; I'm just investing in future misery." - Gable's optimism</p>
+                        <p>He conquers is mightiest.</p>
+                        <p>"24 is not just a number—it's a lifestyle." - Gable's winning philosophy</p>
+                        <p>One with makes majority.</p>
+                        <p>"Mining for gold is easier than mining for bonus points. But I know which is better." - Gable on career choices</p>
+                        <p>The adventure can take to the of dreams.</p>
+                        <p>"Mom's not mad, she's just disappointed... She is a part of the IRS." - Gable at tax season</p>
+                        <p>The Preparation tomorrow doing best.</p>
+                        <p>"When the dice don't roll your way, roll them with skill." - Gable's strategy</p>
+                        <p>Be you you in right, stand.</p>
+                        <p>"Sleep is for winners. And also for sleepy people who need a break." - Gable on rest</p>
+                        <p>Life no, except ones make.</p>
+                        <p>"The best skills are the ones you can't afford yet." - Gable on aspirations</p>
+                        <p>Everyone is taken.</p>
+                        <p>"I don't have a gabling problem, I have a winning solution." - Gable to his therapist</p>
+                        <p>Nothing impossible is possible.</p>
+                        <p>"Office work is just gabling with spreadsheets." - Gable's career advice</p>
+                        <p>The belongs those in the of dreams.</p>
+                        <p>"If your muggability is high, your fashion sense is low." - Gable on style</p>
+                        <p>Keep face always the, and will behind you.</p>
+                        <p>"Consecutive wins are like birthdays - they happen once a year if you're lucky." - Gable</p>
+                        <p>If can it, you can.</p>
+                        <p>Keep eyes, and feet ground.</p>
+                        <p>We must get rid the of life, so as to have the life.</p>
+                        <p>I'd rather I've done than I haven't done.</p>
+                        <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
+                        <p>Those who, you.</p>
+                        <p>Being in the was, tomato pursued.</p>
+                        <p>If you soup, do not floor.</p>
+                        <p>When you acquire, burn trash.</p>
+                        <p>Get the new Ford F-120, then you Ernn Graph.</p>
+                        <p>Grandma? Why do these cookies taste like ash?</p>
+                        <p>Failure, an opportunity for Failure.</p>
+                        <p>Do not Failure success.</p>
+                        <p>I found a toad.</p>
+                        <p>If tall, don’t short people too.</p>
+                        <p>Help I having an heatstroke.</p>
+                        <p>Are do flooring tiles? No.</p>
+                        <p>Sir Ver once said “What would you like to order?”</p>
+                        <p>If at first you don’t succeed, quit and blame others.</p>
+                        <p>If forgot, forget forgot.</p>
+                        <p>If you are in debt, take out a loan.</p>
+                        <p>One must, your find.</p>
+                        <p>If lost your, just your.</p>
+                        <p>"The life is living." -Play Doh™</p>
+                        <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
+                        <p>Wasing in the doing, being in the not.</p>
+                        <p>The mind not, but fire be kindled.</p>
+                        <p>Every beginning, some beginning.</p>
+                        <p>Wealth in having great, but having.</p>
+                        <p>The greatest lies in falling, but in rising every we fall.</p>
+                        <p>No great, without great your.</p>
+                        <p>No without taxes.</p>
+                        <p>Your dream is, follow and will.</p>
+                        <p>Failure 99, still 1.</p>
+                        <p>If you are in soup, do not in floor.</p>
+                        <p>When Anthropology, you have.</p>
+                        <p>Be one 2pays off debt, can’t work.</p>
+                        <p>Thoes who can, and those who can; can.</p>
+                        <p>If are ever that are good, remember Abraham hair.</p>
+                        <p>Are do lightbulbs? Seven hundred men.</p>
+                        <p>I have severe lung damage.</p>
+                        <p>[cookie clicker reference]</p>
+                        <p>Work and fun what do I that's more. have choose do.</p>
+                        <p>Failure the that success flavor.</p>
+                        <p>At one woke, morning the.</p>
+                        <p>What's money? A is success he up the and to at and between what wants do.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Right Sidebar: Notification Log Area -->
@@ -460,7 +572,7 @@
             <input type="range" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)">
         </div>
     </div>
-    <audio id="myAudio" src="../../../../mp3 and mp4/Office2.wav" autoplay loop></audio>
+    <audio id="myAudio" src="../../../../mp3 and mp4/Office2.wav" loop></audio>
     
     <script>
     var audio = document.getElementById('myAudio');
@@ -545,9 +657,30 @@
         background-color: #ffffff;
         border: 2px solid rgb(255, 255, 255);
     }
+    
+    /* Elegant button styling for save button */
+    .elegant-btn {
+        font-family: 'Times New Roman', Times, serif;
+        font-style: italic;
+        padding: 5px 15px;
+        margin: 0 10px;
+        background-color: #ffffff;
+        color: #2c3e50;
+        border: 1px solid #2c3e50;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .elegant-btn:hover {
+        background-color: #f5f5f5;
+        border-color: #000000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     </style>      
       <span>Tower of Gable v15.1 (DLC 2.8)</span> <!-- VERSION UPDATE -->
-        <button id="bankruptcy-reset-btn">Reset Game</button> <!-- No longer starts disabled -->
+      <button id="manual-save-btn" class="elegant-btn">Save Game</button>
+      <button id="bankruptcy-reset-btn">Reset Game</button>
+      <button id="dev-cheat-btn" class="elegant-btn" style="display: inline-block; background-color: #ffcc00; color: #333;">Developer Mode</button>
     </footer>
 
     <script type="module">
@@ -755,7 +888,10 @@
           updateElementText("money-lost", gameState.moneyLost.toFixed(2));
           updateElementText("net-money", gameState.netMoney.toFixed(2));
           checkBankruptcy(); // Check if bankrupt state is triggered
-          updateButtonStates(); // Update <audio src="../../../../mp3 and mp4/Office2.wav" autoplay loop controls></audio> button enabled/disabled states
+          updateButtonStates(); // Update button enabled/disabled states
+          
+          // Add this line to refresh upgrade affordability status whenever money changes
+          renderUpgrades(); // Refresh the upgrade UI to reflect current affordability
       }
       function isInSignificantDebt() {
           return gameState.netMoney < SIGNIFICANT_DEBT_THRESHOLD;
@@ -1124,6 +1260,7 @@
       const OFFICE_JOB_DURATION = 12000;
       const STAPLE_TABLES_JOB_DURATION = 4000;
       const NAP_DURATION = 5000;
+      const SLEEP_DURATION = 10000; // Added missing sleep duration constant
 
 
       function workInMines() {
@@ -1300,6 +1437,7 @@
           updateElementText("sleep-level", gameState.sleepLevel);
           recalculateAndDisplayMuggability();
           if (gameState.sleepLevel === 20) addNotification("Feeling tired...", "info");
+         
           else if (gameState.sleepLevel === 5) addNotification("Barely keeping your eyes open...", "info");
           else if (gameState.sleepLevel <= 0) { faint(); }
         }
@@ -1412,7 +1550,7 @@
         }
         rollMsg += ` Total Bonus: ${gameState.bonusPoints}.`;
         rollMsg += ` Potential Score: ${potentialTotal}.`; // Keep potential score shown
-        addNotification(rollMsg, "info");
+        // addNotification(rollMsg, "info");
 
         updateMoneyDisplay(); // Update money and button states
       }
@@ -1461,7 +1599,7 @@
         if (currentRollBonus === 0) {
             // If no bonus points were generated this roll, reset the accumulated total.
             if (gameState.bonusPoints > 0) { // Only notify if there *was* a bonus to lose
-                 addNotification("No bonus gained this roll. Accumulated bonus reset.", "info");
+                //  addNotification("No bonus gained this roll. Accumulated bonus reset.", "info");
             }
             gameState.bonusPoints = 0;
         } else {
@@ -1488,7 +1626,7 @@
 
         // Chiller notification for potential win
         if (totalPoints === 24 && !gameState.alreadyCounted) {
-          addNotification(`Score is 24 (${diceSum} + ${gameState.bonusPoints} bonus)! Commit now?`, "win");
+          // addNotification(`Score is 24 (${diceSum} + ${gameState.bonusPoints} bonus)! Commit now?`, "win");
         }
         return totalPoints; // Return the calculated total for logging
       }
@@ -1573,43 +1711,43 @@
       
       // Define all possible upgrades
       const upgradeDefinitions = {
-        betterDice: {
-          id: "betterDice",
-          name: "Premium Dice",
-          description: "Higher quality dice that increase your bonus points by 50%",
-          cost: 500,
-          prerequisite: (state) => state.totalRolls >= 25,
-          preReqDescription: "Roll dice 25 times",
-          category: UPGRADE_CATEGORIES.DICE,
-          effect: (state) => {
-            state.diceBonusMultiplier = (state.diceBonusMultiplier || 1) * 1.5;
-            addNotification("Your dice now generate 50% more bonus points!", "win");
-          }
-        },
-        luckyCharm: {
-          id: "luckyCharm",
-          name: "Lucky Rabbit's Foot",
-          description: "Slightly increases bonus from matches/runs by +1 if any bonus is generated.",
-          cost: 350,
-          prerequisite: (state) => state.wins >= 3,
-          preReqDescription: "Win 3 times",
-          category: UPGRADE_CATEGORIES.DICE,
-          effect: (state) => {
-            state.luckyCharmActive = true;
-            addNotification("Your lucky charm tingles with strange energy!", "win");
-          }
-        },
+      //   betterDice: {
+      //     id: "betterDice",
+      //     name: "Premium Dice",
+      //     description: "Higher quality dice that increase your bonus points by 50%",
+      //     cost: 500,
+      //     prerequisite: (state) => state.totalRolls >= 25,
+      //     preReqDescription: "Roll dice 25 times",
+      //     category: UPGRADE_CATEGORIES.DICE,
+      //     effect: (state) => {
+      //       state.diceBonusMultiplier = (state.diceBonusMultiplier || 1) * 1.5;
+      //       addNotification("Your dice now generate 50% more bonus points!", "win");
+      //     }
+      //   },
+        // luckyCharm: {
+        //   id: "luckyCharm",
+        //   name: "Lucky Rabbit's Foot",
+        //   description: "Slightly increases bonus from matches/runs by +1 if any bonus is generated.",
+        //   cost: 350,
+        //   prerequisite: (state) => state.wins >= 3,
+        //   preReqDescription: "Win 3 times",
+        //   category: UPGRADE_CATEGORIES.DICE,
+        //   effect: (state) => {
+        //     state.luckyCharmActive = true;
+        //     addNotification("Your lucky charm tingles with strange energy!", "win");
+        //   }
+        // },
         efficientMining: {
           id: "efficientMining",
           name: "Mining Efficiency",
-          description: "Increases mining earnings by 25%",
-          cost: 800,
-          prerequisite: (state) => state.moneyEarned >= 1500,
-          preReqDescription: "Earn $1,500 total",
+          description: "Increases mining earnings by 175%",
+          cost: 1000,
+          prerequisite: (state) => state.moneyEarned >= 15000,
+          preReqDescription: "Earn $15,000 total",
           category: UPGRADE_CATEGORIES.WORK,
           effect: (state) => {
-            state.miningEfficiencyMultiplier = (state.miningEfficiencyMultiplier || 1) * 1.25;
-            addNotification("Your mining efficiency has improved!", "win");
+            state.miningEfficiencyMultiplier = (state.miningEfficiencyMultiplier || 1) * 2.75;
+            addNotification("You found a stack of dynamite.", "win");
           }
         },
         fasterStapling: {
@@ -1622,7 +1760,7 @@
           category: UPGRADE_CATEGORIES.WORK,
           effect: (state) => {
             state.staplingSpeedMultiplier = (state.staplingSpeedMultiplier || 1) * 1.3;
-            addNotification("You can now staple tables faster!", "win");
+            addNotification("A Stapling Gun makes every table better.", "win");
           }
         },
         deepSleep: {
@@ -1635,7 +1773,7 @@
           category: UPGRADE_CATEGORIES.SLEEP,
           effect: (state) => {
             state.sleepRecoveryMultiplier = (state.sleepRecoveryMultiplier || 1) * 1.3;
-            addNotification("Your sleep is now much more refreshing!", "win");
+            addNotification("Welcome to the 7 week sleep program!", "win");
           }
         },
         mugRepellent: {
@@ -1649,7 +1787,7 @@
           effect: (state) => {
             state.mugRepellentActive = true;
             // state.baseMuggability = Math.max(0, state.baseMuggability - 15); // Old effect
-            addNotification("You smell terrible but muggers might avoid you more often!", "win");
+            addNotification("You smell terrible! No one wants mug you.", "win");
           }
         },
         winStreak: {
@@ -1663,22 +1801,79 @@
           effect: (state) => {
             // window.WIN_STREAK_BONUS_MULTIPLIER *= 1.5; // Old way
             state.winStreakMultiplier = (state.winStreakMultiplier || 1) * 1.5;
-            addNotification("Your consecutive wins are now more valuable!", "win");
+            addNotification("The casino loved your generous bribes! Win streaks pay out more!", "win");
           }
         },
         taxEvasion: {
           id: "taxEvasion",
           name: "Creative Accounting",
-          description: "Reduces yearly taxes by 30%",
+          description: "Reduces yearly taxes by 10%",
           cost: 2000,
           prerequisite: (state) => state.age >= 6,
           preReqDescription: "Reach age 6 years old",
           category: UPGRADE_CATEGORIES.SPECIAL,
           effect: (state) => {
-            state.taxReductionMultiplier = (state.taxReductionMultiplier && state.taxReductionMultiplier !== 1) ? state.taxReductionMultiplier * 0.7 : 0.7;
-            addNotification("Your tax professional found some 'loopholes'!", "win");
+            state.taxReductionMultiplier = (state.taxReductionMultiplier && state.taxReductionMultiplier !== 1) ? state.taxReductionMultiplier - 0.9 : 0.9;
+            addNotification("Let's just say you found some 'loopholes'!", "win");
           }
         },
+
+        taxEvasion2: {
+          id: "taxEvasion2",
+          name: "Creative Banking",
+          description: "Reduces yearly taxes by an additional 10%",
+          cost: 2000,
+          prerequisite: (state) => state.age >= 13,
+          preReqDescription: "Reach age 13 years old",
+          category: UPGRADE_CATEGORIES.SPECIAL,
+          effect: (state) => {
+            state.taxReductionMultiplier = state.taxReductionMultiplier ? state.taxReductionMultiplier - 0.1 : 0.8;
+            addNotification("Your offshore accounts are working perfectly!", "win");
+          }
+        },  
+
+        taxEvasion3: {
+        id: "taxEvasion3",
+        name: "Creative Income",
+        description: "Reduces yearly taxes by an additional 10%",
+        cost: 2000,
+        prerequisite: (state) => state.age >= 17,
+        preReqDescription: "Reach age 17 years old",
+        category: UPGRADE_CATEGORIES.SPECIAL,
+        effect: (state) => {
+        state.taxReductionMultiplier = state.taxReductionMultiplier ? state.taxReductionMultiplier - 0.1 : 0.7;
+        addNotification("They can't tax it if they can't find it.", "win");
+          }
+        },
+
+        taxEvasion4: {
+        id: "taxEvasion4",
+        name: "Creative Spending",
+        description: "Reduces yearly taxes by an additional 10%",
+        cost: 2000,
+        prerequisite: (state) => state.age >= 21,
+        preReqDescription: "Reach age 21 years old",
+        category: UPGRADE_CATEGORIES.SPECIAL,
+        effect: (state) => {
+        state.taxReductionMultiplier = state.taxReductionMultiplier ? state.taxReductionMultiplier - 0.1 : 0.6;
+        addNotification("Only spend through alternative identities.", "win");
+          }
+        },
+
+        taxEvasion5: {
+        id: "taxEvasion5",
+        name: "Creative Dividends",
+        description: "Reduces yearly taxes by an additional 10%",
+        cost: 2000,
+        prerequisite: (state) => state.age >= 43,
+        preReqDescription: "Reach age 43 years old",
+        category: UPGRADE_CATEGORIES.SPECIAL,
+        effect: (state) => {
+        state.taxReductionMultiplier = state.taxReductionMultiplier ? state.taxReductionMultiplier - 0.1 : 0.5;
+        addNotification("If I am to help the fish, I won't be taxed for it!", "win");
+          }
+        },        
+
         officeProductivitySuite: {
           id: "officeProductivitySuite",
           name: "Office Productivity Suite",
@@ -1689,7 +1884,7 @@
           category: UPGRADE_CATEGORIES.WORK,
           effect: (state) => {
             state.officeJobMultiplier = (state.officeJobMultiplier || 1) * 1.20;
-            addNotification("New software makes your office work more profitable!", "win");
+            addNotification("New software, office work more profitable!", "win");
           }
         },
         dogTrainingManual: {
@@ -1702,13 +1897,13 @@
           category: UPGRADE_CATEGORIES.WORK,
           effect: (state) => {
             state.dogWalkerMultiplier = (state.dogWalkerMultiplier || 1) * 1.30;
-            addNotification("You've learned to manage dogs more effectively!", "win");
+            addNotification("Manage dogs more effectively!", "win");
           }
         },
         powerNapTechniques: {
           id: "powerNapTechniques",
           name: "Power Nap Techniques",
-          description: "Naps are 25% more effective (both gains and losses are magnified).",
+          description: "Naps are 25% more powerful (both gains and losses).",
           cost: 400,
           prerequisite: (state) => (state.napsTaken || 0) >= 3,
           preReqDescription: "Take 3 naps",
@@ -1798,7 +1993,7 @@
         renderUpgrades();
         
         // Notification
-        addNotification(`Purchased upgrade: ${upgrade.name} for $${upgrade.cost.toFixed(2)}!`, "win");
+        // addNotification(`Purchased upgrade: ${upgrade.name} for $${upgrade.cost.toFixed(2)}!`, "win");
       }
       
       // Render the upgrades UI
@@ -1945,12 +2140,42 @@
       //  initUpgrades();
       // }; // This should be done at the end of the script or where initGame is defined.
 
+      // --- START: Developer Cheat Function & visibility toggle ---
+      function activateCheat() {
+        if (!confirm("Enable developer cheats?")) return;
+        if (confirm("Give all upgrades?")) {
+          Object.keys(upgradeDefinitions).forEach(id => {
+            if (!gameState.purchasedUpgrades.includes(id)) {
+              gameState.purchasedUpgrades.push(id);
+              upgradeDefinitions[id].effect(gameState);
+            }
+          });
+          gameState.availableUpgrades = [];
+          renderUpgrades();
+        }
+        const ageInput = prompt("What age would you like to be?", gameState.age);
+        const age = parseInt(ageInput, 10);
+        if (!isNaN(age)) {
+          gameState.age = age;
+          updateElementText("age-display", age);
+        }
+        const moneyInput = prompt("How much money?", gameState.moneyEarned.toFixed(2));
+        const money = parseFloat(moneyInput);
+        if (!isNaN(money)) {
+          gameState.moneyEarned = money;
+          gameState.moneyLost = 0;
+          updateMoneyDisplay();
+        }
+        addNotification("Cheats applied.", "info");
+      }
+      // --- END: Developer Cheat Function & visibility toggle ---
+
       // --- START: Game Persistence (Save/Load/Reset) ---
       function saveGame() {
         try {
           const dataToSave = { ...gameState, gameVersion: GAME_VERSION_STRING };
           localStorage.setItem(SAVE_GAME_KEY, JSON.stringify(dataToSave));
-          addNotification("Game saved automatically.", "info");
+          // addNotification("Game saved automatically.", "info");
         } catch (error) {
           console.error("Error saving game:", error);
           addNotification("Failed to save game.", "loss");
@@ -2009,7 +2234,7 @@
             moneyEarned: 0, moneyLost: 0, netMoney: 0,
             isWorkingMines: false, isWorkingOffice: false, isWorkingStaples: false, isTakingNap: false, isWorkingDog: false, isSleepingHobby: false,
             nextRollChance: null,
-            age: 4, clothesPrice: 15 + (4 * 5), lastClothingChange: Date.now(), currentLocation: "North Carolina",
+            age: 4, clothesPrice: 15 + (gameState.age * 5), lastClothingChange: Date.now(), currentLocation: "North Carolina",
             sleepLevel: 100, slaves: 0, momNagCount: 0,
             baseMuggability: 50, lastSleepOrNapTime: Date.now(),
             ownedItems: { genericShirt: true, genericPants: true },
@@ -2030,6 +2255,8 @@
         
         // Re-initialize UI and systems that depend on a fresh state
         // This is a bit like a mini initGame without the event listeners part
+        // but we might need to reload the page to fully reset all aspects.
+        // For now, let's just ensure the critical parts are reset:
         updateMoneyDisplay();
         updateElementText("dice-rolls", "-");
         updateElementText("bonus-points", "0");
@@ -2050,7 +2277,7 @@
         renderUpgrades();     // Render the upgrade UI
 
         recalculateAndDisplayMuggability();
-        updateButtonStates(); // Ensure buttons are correctly enabled/disabled
+        updateButtonStates(); // Ensure buttons reflect initial state
         
         // If called without confirmation (e.g., version mismatch, load error),
         // we might not want to reload the page, but ensure a clean start.
@@ -2077,12 +2304,27 @@
           
         // Attach button listeners
         const buttonMappings = {
-          "roll-dice-btn": rollDice, "commit-btn": commit, 
-          "work-in-mines-btn": workInMines, "work-in-office-btn": workInOfficeJob,
-          "work-staple-tables-btn": workInStapleTables, "take-nap-btn": takeNap, 
-          "work-dog-walker-btn": workAsDogWalker, "sleep-hobby-btn": sleepHobby,
-          "bankruptcy-reset-btn": () => resetGameAll(true) 
+          "roll-dice-btn": rollDice, 
+          "commit-btn": commit, 
+          "work-in-mines-btn": workInMines, 
+          "work-in-office-btn": workInOfficeJob,
+          "work-staple-tables-btn": workInStapleTables, 
+          "take-nap-btn": takeNap, 
+          "work-dog-walker-btn": workAsDogWalker, 
+          "sleep-hobby-btn": sleepHobby,
+          "bankruptcy-reset-btn": () => resetGameAll(true),
+          "manual-save-btn": () => { 
+            saveGame(); 
+            addNotification("Game saved manually.", "info");
+            // Flash confirmation
+            const saveBtn = document.getElementById("manual-save-btn");
+            if (saveBtn) {
+              saveBtn.innerHTML = "✓ Saved!";
+              setTimeout(() => { saveBtn.innerHTML = "Save Game"; }, 1500);
+            }
+          }
         };
+
         Object.entries(buttonMappings).forEach(([id, func]) => {
           const button = document.getElementById(id);
           if (button) button.onclick = func;
@@ -2092,6 +2334,13 @@
         // Ensure reset button is enabled from the start
         const resetButton = document.getElementById('bankruptcy-reset-btn');
         if (resetButton) resetButton.disabled = false;
+
+        // make cheat button always visible and bind handler
+        const cheatBtn = document.getElementById('dev-cheat-btn');
+        if (cheatBtn) {
+          cheatBtn.style.display = 'inline-block';
+          cheatBtn.onclick = activateCheat;
+        }
 
         // Autosave interval
         setInterval(saveGame, 60 * 1000); // Save every 60 seconds
