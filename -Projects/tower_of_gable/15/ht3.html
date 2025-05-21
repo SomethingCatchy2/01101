@@ -339,7 +339,7 @@
 
             <!-- Tab Navigation -->
             <div class="tabs">
-                <button class="tab-button active" data-tab="gamble">Gable</button>
+                <button class="tab-button active" data-tab="gable">Gable</button>
                 <button class="tab-button" data-tab="upgrades">Upgrades <span class="upgrade-counter" id="upgrade-counter"></span></button>
                 <button class="tab-button" data-tab="status">Status & Actions</button>
                 <button class="tab-button" data-tab="shop">Shop</button>
@@ -347,13 +347,13 @@
             </div>
 
             <!-- Tab Content Panels -->
-            <div id="gamble-tab" class="tab-content active">
-                <div class="box"> <!-- Gamble Stats -->
+            <div id="gable-tab" class="tab-content active">
+                <div class="box"> <!-- gable Stats -->
                     <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span> | <strong>Bonus Points:</strong> <span id="bonus-points">0</span> | <strong>Total Points:</strong> <span id="total-points">-</span></p>
                     <p><strong>Wins:</strong> <span id="wins">0</span> | <strong>Rolls:</strong> <span id="total-rolls">0</span></p>
                     <p><strong>Earned:</strong> $<span id="money-earned">0.00</span> | <strong>Lost:</strong> $<span id="money-lost">0.00</span> | <strong>Net:</strong> $<span id="net-money">0.00</span></p>
                 </div>
-                <div class="box"> <!-- Gamble Actions -->
+                <div class="box"> <!-- gable Actions -->
                     <button id="roll-dice-btn">Roll Dice ($1)</button>
                     <button id="commit-btn">Commit</button>
                 </div>
@@ -457,16 +457,19 @@
             <!-- --- END: Upgrades Tab Content --- -->
 
             <div id="gableisms-tab" class="tab-content">
-                <h4>Wisdom of Gable</h4>
+                <h4>Insperational Gablisms</h4>
                 <div class="box quote-marquee">
                     <div class="quote-content">
+                        <p>Hello? Are you do gable?</p>
+                        <p>Hello? Are you do need insperation?</p>
+                        <p>Hello? Are you do LIGHTBULB?</p>
                         <p>"If you can't win big, at least lose with style." - Gable, age 4</p>
                         <p>All dreams come, if have courage pursue.</p>
                         <p>"The house always wins, unless it's my house. My floor is Charred." - Gable, age 5</p>
                         <p>5It never late be you have.</p>
                         <p>"Sometimes the best dice roll is the one you don't make." - Gable, age 4½</p>
                         <p>Try to a of, but try become man value.</p>
-                        <p>"Staple tables, not dreams." - Gable, while avoiding the IRS</p>
+                        <p>"Kid, we Staple Tables, not dreams." - Gable, while avoiding the IRS</p>
                         <p>Keep face toward sunshine, shadows fall you.</p>
                         <p>"When life gives you debt, take a nap." - Gable's philosophy</p>
                         <p>Either run day, the runs you.</p>
@@ -544,6 +547,7 @@
                         <p>Work and fun what do I that's more. have choose do.</p>
                         <p>Failure the that success flavor.</p>
                         <p>At one woke, morning the.</p>
+                        <p><i>I</i> are do lightbulb</p>
                         <p>What's money? A is success he up the and to at and between what wants do.</p>
                     </div>
                 </div>
@@ -1479,7 +1483,7 @@
       function initTabs() {
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
-        const defaultTab = 'gamble'; // Default tab
+        const defaultTab = 'gable'; // Default tab
         let activeTabId = localStorage.getItem('activeTabId_v15_1') || defaultTab; // Use versioned key
 
         function switchTab(tabId) {
