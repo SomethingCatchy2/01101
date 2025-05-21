@@ -681,7 +681,7 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     </style>      
-      <span>Tower of Gable v15.2 (DLC 2.9)</span> <!-- VERSION UPDATE -->
+      <span>Tower of Gable v15.2 (DLC 2.10)</span> <!-- VERSION UPDATE -->
      
       <button id="bankruptcy-reset-btn">Reset Game</button>
       <button id="manual-save-btn" class="elegant-btn">Manual Save</button>
@@ -705,15 +705,15 @@
       const GAME_VERSION_STRING = "WebV15.2"; // VERSION UPDATE
 
       // Muggability Constants
-      const MUGGABILITY_FLUCTUATION_INTERVAL = 10000;
-      const MAJOR_MUGGING_CHECK_INTERVAL = 7 * 60 * 1000;
-      const MUGGING_SUCCESS_RATE = 0.65;
-      const MONEY_LOSS_PERCENTAGE = 0.30;
-      const MUGGABILITY_RESET_REDUCTION = 30;
-      const SLEEP_MUGGABILITY_THRESHOLD_LOW = 25;
-      const SLEEP_MUGGABILITY_THRESHOLD_HIGH = 75;
-      const SLEEP_MUGGABILITY_PENALTY = 5;
-      const SLEEP_MUGGABILITY_BONUS = -3;
+      const MUGGABILITY_FLUCTUATION_INTERVAL = 10000; // How often muggability randomly fluctuates (milliseconds)
+      const MAJOR_MUGGING_CHECK_INTERVAL = (Math.floor(Math.random() * 6) + 3) * 60 * 1000; // How often a major mugging event is checked (3-8 minutes, milliseconds)
+      const MUGGING_SUCCESS_RATE = 0.65; // Chance of a mugging succeeding (0 to 1)
+      const MONEY_LOSS_PERCENTAGE = 0.45; // Percentage of net money lost in a successful mugging (0 to 1)
+      const MUGGABILITY_RESET_REDUCTION = 30; // Amount muggability is reduced by after a mugging event
+      const SLEEP_MUGGABILITY_THRESHOLD_LOW = 62; // Sleep level below which muggability is penalized
+      const SLEEP_MUGGABILITY_THRESHOLD_HIGH = 94; // Sleep level above which muggability is rewarded
+      const SLEEP_MUGGABILITY_PENALTY = 9; // Muggability penalty when sleep is low
+      const SLEEP_MUGGABILITY_BONUS = -4; // Muggability bonus when sleep is high
 
       // --- Content from game_state.js ---
       const gameState = {
@@ -757,7 +757,7 @@
       window.gameState = gameState; // Make globally accessible for debug/potential extensions
 
       // --- Content from items.js ---
-      const calculateCost = (base) => base * 8 + 25;
+      const calculateCost = (base) => base * 8 + 25 * gameState.age/ 2;
       const itemDefinitions = {
           // Helms
           knightHelm: { name: "Knight Helm", cost: calculateCost(15), type: 'hat', effects: { muggability: -10 } },
@@ -1875,7 +1875,7 @@
         category: UPGRADE_CATEGORIES.SPECIAL,
         effect: (state) => {
         state.taxReductionMultiplier = state.taxReductionMultiplier ? state.taxReductionMultiplier - 0.1 : 0.5;
-        addNotification("If I am to help the fish, I won't be taxed for it!", "win");
+        addNotification("If I am to help the fish; I won't be taxed for it!", "win");
           }
         },        
 
@@ -2163,6 +2163,7 @@
         if (!isNaN(age)) {
           gameState.age = age;
           updateElementText("age-display", age);
+          gameState.clothesPrice = 15 + (gameState.age * 5); // Update clothesPrice
         }
         const moneyInput = prompt("How much money?", gameState.moneyEarned.toFixed(2));
         const money = parseFloat(moneyInput);
