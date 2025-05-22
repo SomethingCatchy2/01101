@@ -13,7 +13,7 @@ Being mean, doing bad stuff
 
 ## Enforcement Responsibilities
 
-If you aren't nice, you can't be mean here.
+If you aren't being nice, you can't be here.
 
 ## Scope
 
