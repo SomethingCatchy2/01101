@@ -1,19 +1,12 @@
 html,
 body {
-    /* height: 100%; <--- REMOVED THIS LINE */
     margin: 0;
     padding: 0;
-    /* font-family: Arial, sans-serif; */
     background-color: #ffffff;
     color: #000000;
-    /* Added min-height to ensure body fills at least viewport height
-           when content is very short, preventing footer from floating mid-screen,
-           but still allowing it to be pushed down by longer content. */
     min-height: 100vh;
     display: flex;
-    /* Use flexbox on body */
     flex-direction: column;
-    /* Stack children vertically */
     font-family: 'Times New Roman', Times, serif;
 }
 
@@ -178,13 +171,6 @@ body {
     background-color: #e9ecef;
 }
 
-/* .actions-box button { */
-/* This class is being removed/restructured */
-/*   margin: 1px; */
-/*   cursor: pointer; */
-/* } */
-/* Individual buttons within new boxes will rely on default button styling or more specific rules if needed */
-
 footer {
     border-top: 1px solid #dee2e6;
     background-color: #ffffff;
@@ -192,9 +178,7 @@ footer {
     text-align: center;
     font-size: 0.9em;
     color: #000000;
-    /* Removed any specific height/positioning rules if they existed */
-    /* Added margin-top: auto; IS NOT NEEDED with the flexbox setup on body */
-    /* flex-shrink: 0; /* Prevent footer from shrinking */
+    flex-shrink: 0; /* Prevent footer from shrinking */
 }
 
 /* Marquee effect for quotes */
@@ -400,21 +384,20 @@ footer {
 .audio-controls input[type="range"]::-moz-range-thumb {
     width: 20px;
     height: 20px;
-    background-color: #ffffff;
+    background-color: #000000; /* Changed from #ffffff for consistency */
     border: 2px solid rgb(255, 255, 255);
+    cursor: pointer;
 }
-
-
 
 /* Elegant button styling for save button */
 .elegant-btn {
     font-family: 'Times New Roman', Times, serif;
     font-style: italic;
-    /* padding: 5px 15px;
-        margin: 0 10px; */
+    padding: 5px 15px;
+    margin: 0 10px;
     background-color: #ffffff;
     color: #2c3e50;
-    border: 0.1px solid #2c3e50;
+    border: 1px solid #2c3e50; /* Changed from 0.1px for better visibility */
     cursor: pointer;
     transition: all 0.3s ease;
 }
