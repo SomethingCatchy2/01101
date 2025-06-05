@@ -814,9 +814,29 @@ const audio = document.getElementById('myAudio');
       const tabButtons = document.querySelectorAll('.tab-button');
       const tabContents = document.querySelectorAll('.tab-content');
       const defaultTab = 'gable'; // Default tab
-      let activeTabId = localStorage.getItem('activeTabId_v15_1') || defaultTab; // Use versioned key
+
+      // Helper: Find first visible tab button
+      function getFirstVisibleTabId() {
+        for (const btn of tabButtons) {
+          if (btn.style.display !== 'none') return btn.dataset.tab;
+        }
+        return defaultTab;
+      }
+
+      // On load, get stored tab, but fallback to visible/default if needed
+      activeTabId = localStorage.getItem('activeTabId_v15_1') || defaultTab;
+      // If the stored tab is hidden, fallback to first visible
+      let currentActiveButton = document.querySelector(`.tab-button[data-tab="${activeTabId}"]`);
+      if (!currentActiveButton || currentActiveButton.style.display === 'none') {
+        activeTabId = getFirstVisibleTabId();
+      }
 
       function switchTab(tabId) {
+        // Only switch if the tab button is visible
+        const btn = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
+        if (!btn || btn.style.display === 'none') {
+          tabId = getFirstVisibleTabId();
+        }
         tabContents.forEach(content => {
           content.classList.remove('active');
           if (content.id === tabId + '-tab') {
@@ -829,22 +849,17 @@ const audio = document.getElementById('myAudio');
             button.classList.add('active');
           }
         });
-        localStorage.setItem('activeTabId_v15_1', tabId); // Use versioned key
-        activeTabId = tabId;
+        localStorage.setItem('activeTabId_v15_1', tabId);
       }
 
       tabButtons.forEach(button => {
         button.addEventListener('click', () => {
-          switchTab(button.dataset.tab);
+          if (button.style.display !== 'none') {
+            switchTab(button.dataset.tab);
+          }
         });
       });
 
-      // Ensure the initially active tab (from localStorage or default) is shown
-      // And fallback if the stored tab ID doesn't correspond to an existing tab button
-      let currentActiveButton = document.querySelector(`.tab-button[data-tab="${activeTabId}"]`);
-      if (!currentActiveButton) {
-        activeTabId = defaultTab; // Fallback to default if stored tab is invalid
-      }
       switchTab(activeTabId);
     }
     // --- END: Tabbed Interface Logic ---
@@ -1525,7 +1540,26 @@ const audio = document.getElementById('myAudio');
     // --- START: Developer Cheat Function & visibility toggle ---
     function activateCheat() {
       if (!confirm("Enable developer cheats?")) return;
-      if (confirm("Give all upgrades?")) {
+
+      // Present options to the user
+      const options = [
+        { key: "1", label: "Give ALL upgrades" },
+        { key: "2", label: "Give ALL items" },
+        { key: "3", label: "Set max money" },
+        { key: "4", label: "Set max sleep" },
+        { key: "5", label: "Set age" },
+        { key: "6", label: "Unlock all tabs" },
+        { key: "7", label: "Give EVERYTHING (all of the above)" }
+      ];
+      let menu = "Developer Mode Options:\n";
+      options.forEach(opt => { menu += `${opt.key}: ${opt.label}\n`; });
+      menu += "Enter option numbers separated by commas (e.g. 1,2,3):";
+      const input = prompt(menu, "7");
+      if (!input) return;
+      const selected = input.split(",").map(s => s.trim());
+
+      // Helper: Give all upgrades
+      function giveAllUpgrades() {
         Object.keys(upgradeDefinitions).forEach(id => {
           if (!gameState.purchasedUpgrades.includes(id)) {
             gameState.purchasedUpgrades.push(id);
@@ -1535,21 +1569,88 @@ const audio = document.getElementById('myAudio');
         gameState.availableUpgrades = [];
         renderUpgrades();
       }
-      const ageInput = prompt("What age would you like to be?", gameState.age);
-      const age = parseInt(ageInput, 10);
-      if (!isNaN(age)) {
-        gameState.age = age;
-        updateElementText("age-display", age);
-        gameState.clothesPrice = 15 + (gameState.age * 5); // Update clothesPrice
+
+      // Helper: Give all items
+      function giveAllItems() {
+        Object.keys(itemDefinitions).forEach(key => {
+          gameState.ownedItems[key] = true;
+        });
+        // Equip best available for each slot
+        const equipSlots = {
+          hat: null, jacket: null, shirt: null, pants: null, shoes: null, socks: null
+        };
+        Object.entries(itemDefinitions).forEach(([key, item]) => {
+          if (item.type && !item.nonBuyable) {
+            equipSlots[item.type] = key;
+          }
+        });
+        if (equipSlots.hat) gameState.equippedHat = equipSlots.hat;
+        if (equipSlots.jacket) gameState.equippedJacket = equipSlots.jacket;
+        if (equipSlots.shirt) gameState.equippedShirt = equipSlots.shirt;
+        if (equipSlots.pants) gameState.equippedPants = equipSlots.pants;
+        if (equipSlots.shoes) gameState.equippedShoes = equipSlots.shoes;
+        if (equipSlots.socks) gameState.equippedSocks = equipSlots.socks;
+        updateEquipmentSelectors();
+        updateOwnedItemButtons();
       }
-      const moneyInput = prompt("How much money?", gameState.moneyEarned.toFixed(2));
-      const money = parseFloat(moneyInput);
-      if (!isNaN(money)) {
-        gameState.moneyEarned = money;
+
+      // Helper: Set max money
+      function setMaxMoney() {
+        gameState.moneyEarned = 9999999;
         gameState.moneyLost = 0;
         updateMoneyDisplay();
       }
-      addNotification("Cheats applied.", "info");
+
+      // Helper: Set max sleep
+      function setMaxSleep() {
+        gameState.sleepLevel = 100;
+        updateElementText("sleep-level", gameState.sleepLevel);
+      }
+
+      // Helper: Set age
+      function setAge() {
+        const ageInput = prompt("What age would you like to be?", gameState.age);
+        const age = parseInt(ageInput, 10);
+        if (!isNaN(age)) {
+          gameState.age = age;
+          updateElementText("age-display", age);
+          gameState.clothesPrice = 15 + (gameState.age * 5); // Update clothesPrice
+        }
+      }
+
+      // Helper: Unlock all tabs
+      function unlockAllTabs() {
+        const shopBtn = document.getElementById("shop-tab-button");
+        if (shopBtn) shopBtn.style.display = "";
+        const gableismsBtn = document.getElementById("gableisms-tab-button");
+        if (gableismsBtn) gableismsBtn.style.display = "";
+        const statusBtn = document.getElementById("status-tab-button");
+        if (statusBtn) statusBtn.style.display = "";
+        const upgradesBtn = document.getElementById("upgrades-tab-button");
+        if (upgradesBtn) upgradesBtn.style.display = "";
+      }
+
+      // If "Give EVERYTHING" is selected, do all
+      if (selected.includes("7")) {
+        giveAllUpgrades();
+        giveAllItems();
+        setMaxMoney();
+        setMaxSleep();
+        setAge();
+        unlockAllTabs();
+        addNotification("All cheats applied.", "info");
+        return;
+      }
+
+      // Otherwise, apply selected cheats
+      if (selected.includes("1")) giveAllUpgrades();
+      if (selected.includes("2")) giveAllItems();
+      if (selected.includes("3")) setMaxMoney();
+      if (selected.includes("4")) setMaxSleep();
+      if (selected.includes("5")) setAge();
+      if (selected.includes("6")) unlockAllTabs();
+
+      addNotification("Selected cheats applied.", "info");
     }
     // --- END: Developer Cheat Function & visibility toggle ---
 
@@ -1674,6 +1775,9 @@ const audio = document.getElementById('myAudio');
       const upgradesBtn = document.getElementById("upgrades-tab-button");
       if (upgradesBtn) upgradesBtn.style.display = "none";
 
+      // --- ADDED: Clear stored tab selection on reset ---
+      localStorage.removeItem('activeTabId_v15_1');
+
       updateButtonStates(); // Ensure buttons reflect initial state
 
       // If called without confirmation (e.g., version mismatch, load error),
@@ -1747,7 +1851,7 @@ const audio = document.getElementById('myAudio');
       }
 
       // Autosave interval
-      setInterval(saveGame, 60 * 1000); // Save every 60 seconds
+      setInterval(saveGame, 10 * 1000); // Save every 10 seconds
 
       // Initial bankruptcy check & UI update
       checkBankruptcy();
@@ -1782,3 +1886,99 @@ const audio = document.getElementById('myAudio');
     window.addEventListener("load", initGame);
 
     // --- END OF CONSOLIDATED JAVASCRIPT ---
+
+    // --- Tax Info UI Helpers ---
+    function updateTaxInfoUI() {
+      // Tax Rate
+      const locationData = locations[gameState.currentLocation] || locations["North Carolina"];
+      let currentTaxRate = locationData.totalTaxRate;
+      if (gameState.taxReductionMultiplier && gameState.taxReductionMultiplier !== 1) {
+        currentTaxRate *= gameState.taxReductionMultiplier;
+      }
+      updateElementText("tax-rate-display", (currentTaxRate * 100).toFixed(1) + "%");
+
+      // Estimated Tax
+      const net = gameState.moneyEarned - gameState.moneyLost - gameState.totalRolls;
+      let estimatedTax = 0;
+      if (net > 0) {
+        estimatedTax = Math.floor(net * currentTaxRate);
+      }
+      updateElementText("estimated-tax-display", estimatedTax.toFixed(2));
+
+      // Time to next birthday (age up)
+      // Use gameState.lastBirthdayTime as the last age-up timestamp
+      let lastBirthday = gameState.lastBirthdayTime;
+      if (!lastBirthday) {
+        // If not set (old save), estimate based on age and AGE_INTERVAL
+        lastBirthday = Date.now() - ((gameState.age - 4) * AGE_INTERVAL);
+        gameState.lastBirthdayTime = lastBirthday;
+      }
+      const now = Date.now();
+      const msSinceLast = now - lastBirthday;
+      let msToNext = AGE_INTERVAL - (msSinceLast % AGE_INTERVAL);
+      if (msToNext < 0 || msToNext > AGE_INTERVAL) msToNext = AGE_INTERVAL; // fallback
+      const min = Math.floor(msToNext / 60000);
+      const sec = Math.floor((msToNext % 60000) / 1000);
+      updateElementText("next-birthday-display", `${min}m ${sec}s`);
+    }
+
+    // Patch increaseAge to record lastBirthdayTime
+    const _orig_increaseAge = increaseAge;
+    increaseAge = function() {
+      gameState.lastBirthdayTime = Date.now();
+      _orig_increaseAge();
+    };
+
+    // Patch resetGameAll to set lastBirthdayTime
+    const _orig_resetGameAll = resetGameAll;
+    resetGameAll = function(confirmReset = true) {
+      _orig_resetGameAll(confirmReset);
+      gameState.lastBirthdayTime = Date.now();
+    };
+
+    // Patch loadGame to set lastBirthdayTime if missing
+    const _orig_loadGame = loadGame;
+    loadGame = function() {
+      _orig_loadGame();
+      if (!gameState.lastBirthdayTime) {
+        gameState.lastBirthdayTime = Date.now() - ((gameState.age - 4) * AGE_INTERVAL);
+      }
+    };
+
+    // --- Add more status info ---
+    function updateStatusExtras() {
+      // Win streak, missed wins, etc.
+      updateElementText("win-streak-display", gameState.consecutiveWins || 0);
+      updateElementText("missed-wins-display", gameState.missedWins || 0);
+      updateElementText("actions-available-display", getAvailableActionsString());
+      updateElementText("muggability-explain", "Lower is safer. High muggability means more risk of losing money randomly. Reduce it by sleeping, equipping safer clothes, or upgrades.");
+    }
+
+    // Helper: List available actions
+    function getAvailableActionsString() {
+      let actions = [];
+      if (!gameState.isWorkingMines && !isInSignificantDebt()) actions.push("Work: Mines");
+      if (!gameState.isWorkingOffice && !isInSignificantDebt()) actions.push("Work: Office");
+      if (!gameState.isWorkingStaples) actions.push("Work: Staple Tables");
+      if (!gameState.isWalkingDog) actions.push("Work: Walk Dogs");
+      if (!gameState.isTakingNap && !isInSignificantDebt()) actions.push("Nap");
+      if (!gameState.isSleepingHobby && !isInSignificantDebt()) actions.push("Sleep");
+      if (!gameState.isWorkingMines && !gameState.isWorkingOffice && !gameState.isWorkingStaples && !gameState.isTakingNap && !gameState.isWalkingDog && !gameState.isSleepingHobby) {
+        actions.push("Roll Dice", "Commit");
+      }
+      return actions.join(", ");
+    }
+
+    // --- Patch initGame to start tax info/status updates ---
+    const _orig_initGame = initGame;
+    initGame = function() {
+      _orig_initGame();
+      // Start periodic tax info/status updates
+      setInterval(() => {
+        updateTaxInfoUI();
+        updateStatusExtras();
+      }, 1000);
+      // Initial update
+      updateTaxInfoUI();
+      updateStatusExtras();
+    };

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Binary Horizon (Fractle)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #111;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #111;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    .credit {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 2;
+      text-shadow: 0 0 8px #000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="binaryhorizon"></canvas>
+<div class="credit">
+  Binary Horizon &mdash; Path Tracing System<br>
+  Patrick Leiser, J. Tarbell, Emilio Del Tessandoro (2021)
+</div>
+<script>
+// Binary Horizon: Path tracing particles from a horizon, alternating colors
+
+const canvas = document.getElementById('binaryhorizon');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth, height = window.innerHeight;
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Parameters
+const PARTICLE_COUNT = 220;
+const TRAIL_LENGTH = 120;
+const SPEED = 1.2;
+const COLOR_A = "#00eaff";
+const COLOR_B = "#ff3c6f";
+const HORIZON_Y = 0.52; // as a fraction of height
+const COLOR_SWITCH_TIME = 2.5; // seconds
+
+// Particle system
+class Particle {
+  constructor(x, y, colorIndex) {
+    this.x = x;
+    this.y = y;
+    this.angle = Math.random() * Math.PI * 2;
+    this.speed = SPEED * (0.7 + 0.6 * Math.random());
+    this.trail = [{x: x, y: y}];
+    this.colorIndex = colorIndex;
+    this.t = Math.random() * 1000;
+  }
+  update() {
+    // Evolve angle with some noise and horizon bias
+    this.t += 0.012 + Math.random() * 0.01;
+    let bias = (this.y < height * HORIZON_Y) ? 0.04 : -0.04;
+    this.angle += (Math.random() - 0.5) * 0.18 + bias;
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
+
+    // Bounce off edges
+    if (this.x < 0) { this.x = 0; this.angle = Math.PI - this.angle; }
+    if (this.x > width) { this.x = width; this.angle = Math.PI - this.angle; }
+    if (this.y < 0) { this.y = 0; this.angle = -this.angle; }
+    if (this.y > height) { this.y = height; this.angle = -this.angle; }
+
+    this.trail.push({x: this.x, y: this.y});
+    if (this.trail.length > TRAIL_LENGTH) this.trail.shift();
+  }
+  draw(ctx, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (let i = 0; i < this.trail.length; ++i) {
+      let p = this.trail[i];
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
+}
+
+// Initialize particles along a horizon
+let particles = [];
+function resetParticles() {
+  particles = [];
+  for (let i = 0; i < PARTICLE_COUNT; ++i) {
+    let x = (i + 0.5) * width / PARTICLE_COUNT;
+    let y = height * HORIZON_Y + (Math.random() - 0.5) * 8;
+    let colorIndex = i % 2;
+    particles.push(new Particle(x, y, colorIndex));
+  }
+}
+resetParticles();
+window.addEventListener('resize', resetParticles);
+
+// Animation loop
+let lastColorSwitch = performance.now();
+let colorToggle = false;
+
+function animate() {
+  // Fade old trails
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = "#111";
+  ctx.fillRect(0, 0, width, height);
+  ctx.globalAlpha = 1.0;
+
+  // Alternate colors every COLOR_SWITCH_TIME seconds
+  let now = performance.now();
+  if (now - lastColorSwitch > COLOR_SWITCH_TIME * 1000) {
+    colorToggle = !colorToggle;
+    lastColorSwitch = now;
+  }
+
+  // Draw and update particles
+  for (let p of particles) {
+    let color = (p.colorIndex ^ colorToggle) ? COLOR_A : COLOR_B;
+    p.draw(ctx, color);
+    p.update();
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

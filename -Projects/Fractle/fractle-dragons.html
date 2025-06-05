@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fractle Dragons</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #181818;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #181818;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    .credit {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 2;
+      text-shadow: 0 0 8px #000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="dragons"></canvas>
+<div class="credit">Fractle Dragons &mdash; Animated Heighway Dragons</div>
+<script>
+// --- Fractal Dragon (Heighway Dragon) Drawing Utility ---
+function dragonCurvePoints(iter, x, y, len, angle, sign) {
+  // Returns an array of points for the dragon curve
+  if (iter === 0) {
+    const rad = angle * Math.PI / 180;
+    return [
+      {x, y},
+      {x: x + Math.cos(rad) * len, y: y + Math.sin(rad) * len}
+    ];
+  }
+  // Recursive split
+  const half = len / Math.sqrt(2);
+  const a1 = angle + sign * 45;
+  const a2 = angle - sign * 45;
+  const p1 = dragonCurvePoints(iter - 1, x, y, half, a1, 1);
+  const last = p1[p1.length - 1];
+  const p2 = dragonCurvePoints(iter - 1, last.x, last.y, half, a2, -1);
+  return p1.concat(p2.slice(1));
+}
+
+// --- Dragon Entity ---
+class Dragon {
+  constructor(opts) {
+    this.x = opts.x;
+    this.y = opts.y;
+    this.baseAngle = opts.angle || 0;
+    this.angle = this.baseAngle;
+    this.length = opts.length || 120;
+    this.iter = opts.iter || 12;
+    this.color = opts.color || "#fff";
+    this.t = Math.random() * 1000;
+    this.speed = opts.speed || 0.3 + Math.random() * 0.3;
+    this.pathRadius = opts.pathRadius || 180 + Math.random() * 200;
+    this.pathAngle = Math.random() * Math.PI * 2;
+    this.pathSpeed = 0.003 + Math.random() * 0.002;
+    this.sign = Math.random() < 0.5 ? 1 : -1;
+  }
+  update(dt, cx, cy) {
+    this.t += dt * this.speed;
+    this.pathAngle += this.pathSpeed * dt;
+    // Move in a circle or lissajous path
+    this.x = cx + Math.cos(this.pathAngle) * this.pathRadius * Math.sin(this.t * 0.2);
+    this.y = cy + Math.sin(this.pathAngle * 1.2) * this.pathRadius * Math.cos(this.t * 0.18);
+    this.angle = this.baseAngle + Math.sin(this.t * 0.4) * 180;
+  }
+  draw(ctx) {
+    const pts = dragonCurvePoints(this.iter, 0, 0, this.length, this.angle, this.sign);
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; ++i) {
+      ctx.lineTo(pts[i].x, pts[i].y);
+    }
+    ctx.strokeStyle = this.color;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 16;
+    ctx.lineWidth = 2.2;
+    ctx.globalAlpha = 0.85;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+}
+
+// --- Setup ---
+const canvas = document.getElementById('dragons');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth, height = window.innerHeight;
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- Create Dragons ---
+const palette = [
+  "#00fff7", "#ff00c8", "#ffea00", "#00ff6a", "#ff6b00", "#00aaff", "#ff007a"
+];
+const dragons = [];
+for (let i = 0; i < 7; ++i) {
+  dragons.push(new Dragon({
+    x: width/2, y: height/2,
+    angle: Math.random() * 360,
+    length: 120 + Math.random() * 80,
+    iter: 12,
+    color: palette[i % palette.length],
+    speed: 0.2 + Math.random() * 0.4,
+    pathRadius: 180 + Math.random() * 220
+  }));
+}
+
+// --- Animation Loop ---
+let lastTime = performance.now();
+function animate(now) {
+  const dt = (now - lastTime) * 0.001;
+  lastTime = now;
+
+  ctx.clearRect(0, 0, width, height);
+
+  // Draw all dragons
+  for (let dragon of dragons) {
+    dragon.update(dt, width/2, height/2);
+    dragon.draw(ctx);
+  }
+
+  requestAnimationFrame(animate);
+}
+animate(performance.now());
+</script>
+</body>
+</html>

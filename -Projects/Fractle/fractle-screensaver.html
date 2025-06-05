@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fractle Screensaver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    .credit {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 2;
+      text-shadow: 0 0 8px #000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="fractal"></canvas>
+<div class="credit">Fractle Screensaver &mdash; 2D Mandelbrot/Julia</div>
+<script>
+const canvas = document.getElementById('fractal');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth, height = window.innerHeight;
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Animation state
+let t = 0;
+let mode = 0; // 0 = Mandelbrot, 1 = Julia
+let lastSwitch = 0;
+
+// Utility: HSV to RGB
+function hsv2rgb(h, s, v) {
+  let f = (n, k = (h * 6 + n) % 6) =>
+    v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
+  return [f(5)*255, f(3)*255, f(1)*255];
+}
+
+// Main draw loop
+function drawFractal() {
+  // Animate center and zoom
+  t += 0.008;
+  if (performance.now() - lastSwitch > 12000) {
+    mode = 1 - mode;
+    lastSwitch = performance.now();
+  }
+
+  // Mandelbrot: center orbits, Julia: c orbits
+  let zoom = 1.5 + 0.8 * Math.sin(t * 0.7);
+  let centerX = -0.5 + 0.3 * Math.cos(t * 0.4);
+  let centerY = 0.0 + 0.3 * Math.sin(t * 0.6);
+
+  // Julia set parameter
+  let cRe = 0.285 + 0.35 * Math.cos(t * 0.9);
+  let cIm = 0.01 + 0.35 * Math.sin(t * 0.7);
+
+  // Rotation for screensaver effect
+  let rot = t * 0.2;
+
+  // Pixel loop (blocky for speed, but smooths out on modern CPUs)
+  let img = ctx.createImageData(width, height);
+  let data = img.data;
+  let maxIter = 64 + Math.floor(64 * (0.5 + 0.5 * Math.sin(t * 0.3)));
+
+  for (let y = 0; y < height; y++) {
+    let ny = (y - height/2) / Math.min(width, height) * 2 * zoom;
+    for (let x = 0; x < width; x++) {
+      let nx = (x - width/2) / Math.min(width, height) * 2 * zoom;
+
+      // Apply rotation
+      let rx = nx * Math.cos(rot) - ny * Math.sin(rot);
+      let ry = nx * Math.sin(rot) + ny * Math.cos(rot);
+
+      let zx, zy, cx, cy;
+      if (mode === 0) {
+        // Mandelbrot
+        zx = 0; zy = 0;
+        cx = rx + centerX;
+        cy = ry + centerY;
+      } else {
+        // Julia
+        zx = rx + centerX;
+        zy = ry + centerY;
+        cx = cRe;
+        cy = cIm;
+      }
+
+      let i = 0;
+      for (; i < maxIter; i++) {
+        let zx2 = zx*zx - zy*zy + cx;
+        let zy2 = 2*zx*zy + cy;
+        zx = zx2;
+        zy = zy2;
+        if (zx*zx + zy*zy > 4) break;
+      }
+
+      // Smooth coloring
+      let norm = i - Math.log2(Math.log2(zx*zx + zy*zy)) + 4.0;
+      let hue = 0.65 + 0.35 * Math.sin(t + norm * 0.08);
+      let sat = 0.8;
+      let val = i < maxIter ? 1.0 : 0.0;
+
+      let [r, g, b] = hsv2rgb(hue + norm * 0.015, sat, val);
+
+      let idx = (y * width + x) * 4;
+      data[idx] = r;
+      data[idx+1] = g;
+      data[idx+2] = b;
+      data[idx+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  requestAnimationFrame(drawFractal);
+}
+
+drawFractal();
+</script>
+</body>
+</html>
