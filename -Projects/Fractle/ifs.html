@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IFS Fractals (Chaos Game, XScreenSaver-style)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #111;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #111;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    .overlay-ui {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      border-radius: 8px;
+      padding: 10px 16px;
+      user-select: none;
+    }
+    .overlay-ui a {
+      color: #fff;
+      text-decoration: underline;
+      margin-right: 16px;
+    }
+    .credit {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 2;
+      text-shadow: 0 0 8px #000;
+    }
+    .preset-select {
+      margin-right: 12px;
+      font-size: 14px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+    .param-input {
+      width: 40px;
+      font-size: 13px;
+      margin: 0 2px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 3px;
+      text-align: right;
+    }
+    .param-label {
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="overlay-ui">
+  <a href="../../index.html">← Back</a>
+  <label class="param-label">Preset:
+    <select id="presetSelect" class="preset-select">
+      <option value="sierpinski">Sierpiński Triangle</option>
+      <option value="barnsley">Barnsley Fern</option>
+      <option value="custom">Custom Affine</option>
+    </select>
+  </label>
+  <label class="param-label">Points:
+    <input id="pointCount" class="param-input" type="number" min="1000" max="1000000" value="120000">
+  </label>
+  <span>
+    <a href="https://en.wikipedia.org/wiki/Iterated_function_system" target="_blank" rel="noopener">Wikipedia: Iterated function system</a>
+  </span>
+</div>
+<canvas id="ifs"></canvas>
+<div class="credit">
+  IFS Fractals (Chaos Game) &mdash; Inspired by XScreenSaver<br>
+  Sierpiński, Barnsley, and more
+</div>
+<script>
+// --- IFS Fractals: Chaos Game Demo ---
+
+const canvas = document.getElementById('ifs');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth, height = window.innerHeight;
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- IFS Presets ---
+const PRESETS = {
+  sierpinski: {
+    name: "Sierpiński Triangle",
+    funcs: [
+      // Each: [a, b, c, d, e, f, probability]
+      [0.5, 0, 0, 0.5, 0, 0, 1/3],
+      [0.5, 0, 0, 0.5, 0.5, 0, 1/3],
+      [0.5, 0, 0, 0.5, 0.25, 0.433, 1/3]
+    ],
+    color: "#00fff7"
+  },
+  barnsley: {
+    name: "Barnsley Fern",
+    funcs: [
+      [0,    0,    0, 0.16, 0,    0,    0.01],
+      [0.85, 0.04, -0.04, 0.85, 0, 1.6, 0.85],
+      [0.2, -0.26, 0.23, 0.22, 0, 1.6, 0.07],
+      [-0.15, 0.28, 0.26, 0.24, 0, 0.44, 0.07]
+    ],
+    color: "#00ff6a"
+  },
+  custom: {
+    name: "Custom Affine",
+    funcs: [
+      [0.5, 0, 0, 0.5, 0, 0, 0.5],
+      [0.5, 0, 0, 0.5, 0.5, 0, 0.5]
+    ],
+    color: "#ffea00"
+  }
+};
+
+// --- UI State ---
+let currentPreset = "sierpinski";
+let pointCount = 120000;
+let customFuncs = JSON.parse(JSON.stringify(PRESETS.custom.funcs));
+
+// --- UI Elements ---
+const presetSelect = document.getElementById('presetSelect');
+const pointCountInput = document.getElementById('pointCount');
+
+presetSelect.value = currentPreset;
+pointCountInput.value = pointCount;
+
+presetSelect.onchange = function() {
+  currentPreset = this.value;
+  if (currentPreset === "custom") {
+    // Optionally: show custom param UI (not implemented here for brevity)
+  }
+  drawIFS();
+};
+pointCountInput.oninput = function() {
+  pointCount = Math.max(1000, Math.min(1000000, parseInt(this.value) || 120000));
+  drawIFS();
+};
+
+// --- IFS Chaos Game Algorithm ---
+function pickFunc(funcs, r) {
+  let acc = 0;
+  for (let i = 0; i < funcs.length; ++i) {
+    acc += funcs[i][6];
+    if (r < acc) return funcs[i];
+  }
+  return funcs[funcs.length - 1];
+}
+
+// --- Main Draw ---
+function drawIFS() {
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1.0;
+  ctx.fillStyle = "#111";
+  ctx.fillRect(0, 0, width, height);
+
+  // Get IFS functions and color
+  let funcs, color;
+  if (currentPreset === "custom") {
+    funcs = customFuncs;
+    color = PRESETS.custom.color;
+  } else {
+    funcs = PRESETS[currentPreset].funcs;
+    color = PRESETS[currentPreset].color;
+  }
+
+  // Find bounding box by iterating a bit (for auto-fit)
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  let x = 0, y = 0;
+  for (let i = 0; i < 1000; ++i) {
+    let f = pickFunc(funcs, Math.random());
+    let nx = f[0]*x + f[1]*y + f[4];
+    let ny = f[2]*x + f[3]*y + f[5];
+    x = nx; y = ny;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  // Add a little margin
+  let dx = maxX - minX, dy = maxY - minY;
+  minX -= dx*0.05; maxX += dx*0.05;
+  minY -= dy*0.05; maxY += dy*0.05;
+
+  // Fit to canvas
+  let scale = Math.min(width/(maxX-minX), height/(maxY-minY));
+  let offsetX = (width - scale*(maxX+minX))/2;
+  let offsetY = (height - scale*(maxY+minY))/2;
+
+  // Chaos game: plot points
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = color;
+  x = 0; y = 0;
+  // Burn-in
+  for (let i = 0; i < 20; ++i) {
+    let f = pickFunc(funcs, Math.random());
+    let nx = f[0]*x + f[1]*y + f[4];
+    let ny = f[2]*x + f[3]*y + f[5];
+    x = nx; y = ny;
+  }
+  // Draw points
+  ctx.beginPath();
+  for (let i = 0; i < pointCount; ++i) {
+    let f = pickFunc(funcs, Math.random());
+    let nx = f[0]*x + f[1]*y + f[4];
+    let ny = f[2]*x + f[3]*y + f[5];
+    x = nx; y = ny;
+    let px = offsetX + scale * x;
+    let py = offsetY + scale * y;
+    if (i % 2 === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 0.7;
+  ctx.globalAlpha = 0.8;
+  ctx.stroke();
+  ctx.restore();
+}
+
+// --- Animate: morph between presets every 20s ---
+let lastPresetSwitch = performance.now();
+function animate() {
+  let now = performance.now();
+  if (now - lastPresetSwitch > 20000) {
+    // Cycle presets
+    const keys = Object.keys(PRESETS);
+    let idx = keys.indexOf(currentPreset);
+    currentPreset = keys[(idx + 1) % keys.length];
+    presetSelect.value = currentPreset;
+    lastPresetSwitch = now;
+    drawIFS();
+  }
+  requestAnimationFrame(animate);
+}
+drawIFS();
+animate();
+</script>
+</body>
+</html>

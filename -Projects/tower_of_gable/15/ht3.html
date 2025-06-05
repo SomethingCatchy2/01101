@@ -57,19 +57,33 @@
 
       <div id="status-tab" class="tab-content">
         <div class="box"> <!-- Status Stats -->
-          <p><strong>Age:</strong> <span id="age-display">4</span> | <strong>Location:</strong> <span
-              id="location-display">North Carolina</span> | <strong>Sleep:</strong> <span id="sleep-level">100</span>
+          <p>
+            <strong>Age:</strong> <span id="age-display">4</span> |
+            <strong>Location:</strong> <span id="location-display">North Carolina</span> |
+            <strong>Sleep:</strong> <span id="sleep-level">100</span>
           </p>
           <p id="muggability-info">
             <strong>Muggability:</strong>
             Base: <span id="muggability-base-display">50</span> |
             Effective: <span id="muggability-effective-display">50</span>
+            <br>
+            <span id="muggability-explain" style="font-size:0.9em;color:#555;"></span>
           </p>
           <p id="tax-info">
             <strong>Tax Info:</strong>
             Rate: <span id="tax-rate-display">10.0%</span> |
             Next Birthday: <span id="next-birthday-display">0m 0s</span> |
             Estimated Tax: $<span id="estimated-tax-display">0.00</span>
+            <br>
+            <span style="font-size:0.9em;color:#555;">Taxes are paid on your birthday, based on your net worth and location. Upgrades can reduce your tax rate.</span>
+          </p>
+          <p>
+            <strong>Win Streak:</strong> <span id="win-streak-display">0</span> |
+            <strong>Missed Wins:</strong> <span id="missed-wins-display">0</span>
+          </p>
+          <p>
+            <strong>Available Actions:</strong>
+            <span id="actions-available-display" style="font-size:0.95em;color:#333;"></span>
           </p>
         </div>
         <div class="box"> <!-- Status Actions -->

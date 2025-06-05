@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drift (Cosmic Flames) - Fractle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      width: 100vw;
+      height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    .credit {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 2;
+      text-shadow: 0 0 8px #000;
+    }
+    .back-link {
+      position: fixed;
+      top: 10px;
+      left: 20px;
+      z-index: 10;
+      color: #fff;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .back-link:hover { background: #222; }
+  </style>
+</head>
+<body>
+<a class="back-link" href="../../index.html">&larr; Back</a>
+<canvas id="drift"></canvas>
+<div class="credit">Drift &mdash; Recursive Fractal Cosmic Flames<br>Inspired by Scott Draves, 1997</div>
+<script>
+// --- Drift: Recursive Fractal Cosmic Flames (JS version) ---
+
+const canvas = document.getElementById('drift');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth, height = window.innerHeight;
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- Flame Transformations (randomized for variety) ---
+function randomTransform() {
+  // Each transform is an affine + non-linear (sin/cos) function
+  return {
+    a: Math.random()*2-1,
+    b: Math.random()*2-1,
+    c: Math.random()*2-1,
+    d: Math.random()*2-1,
+    e: Math.random()*2-1,
+    f: Math.random()*2-1,
+    color: Math.random(),
+    nonlinear: Math.random() < 0.5 ? "sin" : "cos"
+  };
+}
+
+const TRANSFORM_COUNT = 4;
+let transforms = [];
+function randomizeTransforms() {
+  transforms = [];
+  for (let i = 0; i < TRANSFORM_COUNT; ++i) {
+    transforms.push(randomTransform());
+  }
+}
+randomizeTransforms();
+
+// --- Flame Iteration ---
+function flameIter(x, y, t) {
+  // Pick a random transform
+  const tr = transforms[Math.floor(Math.random() * transforms.length)];
+  // Affine
+  let nx = tr.a * x + tr.b * y + tr.c;
+  let ny = tr.d * x + tr.e * y + tr.f;
+  // Nonlinear
+  if (tr.nonlinear === "sin") {
+    nx = Math.sin(nx + t*0.1);
+    ny = Math.sin(ny + t*0.13);
+  } else {
+    nx = Math.cos(nx + t*0.1);
+    ny = Math.cos(ny + t*0.13);
+  }
+  return {x: nx, y: ny, color: tr.color};
+}
+
+// --- Color palette (flame-like) ---
+function palette(h) {
+  // h in [0,1]
+  let r = Math.floor(255 * Math.pow(h, 0.5));
+  let g = Math.floor(180 * Math.pow(h, 1.5));
+  let b = Math.floor(60 + 180 * (1-h));
+  return `rgb(${r},${g},${b})`;
+}
+
+// --- Animation State ---
+let points = [];
+let t = 0;
+let frame = 0;
+
+// --- Animation Loop ---
+function animate() {
+  t += 0.012;
+  frame++;
+
+  // Fade old image
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, width, height);
+
+  // Draw new points
+  ctx.globalAlpha = 0.13 + 0.07 * Math.sin(t*0.5);
+
+  // Start with a few random seeds
+  if (points.length < 1000) {
+    for (let i = 0; i < 100; ++i) {
+      points.push({
+        x: (Math.random()-0.5)*2,
+        y: (Math.random()-0.5)*2,
+        color: Math.random()
+      });
+    }
+  }
+
+  // Iterate and draw
+  let nextPoints = [];
+  for (let i = 0; i < points.length; ++i) {
+    let p = points[i];
+    let iter = flameIter(p.x, p.y, t);
+    // Map to screen
+    let sx = width/2 + iter.x * width*0.38;
+    let sy = height/2 + iter.y * height*0.38;
+    // Color
+    ctx.beginPath();
+    ctx.arc(sx, sy, 0.7 + 0.7*Math.random(), 0, 2*Math.PI);
+    ctx.fillStyle = palette((iter.color + t*0.07) % 1.0);
+    ctx.fill();
+    // Next
+    if (Math.abs(iter.x) < 2.2 && Math.abs(iter.y) < 2.2) {
+      nextPoints.push(iter);
+    }
+  }
+  points = nextPoints;
+
+  // Occasionally randomize transforms for new flame
+  if (frame % 1200 === 0) {
+    randomizeTransforms();
+    points = [];
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// --- Optional: click to randomize instantly ---
+canvas.addEventListener('click', () => {
+  randomizeTransforms();
+  points = [];
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Substrate Evolved (GPU/WebGL, XScreenSaver-inspired)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; background: #0c0c0f; /* Darker base */
+      width: 100vw; height: 100vh;
+    }
+    canvas {
+      display: block;
+      width: 100vw; height: 100vh;
+      background: transparent; /* Canvas background handled by shader */
+      position: fixed; top: 0; left: 0;
+    }
+    .credit {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      color: #aaa;
+      font-family: monospace;
+      font-size: 13px;
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 2;
+      text-shadow: 0 0 8px #000;
+      text-align: right;
+    }
+    .home-button {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      padding: 8px 15px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      border-radius: 5px;
+      z-index: 10;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: background-color 0.3s;
+    }
+    .home-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+<a href="../../index.html" class="home-button">← Home</a>
+<canvas id="substrate"></canvas>
+<div class="credit">
+  Substrate Evolved &mdash; GPU/WebGL Version<br>
+  Inspired by XScreenSaver & J. Tarbell
+</div>
+<script>
+// --- GPU-Accelerated Substrate Evolved (WebGL) ---
+
+const canvas = document.getElementById('substrate');
+let gl = canvas.getContext('webgl', { preserveDrawingBuffer: false, antialias: true }); // Antialias if possible
+let width = window.innerWidth, height = window.innerHeight;
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+  if (gl) gl.viewport(0, 0, width, height);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Vertex shader: simple passthrough
+const vertSrc = `
+attribute vec2 aPos;
+varying vec2 vUv;
+void main() {
+  vUv = aPos * 0.5 + 0.5; // Convert from clip space to UV space
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}
+`;
+
+// Fragment shader: enhanced substrate effect
+const fragSrc = `
+precision highp float;
+varying vec2 vUv; // UV coordinates (0 to 1)
+
+uniform float uTime;
+uniform vec2 uRes; // Resolution of the canvas
+
+#define MAX_CRACKS_SHADER 96 // Must match JS MAX_CRACKS
+#define PI 3.14159265359
+
+// Crack properties passed as uniforms
+uniform vec2 uCrackStarts[MAX_CRACKS_SHADER];    // Start position
+uniform vec2 uCrackDirs[MAX_CRACKS_SHADER];      // Normalized direction
+uniform float uCrackCurrentLens[MAX_CRACKS_SHADER]; // Current animated length
+uniform float uCrackPhases[MAX_CRACKS_SHADER];    // For shimmer/animation
+uniform float uCrackWidths[MAX_CRACKS_SHADER];    // Thickness of the crack
+uniform vec3 uCrackColors[MAX_CRACKS_SHADER];     // Base color of the crack
+uniform int uCrackCount;                         // Actual number of active cracks
+
+// Helper: distance from point p to line segment defined by a, a + dir*len
+float lineSegmentDist(vec2 p, vec2 a, vec2 dir, float len) {
+  if (len <= 0.0) return 1e5; // Effectively invisible if length is zero
+  vec2 pa = p - a;
+  float h = clamp(dot(pa, dir), 0.0, len); // Project pa onto dir, clamp to segment length
+  return length(pa - dir * h);
+}
+
+// Procedural noise for background
+float noise(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+// HSV to RGB conversion
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+void main() {
+  vec2 fragCoord = vUv * uRes; // Pixel coordinates
+  float minOverallDist = 1e5;
+  vec3 finalColor = vec3(0.0);
+  float totalGlow = 0.0;
+
+  // Subtle animated background noise
+  vec2 uv_bg = fragCoord / uRes;
+  float n = noise(uv_bg * 3.0 + uTime * 0.05) * 0.03; // Slow moving noise
+  vec3 bgColor = vec3(0.05 + n, 0.06 + n, 0.08 + n); // Dark blueish-grey
+
+  for (int i = 0; i < MAX_CRACKS_SHADER; ++i) {
+    if (i >= uCrackCount) break;
+    if (uCrackCurrentLens[i] <= 0.01) continue; // Skip effectively invisible cracks
+
+    float d = lineSegmentDist(fragCoord, uCrackStarts[i], uCrackDirs[i], uCrackCurrentLens[i]);
+    minOverallDist = min(minOverallDist, d);
+
+    float crackWidth = uCrackWidths[i];
+    // Smoothstep for antialiased line, thicker means softer edges
+    float lineIntensity = smoothstep(crackWidth * 0.7, crackWidth * 0.3, d);
+    if (lineIntensity > 0.0) {
+      vec3 baseCrackColor = uCrackColors[i];
+      
+      // Shimmer effect based on phase and distance along crack
+      float phaseEffect = sin(uCrackPhases[i] + d * 0.1 + uTime * 2.0) * 0.5 + 0.5;
+      vec3 shimmeringColor = mix(baseCrackColor, hsv2rgb(vec3(fract(baseCrackColor.r + 0.2 + phaseEffect*0.1), 0.8, 1.0)), 0.3 * phaseEffect);
+
+      // Glow effect, stronger near the line
+      float glow = exp(-d * (2.5 / crackWidth)) * 0.8; // Sharper glow for thinner lines
+      totalGlow += glow * lineIntensity;
+      
+      finalColor += shimmeringColor * lineIntensity * (1.0 + glow * 0.5);
+    }
+  }
+  
+  // Composite final color
+  finalColor = mix(bgColor, finalColor, clamp(length(finalColor),0.0,1.0)); // Mix with background
+  finalColor += bgColor * totalGlow * 0.2; // Additive glow to background
+  finalColor = pow(finalColor, vec3(0.85)); // Slight gamma correction for richness
+
+  gl_FragColor = vec4(finalColor, 1.0);
+}
+`;
+
+// Compile shader
+function compileShader(gl, src, type) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS))
+    throw new Error(`Shader compile error: ${gl.getShaderInfoLog(sh)}`);
+  return sh;
+}
+
+// Create program
+function createProgram(gl, vs, fs) {
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compileShader(gl, vs, gl.VERTEX_SHADER));
+  gl.attachShader(prog, compileShader(gl, fs, gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
+    throw new Error(`Program link error: ${gl.getProgramInfoLog(prog)}`);
+  return prog;
+}
+
+const prog = createProgram(gl, vertSrc, fragSrc);
+
+// Fullscreen quad
+const quadBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+
+// --- Crack state (CPU-side) ---
+const MAX_CRACKS = 96; // Max cracks to simulate (must match shader)
+let cracks = [];
+
+// Crack object structure
+function createCrack(startX, startY, initialAngle, targetLen, life, customColor) {
+  let dir = [Math.cos(initialAngle), Math.sin(initialAngle)];
+  let baseHue = Math.random();
+  return {
+    start: [startX, startY],
+    dir: dir,
+    currentLen: 0.01, // Start small
+    targetLen: targetLen || (Math.min(width, height) * (0.2 + Math.random() * 0.6)),
+    phase: Math.random() * Math.PI * 2,
+    phaseSpeed: 0.01 + Math.random() * 0.02,
+    width: 1.0 + Math.random() * 1.5, // Variable thickness
+    color: customColor || [baseHue, 0.7 + Math.random() * 0.2, 0.8 + Math.random() * 0.2], // HSV
+    age: 0,
+    maxAge: life || (5 + Math.random() * 10), // seconds
+    state: 'growing', // 'growing', 'stable', 'fading'
+    initialSpeed: 0.5 + Math.random() * 1.0, // Speed of growth/fade
+    isBurst: !!customColor // Flag for click-spawned cracks
+  };
+}
+
+function spawnNewCrack() {
+  if (cracks.length >= MAX_CRACKS) return;
+
+  let edge = Math.floor(Math.random() * 4);
+  let x, y, angle;
+  const margin = 10; // Spawn slightly off-screen or near edge
+  if (edge === 0) { // left
+    x = margin; y = Math.random() * height;
+    angle = (Math.random() - 0.5) * Math.PI * 0.8; // Towards right
+  } else if (edge === 1) { // right
+    x = width - margin; y = Math.random() * height;
+    angle = Math.PI + (Math.random() - 0.5) * Math.PI * 0.8; // Towards left
+  } else if (edge === 2) { // top
+    x = Math.random() * width; y = margin;
+    angle = Math.PI * 0.5 + (Math.random() - 0.5) * Math.PI * 0.8; // Towards bottom
+  } else { // bottom
+    x = Math.random() * width; y = height - margin;
+    angle = -Math.PI * 0.5 + (Math.random() - 0.5) * Math.PI * 0.8; // Towards top
+  }
+  cracks.push(createCrack(x, y, angle));
+}
+
+function updateCracks(dt) {
+  for (let i = cracks.length - 1; i >= 0; i--) {
+    let c = cracks[i];
+    c.age += dt;
+    c.phase += c.phaseSpeed;
+
+    // Lifecycle
+    if (c.state === 'growing') {
+      c.currentLen += c.targetLen * 0.1 * c.initialSpeed * dt; // Grow faster
+      if (c.currentLen >= c.targetLen) {
+        c.currentLen = c.targetLen;
+        c.state = 'stable';
+      }
+    } else if (c.state === 'stable') {
+      if (c.age >= c.maxAge * 0.7) { // Start fading before maxAge
+        c.state = 'fading';
+      }
+    } else if (c.state === 'fading') {
+      c.currentLen -= c.targetLen * 0.2 * c.initialSpeed * dt; // Fade faster
+    }
+    
+    // Evolve color (e.g., shift hue slowly, or fade brightness)
+    if (!c.isBurst) { // Regular cracks evolve color
+        c.color[0] = (c.color[0] + dt * 0.01) % 1.0; // Slow hue shift
+        c.color[2] = Math.max(0.3, 0.9 - (c.age / c.maxAge) * 0.6); // Brightness fades with age
+    } else { // Burst cracks fade faster
+        c.color[2] = Math.max(0.1, 0.9 - (c.age / c.maxAge) * 0.8);
+    }
+
+
+    if (c.currentLen <= 0.0 && c.state === 'fading') {
+      cracks.splice(i, 1);
+    }
+  }
+
+  // Spawn new cracks to maintain density
+  if (cracks.length < MAX_CRACKS * 0.8 && Math.random() < 0.2) {
+     for(let k=0; k < 3; ++k) spawnNewCrack(); // Spawn a few at a time
+  }
+   if (cracks.length < MAX_CRACKS * 0.5 && Math.random() < 0.5) { // Faster refill if very empty
+     for(let k=0; k < 5; ++k) spawnNewCrack();
+  }
+}
+
+// Mouse click interaction
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+  const numBurstCracks = 8 + Math.floor(Math.random() * 8); // 8-15 cracks
+  const burstHue = Math.random();
+  for (let i = 0; i < numBurstCracks; i++) {
+    if (cracks.length >= MAX_CRACKS) break;
+    let angle = (i / numBurstCracks) * Math.PI * 2 + (Math.random()-0.5)*0.2;
+    let len = Math.min(width,height) * (0.05 + Math.random() * 0.15); // Shorter burst cracks
+    let life = 0.5 + Math.random() * 1.0; // Short lifespan
+    let color = [burstHue, 0.9, 1.0]; // Bright, consistent hue for burst
+    cracks.push(createCrack(clickX, clickY, angle, len, life, color));
+  }
+});
+
+
+// --- Animation loop ---
+let lastTime = 0;
+function render(time) {
+  const dt = (time - lastTime) * 0.001; // Delta time in seconds
+  lastTime = time;
+
+  updateCracks(dt);
+
+  gl.useProgram(prog);
+  // Attributes
+  const posLoc = gl.getAttribLocation(prog, "aPos");
+  gl.enableVertexAttribArray(posLoc);
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  // Uniforms
+  gl.uniform1f(gl.getUniformLocation(prog, "uTime"), time * 0.001);
+  gl.uniform2f(gl.getUniformLocation(prog, "uRes"), width, height);
+  gl.uniform1i(gl.getUniformLocation(prog, "uCrackCount"), cracks.length);
+
+  // Pack crack data into arrays for uniforms
+  let starts = [], dirs = [], currentLens = [], phases = [], widths = [], colorsRGB = [];
+  for(let i=0; i < cracks.length; ++i) {
+    const c = cracks[i];
+    starts.push(c.start[0], c.start[1]);
+    dirs.push(c.dir[0], c.dir[1]);
+    currentLens.push(c.currentLen);
+    phases.push(c.phase);
+    widths.push(c.width);
+    // Convert HSV to RGB for shader
+    let rgb = hsvToRgbJS(c.color[0], c.color[1], c.color[2]);
+    colorsRGB.push(rgb[0], rgb[1], rgb[2]);
+  }
+  // Fill remaining slots if cracks.length < MAX_CRACKS
+  for(let i = cracks.length; i < MAX_CRACKS; ++i) {
+    starts.push(0,0); dirs.push(1,0); currentLens.push(0); phases.push(0); widths.push(0); colorsRGB.push(0,0,0);
+  }
+
+  gl.uniform2fv(gl.getUniformLocation(prog, "uCrackStarts"), starts);
+  gl.uniform2fv(gl.getUniformLocation(prog, "uCrackDirs"), dirs);
+  gl.uniform1fv(gl.getUniformLocation(prog, "uCrackCurrentLens"), currentLens);
+  gl.uniform1fv(gl.getUniformLocation(prog, "uCrackPhases"), phases);
+  gl.uniform1fv(gl.getUniformLocation(prog, "uCrackWidths"), widths);
+  gl.uniform3fv(gl.getUniformLocation(prog, "uCrackColors"), colorsRGB);
+
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  requestAnimationFrame(render);
+}
+
+// HSV to RGB (JS version for CPU-side color management if needed, or for initial color setting)
+function hsvToRgbJS(h, s, v) {
+    let r, g, b;
+    let i = Math.floor(h * 6);
+    let f = h * 6 - i;
+    let p = v * (1 - s);
+    let q = v * (1 - f * s);
+    let t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+    return [r, g, b];
+}
+
+
+// Initial cracks
+for (let i = 0; i < MAX_CRACKS * 0.5; ++i) spawnNewCrack(); // Start with a decent number
+render(0); // Start animation loop
+</script>
+</body>
+</html>
