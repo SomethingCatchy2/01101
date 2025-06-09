@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fracsphere (Fractle 3D Sphere Instancing)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body { margin:0; padding:0; overflow:hidden; background:#000; width:100vw; height:100vh; }
+    canvas { display:block; width:100vw; height:100vh; background:#000; position:fixed; top:0; left:0; }
+    .credit {
+      position: fixed; bottom: 10px; right: 20px; color: #fff; font-family: monospace;
+      font-size: 14px; opacity: 0.3; pointer-events: none; z-index: 2; text-shadow: 0 0 8px #000;
+    }
+    .overlay-ui {
+      position: fixed; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.7);
+      color: #fff; font-family: monospace; font-size: 14px; border-radius: 8px; padding: 8px 14px;
+      user-select: none;
+    }
+    .overlay-ui a { color: #fff; text-decoration: underline; margin-right: 16px; }
+    .overlay-ui label { margin-right: 10px; display: block; margin-bottom: 5px; }
+    .overlay-ui input[type="range"] { vertical-align: middle; }
+    #depthSlider { width: 150px; /* Make depth slider wider */ }
+  </style>
+</head>
+<body>
+<div class="overlay-ui">
+  <a href="../../index.html">← Back</a>
+  <label>Depth: <input id="depthSlider" type="range" min="1" max="8" value="3"></label>
+  <label>Zoom: <input id="zoomSlider" type="range" min="5" max="3000" value="580"></label>
+  <label>Brightness: <input id="brightnessSlider" type="range" min="-0.5" max="0.5" value="0" step="0.01"></label>
+  <label>Contrast: <input id="contrastSlider" type="range" min="0.5" max="2.5" value="1.0" step="0.01"></label>
+  <label>Count: <span id="countDisplay"></span></label>
+</div>
+<canvas id="fracsphere"></canvas>
+<div class="credit">Fracsphere &mdash; 3D Fractal Sphere Instancing</div>
+<script>
+// --- Highly Optimized 3D Fractal Sphere Instancing Demo ---
+
+const canvas = document.getElementById('fracsphere');
+const gl = canvas.getContext('webgl');
+if (!gl) {
+  alert('WebGL not supported');
+  throw new Error('WebGL not supported');
+}
+let width = window.innerWidth, height = window.innerHeight;
+function resize() {
+  width = window.innerWidth; height = window.innerHeight;
+  canvas.width = width; canvas.height = height;
+  gl.viewport(0, 0, width, height);
+}
+window.addEventListener('resize', resize); resize();
+
+// --- Minimal Sphere Geometry (icosphere, low poly) ---
+function createSphere(latBands=7, longBands=7) {
+  let verts=[], norms=[], idxs=[];
+  for(let lat=0;lat<=latBands;++lat){
+    let th=Math.PI*lat/latBands;
+    for(let lon=0;lon<=longBands;++lon){
+      let ph=2*Math.PI*lon/longBands;
+      let x=Math.sin(th)*Math.cos(ph),y=Math.cos(th),z=Math.sin(th)*Math.sin(ph);
+      verts.push(x,y,z); norms.push(x,y,z);
+    }
+  }
+  for(let lat=0;lat<latBands;++lat){
+    for(let lon=0;lon<longBands;++lon){
+      let a=lat*(longBands+1)+lon, b=a+longBands+1;
+      idxs.push(a,b,a+1, b,a+1,b+1);
+    }
+  }
+  return {verts: new Float32Array(verts), norms: new Float32Array(norms), idxs: new Uint16Array(idxs)};
+}
+const sphere = createSphere(7,7);
+
+// --- Fractal Instance Generation (Menger-like, but with spheres) ---
+function generateFractal(depth, arr, x=0,y=0,z=0,s=1) {
+  if(depth===0){ arr.push([x,y,z,s]); return; }
+  let ns=s/3;
+  for(let dx=-1;dx<=1;dx++)
+    for(let dy=-1;dy<=1;dy++)
+      for(let dz=-1;dz<=1;dz++)
+        if([dx,dy,dz].filter(v=>v===0).length>=2)
+          generateFractal(depth-1,arr,x+dx*ns,y+dy*ns,z+dz*ns,ns);
+}
+
+// --- WebGL Shader Sources ---
+const vs=`
+attribute vec3 aPos, aNorm;
+attribute vec4 iPosRad; // xyz=pos, w=radius
+uniform mat4 uMV, uP;
+varying vec3 vN, vP;
+void main(){
+  vec3 pos = aPos * iPosRad.w + iPosRad.xyz;
+  vN = normalize(mat3(uMV)*aNorm);
+  vP = (uMV*vec4(pos,1)).xyz;
+  gl_Position = uP*vec4(vP,1);
+}`;
+const fs=`
+precision mediump float;
+varying vec3 vN, vP;
+uniform vec3 uLight;
+uniform float uTime;
+uniform float uBrightness;
+uniform float uContrast;
+
+void main(){
+  float diff = max(dot(normalize(vN),normalize(uLight)),0.0);
+  float dist = length(vP);
+  float hue = 0.6 + 0.3*sin(uTime*0.3+dist*0.07);
+  float sat = 0.7, val = 0.7+0.3*diff;
+  // HSV to RGB
+  float c=val*sat,x=c*(1.0-abs(mod(hue*6.0,2.0)-1.0)),m=val-c;
+  vec3 rgb;
+  if(hue<1./6.) rgb=vec3(c,x,0.6);
+  else if(hue<1.5/6.) rgb=vec3(x,c,0);
+  else if(hue<2./6.) rgb=vec3(0,c,x);
+  else if(hue<2.5/6.) rgb=vec3(0,x,c);
+  else if(hue<2./6.) rgb=vec3(x,c,0);
+  else if(hue<3./6.) rgb=vec3(0,c,x);
+  else if(hue<4./6.) rgb=vec3(0,x,c);
+  else if(hue<5./6.) rgb=vec3(x,0,c);
+  else rgb=vec3(c,0,x);
+  rgb+=m;
+
+  // Apply brightness & contrast
+  rgb += uBrightness;
+  rgb = (rgb - 0.5) * uContrast + 0.5;
+  rgb = clamp(rgb, 0.0, 1.0);
+
+  float fog=exp(-0.000003*dist*dist); // Adjusted fog density
+  gl_FragColor=vec4(rgb*fog+vec3(0.01,0.02,0.05)*(1.0-fog),1);
+}`;
+
+// --- WebGL Setup ---
+function compileShader(src,type){
+  let sh=gl.createShader(type); gl.shaderSource(sh,src); gl.compileShader(sh);
+  if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(sh); return sh;
+}
+function createProgram(vs,fs){
+  let p=gl.createProgram();
+  gl.attachShader(p,compileShader(vs,gl.VERTEX_SHADER));
+  gl.attachShader(p,compileShader(fs,gl.FRAGMENT_SHADER));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw gl.getProgramInfoLog(p);
+  return p;
+}
+const prog = createProgram(vs,fs);
+gl.useProgram(prog);
+
+// --- Buffers ---
+const posB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,posB); gl.bufferData(gl.ARRAY_BUFFER,sphere.verts,gl.STATIC_DRAW);
+const normB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,normB); gl.bufferData(gl.ARRAY_BUFFER,sphere.norms,gl.STATIC_DRAW);
+const idxB=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,idxB); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sphere.idxs,gl.STATIC_DRAW);
+const iPosRadB=gl.createBuffer();
+
+// --- Attribute Locations ---
+const aPos=gl.getAttribLocation(prog,'aPos');
+const aNorm=gl.getAttribLocation(prog,'aNorm');
+const iPosRad=gl.getAttribLocation(prog,'iPosRad');
+
+// --- Uniform Locations ---
+const uMV=gl.getUniformLocation(prog,'uMV');
+const uP=gl.getUniformLocation(prog,'uP');
+const uLight=gl.getUniformLocation(prog,'uLight');
+const uTime=gl.getUniformLocation(prog,'uTime');
+const uBrightness=gl.getUniformLocation(prog,'uBrightness');
+const uContrast=gl.getUniformLocation(prog,'uContrast');
+
+// --- Instancing Extension ---
+const ext=gl.getExtension('ANGLE_instanced_arrays');
+if (!ext) {
+  alert('ANGLE_instanced_arrays not supported');
+  throw new Error('ANGLE_instanced_arrays not supported');
+}
+
+// --- UI Controls ---
+const depthSlider=document.getElementById('depthSlider');
+const countDisplay=document.getElementById('countDisplay');
+const EFFECTIVE_MAX_FRACTAL_DEPTH = 6; // Practical limit for fractal depth generation
+
+let depth = Math.min(+depthSlider.value, EFFECTIVE_MAX_FRACTAL_DEPTH); // Initialize depth with capping
+let instances=[], instanceData;
+
+const zoomSlider = document.getElementById('zoomSlider');
+let zoomLevel = +zoomSlider.value;
+const MIN_ZOOM = +zoomSlider.min;
+const MAX_ZOOM = +zoomSlider.max;
+const ZOOM_SENSITIVITY = 0.1; 
+
+const brightnessSlider = document.getElementById('brightnessSlider');
+let brightnessLevel = +brightnessSlider.value;
+const contrastSlider = document.getElementById('contrastSlider');
+let contrastLevel = +contrastSlider.value;
+
+// Mouse control variables
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let cameraYaw = 0; // Angle around Y axis
+let cameraPitch = Math.PI / 6; // Angle above XZ plane
+const mouseSensitivity = 0.005;
+
+canvas.addEventListener('mousedown', (event) => {
+  isDragging = true;
+  lastMouseX = event.clientX;
+  lastMouseY = event.clientY;
+});
+
+document.addEventListener('mousemove', (event) => {
+  if (isDragging) {
+    const deltaX = event.clientX - lastMouseX;
+    const deltaY = event.clientY - lastMouseY;
+
+    cameraYaw -= deltaX * mouseSensitivity;
+    cameraPitch -= deltaY * mouseSensitivity;
+
+    // Clamp pitch to avoid flipping
+    cameraPitch = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, cameraPitch));
+
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+canvas.addEventListener('wheel', (event) => {
+  event.preventDefault(); // Prevent page scrolling
+  const zoomAmount = event.deltaY * ZOOM_SENSITIVITY;
+  zoomLevel -= zoomAmount;
+  // Clamp zoom level to slider's min/max
+  zoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel));
+  zoomSlider.value = zoomLevel; // Update slider position
+});
+
+
+function updateInstances(){
+  // 'depth' is already capped and set by initial load or oninput
+  instances=[]; generateFractal(depth,instances,0,0,0,220);
+  instanceData=new Float32Array(instances.length*4);
+  for(let i=0;i<instances.length;++i){
+    let [x,y,z,s]=instances[i];
+    instanceData.set([x,y,z,s*0.28],i*4); // sphere radius
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER,iPosRadB);
+  gl.bufferData(gl.ARRAY_BUFFER,instanceData,gl.STATIC_DRAW);
+  countDisplay.textContent=instances.length;
+}
+depthSlider.oninput=()=>{
+  depth = Math.min(+depthSlider.value, EFFECTIVE_MAX_FRACTAL_DEPTH); // Update and cap depth
+  updateInstances();
+};
+zoomSlider.oninput=()=>{zoomLevel=+zoomSlider.value;}; 
+brightnessSlider.oninput=()=>{brightnessLevel=+brightnessSlider.value;};
+contrastSlider.oninput=()=>{contrastLevel=+contrastSlider.value;};
+updateInstances();
+
+// --- Animation Loop ---
+function perspective(fovy,aspect,near,far){
+  let f=1/Math.tan(fovy/2),nf=1/(near-far);
+  return new Float32Array([
+    f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0
+  ]);
+}
+function lookAt(eye,center,up){
+  let z=[eye[0]-center[0],eye[1]-center[1],eye[2]-center[2]];
+  let zl=1/Math.hypot(...z);z=z.map(v=>v*zl);
+  let x=[up[1]*z[2]-up[2]*z[1],up[2]*z[0]-up[0]*z[2],up[0]*z[1]-up[1]*z[0]];
+  let xl=1/Math.hypot(...x);x=x.map(v=>v*xl);
+  let y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+  return new Float32Array([
+    x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0,
+    -(x[0]*eye[0]+x[1]*eye[1]+x[2]*eye[2]),
+    -(y[0]*eye[0]+y[1]*eye[1]+y[2]*eye[2]),
+    -(z[0]*eye[0]+z[1]*eye[1]+z[2]*eye[2]),1
+  ]);
+}
+
+function draw(now){
+  gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
+
+  // Camera animation
+  let t=now*0.001;
+  let rBase = zoomLevel;
+  // Current zoom distance, directly from zoomLevel (no pulsing)
+  let r = rBase; 
+
+  // Calculate camera position based on mouse-controlled yaw/pitch and zoom
+  let camX = r * Math.cos(cameraPitch) * Math.sin(cameraYaw);
+  let camY = r * Math.sin(cameraPitch);
+  let camZ = r * Math.cos(cameraPitch) * Math.cos(cameraYaw);
+  
+  let cam = [camX, camY, camZ];
+  let mv=lookAt(cam,[0,0,0],[0,1,0]);
+  // Adjust far plane based on zoom (rBase is zoomLevel without pulse)
+  let p=perspective(Math.PI/3,width/height,10, rBase * 4); 
+
+  gl.useProgram(prog);
+  gl.uniformMatrix4fv(uMV,false,mv);
+  gl.uniformMatrix4fv(uP,false,p);
+  gl.uniform3f(uLight,Math.cos(t*0.7),1,Math.sin(t*0.7));
+  gl.uniform1f(uTime,t);
+  gl.uniform1f(uBrightness, brightnessLevel);
+  gl.uniform1f(uContrast, contrastLevel);
+
+  // Attributes
+  gl.bindBuffer(gl.ARRAY_BUFFER,posB);
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,0,0);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER,normB);
+  gl.enableVertexAttribArray(aNorm);
+  gl.vertexAttribPointer(aNorm,3,gl.FLOAT,false,0,0);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER,iPosRadB);
+  gl.enableVertexAttribArray(iPosRad);
+  gl.vertexAttribPointer(iPosRad,4,gl.FLOAT,false,0,0);
+  ext.vertexAttribDivisorANGLE(iPosRad,1);
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,idxB);
+
+  // --- FIX: Actually draw if there are instances ---
+  if (instances.length > 0) {
+    ext.drawElementsInstancedANGLE(
+      gl.TRIANGLES, sphere.idxs.length, gl.UNSIGNED_SHORT, 0, instances.length
+    );
+  }
+
+  ext.vertexAttribDivisorANGLE(iPosRad,0);
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
