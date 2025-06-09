@@ -147,7 +147,7 @@ const PRESETS = {
 
 // --- UI State ---
 let currentPreset = "sierpinski";
-let pointCount = 120000;
+let pointCount = 100000000; // Changed from 120000 to 100,000,000
 let customFuncs = JSON.parse(JSON.stringify(PRESETS.custom.funcs));
 
 // --- UI Elements ---
@@ -237,9 +237,9 @@ function drawIFS() {
     let ny = f[2]*x + f[3]*y + f[5];
     x = nx; y = ny;
     let px = offsetX + scale * x;
-    let py = offsetY + scale * y;
+    let py = height - (offsetY + scale * y);  // changed: flip Y so positive y goes up
     if (i % 2 === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+    else            ctx.lineTo(px, py);
   }
   ctx.strokeStyle = color;
   ctx.lineWidth = 0.7;
