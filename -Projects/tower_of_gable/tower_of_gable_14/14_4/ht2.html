@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tower of Gable</title>
     <link rel="icon" type="image/png" href="../../../../Images/favicon.png">
+    <script src="/-Projects/esc-to-index.js"></script>
     <style>
       html, body {
         /* height: 100%; <--- REMOVED THIS LINE */
@@ -1300,6 +1301,7 @@
            const winnings = BASE_WIN_AMOUNT + streakBonus;
            gameState.moneyEarned += winnings;
            gameState.wins++;
+          
            updateElementText("wins", gameState.wins);
            addNotification(`COMMIT SUCCESS! Score: 24 (${diceSum} + ${gameState.bonusPoints}). Streak: ${gameState.consecutiveWins}x. Earned $${winnings.toFixed(2)}.`, "win");
          } else {
