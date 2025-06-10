@@ -381,7 +381,7 @@ const MAX_LENSES = 16; // Allow up to 16 functions
 const MAX_COLORS = 200;
 
 // const ACTUAL_BUFFER_CAPACITY = 100000000; // Remove this
-const MAX_POSSIBLE_GPU_BUFFER_SIZE = 940000000; // New absolute max (e.g., ~940M points ~ 3.5GB VRAM)
+const MAX_POSSIBLE_GPU_BUFFER_SIZE = 3000000000; // ~3 billion points (~11GB VRAM)
 let currentAllocatedBufferCapacity = 0; // Restore this to track current GPU buffer size
 
 // const BASE_POINTS = 8192; // Remove this, basePoints will be lensnum^detail
