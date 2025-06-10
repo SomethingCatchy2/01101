@@ -176,6 +176,9 @@
         </label>
         <label>Presets:
           <select id="presets" style="width:170px;">
+            <option value="practical">Practical (Low)</option>
+            <option value="practical2">Practical2 (High)</option>
+            <option value="practical3">Practical3 (Medium)</option>
             <option value="custom">Custom</option>
             <option value="lowest">One dot (2/2/0.001)</option>
             <option value="low">A few specs (4/4/0.1)</option>
@@ -1196,7 +1199,10 @@ document.getElementById('presets').onchange = e => {
     'highest': [6, 12, 0.1],
     'mega': [6, 12, 0.019],
     'ultra': [6, 12, 0.5],
-    'mostest': [6, 12, 1.0]
+    'mostest': [6, 12, 1.0],
+    'practical': [4, 12, 0.488],
+    'practical2': [6, 9, 0.488],
+    'practical3': [5, 10, 0.488],
   };
   
   if (presets[preset]) {
@@ -1240,7 +1246,10 @@ function updatePresetDropdown() {
     'highest': [6, 12, 0.1],
     'mega': [6, 12, 0.019],
     'ultra': [6, 12, 0.5],
-    'mostest': [6, 12, 1.0]
+    'mostest': [6, 12, 1.0],
+    'practical': [4, 12, 0.488],
+    'practical2': [6, 9, 0.488],
+    'practical3': [5, 10, 0.488],
   };
   
   // Check if current settings match any preset
