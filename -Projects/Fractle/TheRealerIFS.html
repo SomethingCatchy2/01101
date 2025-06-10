@@ -182,12 +182,6 @@
         <button id="pauseAnimation" style="padding: 3px 8px;">Pause Animation</button>
       </div>
       <div class="control-row">
-        <label>Max Dots:</label>
-        <button id="unlimitedModeButton" style="padding: 2px 6px; font-size: 10px;">Enable Unlimited Detail</button>
-        <input id="maxDots" type="range" min="100000" max="100000000" step="1000000" value="100000000" style="width:140px;">
-        <span id="maxDotsValue" class="value-display">100M</span>
-      </div>
-      <div class="control-row">
         <label>Point Size:</label>
         <span style="font-size: 11px;">Min</span>
         <input id="minPointSize" type="range" min="0.5" max="5.0" step="0.1" value="0.5" style="width:70px;">
@@ -383,14 +377,14 @@ function handleKeyboardInput() {
 let lensnum = 4;
 let detail = 6; // Changed back from 7 to 6
 let multi = true;
-const MAX_LENSES = 6;
+const MAX_LENSES = 16; // Allow up to 16 functions
 const MAX_COLORS = 200;
-// let MAX_POINTS = 300000; // Now configurable -- This line will be replaced/managed differently
-const ACTUAL_BUFFER_CAPACITY = 100000000; // Max capacity of the index buffer, matches slider max
-let currentMaxPointsCapSetting = 100000000; // Changed from 1000000 to 100000000 (100M)
-let isUnlimitedDetailMode = false;
 
-const BASE_POINTS = 8192; // Base point count for zoom level 1.0
+// const ACTUAL_BUFFER_CAPACITY = 100000000; // Remove this
+const MAX_POSSIBLE_GPU_BUFFER_SIZE = 940000000; // New absolute max (e.g., ~940M points ~ 3.5GB VRAM)
+let currentAllocatedBufferCapacity = 0; // Restore this to track current GPU buffer size
+
+// const BASE_POINTS = 8192; // Remove this, basePoints will be lensnum^detail
 
 // --- New UI controlled parameters ---
 let maxFps = 60;
@@ -402,8 +396,8 @@ let animateTranslation = true;
 let translationMagnitude = 0.004;
 let minPointSize = 0.5;
 let maxPointSize = 1.0; // Changed default from 2.0
-let quality = 0.9; // Changed default to 90% (10% removal)
-let lodEnabled = false; // LOD starts disabled
+let quality = 0.5; // Changed default to 90% (10% removal)
+let lodEnabled = true; // LOD starts enabled
 let isAnimationPaused = false; // New state variable for pausing
 
 // Performance monitoring
@@ -414,7 +408,9 @@ let currentFps = 0;
 // --- UI controls ---
 document.getElementById('functions').oninput = e => {
   lensnum = Math.max(2, Math.min(MAX_LENSES, parseInt(e.target.value)||4));
+  randomizeLenses(); // Add this line to re-initialize lenses
 };
+document.getElementById('functions').setAttribute('max', MAX_LENSES); // Update UI max
 document.getElementById('detail').oninput = e => {
   const newDetail = Math.max(2, Math.min(12, parseInt(e.target.value)||6));
   detail = newDetail;
@@ -425,8 +421,10 @@ document.getElementById('quality').oninput = e => {
   quality = parseFloat(e.target.value) || 0.9;
   document.getElementById('qualityValue').textContent = quality.toFixed(1);
 };
+document.getElementById('lodEnabled').checked = true; // LOD enabled by default
 document.getElementById('lodEnabled').onchange = e => {
   lodEnabled = e.target.checked;
+  // No lag: nothing else needed, render loop will adapt instantly
 };
 document.getElementById('multi').onchange = e => {
   multi = e.target.checked;
@@ -447,53 +445,12 @@ document.getElementById('pauseAnimation').onclick = () => {
 };
 
 // New controls for performance tuning
-const maxDotsSlider = document.getElementById('maxDots');
-const maxDotsValueSpan = document.getElementById('maxDotsValue');
-const unlimitedModeButton = document.getElementById('unlimitedModeButton');
 const toggleConfigButton = document.getElementById('toggleConfigButton');
 const configPanel = document.getElementById('configPanel');
 
 // Initialize config panel visibility (e.g., start hidden or visible)
 // Let's start it hidden, matching the button text "Show Config"
 configPanel.style.display = 'none'; 
-
-
-currentMaxPointsCapSetting = parseInt(maxDotsSlider.value); // Initialize from slider
-
-function updateMaxDotsDisplay() {
-  if (isUnlimitedDetailMode) {
-    maxDotsValueSpan.textContent = "Detail-Driven (up to " + (ACTUAL_BUFFER_CAPACITY / 1000000) + "M)";
-  } else {
-    const valueInK = Math.floor(currentMaxPointsCapSetting / 1000);
-    maxDotsValueSpan.textContent = valueInK >= 1000 ?
-      (valueInK / 1000).toFixed(1) + 'M' : valueInK + 'k';
-  }
-}
-
-maxDotsSlider.oninput = e => {
-  currentMaxPointsCapSetting = parseInt(e.target.value) || 300000;
-  if (isUnlimitedDetailMode) {
-    isUnlimitedDetailMode = false;
-    unlimitedModeButton.textContent = "Enable Unlimited Detail";
-    maxDotsSlider.disabled = false;
-  }
-  updateMaxDotsDisplay();
-  // No need to call recreateIndexBuffer here, buffer is fixed size
-};
-
-unlimitedModeButton.onclick = () => {
-  isUnlimitedDetailMode = !isUnlimitedDetailMode;
-  if (isUnlimitedDetailMode) {
-    unlimitedModeButton.textContent = "Use Slider Limit";
-    maxDotsSlider.disabled = true;
-  } else {
-    unlimitedModeButton.textContent = "Enable Unlimited Detail";
-    maxDotsSlider.disabled = false;
-    // Ensure currentMaxPointsCapSetting is synced with slider if user clicks slider then this button
-    currentMaxPointsCapSetting = parseInt(maxDotsSlider.value);
-  }
-  updateMaxDotsDisplay();
-};
 
 toggleConfigButton.onclick = () => {
   const isHidden = configPanel.style.display === 'none';
@@ -506,7 +463,7 @@ toggleConfigButton.onclick = () => {
   }
 };
 
-
+// --- UI controlled parameters ---
 document.getElementById('minPointSize').oninput = e => {
   minPointSize = parseFloat(e.target.value) || 1.0;
   document.getElementById('minPointSizeValue').textContent = minPointSize.toFixed(1);
@@ -653,10 +610,10 @@ let lenses = [];
 function randomizeLenses() {
   lenses = [];
   for (let i = 0; i < lensnum; ++i) {
-    let r = Math.random() - 0.5;
-    let s = Math.random();
-    let tx = Math.random() * 4 - 2;
-    let ty = Math.random() * 4 + 2;
+    let r = Math.random() * 2 * Math.PI - Math.PI; // Full -PI to PI rotation
+    let s = Math.random() * 0.5 + 0.25; // Scale between 0.25 and 0.75 (avoiding too small/large)
+    let tx = Math.random() * 4 - 2; // Translation X between -2 and 2
+    let ty = Math.random() * 4 - 2; // Translation Y between -2 and 2 (was *4+2, making it always positive)
     lenses.push(new Lens(r, s, tx, ty));
   }
 }
@@ -673,12 +630,13 @@ uniform int uDetail;
 uniform bool uMulti;
 uniform float uTime;
 uniform vec3 uPalette[${MAX_COLORS}];
-// Changed lens uniform structure
 uniform mat2 uLensRotScale[${MAX_LENSES}];
 uniform vec2 uLensTranslate[${MAX_LENSES}];
 uniform float uPointScale;
 uniform bool uLodEnabled;
 uniform float uQuality;
+uniform int uStride;
+uniform int uBasePoints;
 
 varying vec3 vColor;
 
@@ -690,51 +648,44 @@ float hash(float n) {
 void main() {
   int lensnum = uLensNum;
   int detail = uDetail;
-  
-  // LOD: randomly skip dots based on quality setting
+
+  // --- LOD: sample every Nth point, not just the first N ---
+  float realIndex = aIndex;
   if (uLodEnabled) {
-    float randomValue = hash(aIndex * 1.37 + uTime * 0.001); // Slow-changing random per dot
-    if (randomValue > uQuality) {
-      // Skip this dot by moving it outside clip space
+    realIndex = aIndex * float(uStride);
+    if (realIndex >= float(uBasePoints)) {
       gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       gl_PointSize = 0.0;
       vColor = vec3(0.0);
       return;
     }
   }
-  
+
   float x = uWidth * 128.0;
   float y = uHeight * 128.0;
   int p = 0;
-  float idx = aIndex;
-  
+  float idx = realIndex;
+
   for (int d = 0; d < 12; ++d) {
     if (d >= detail) break;
     int which = int(mod(idx, float(lensnum)));
     idx = floor(idx / float(lensnum));
-    
     if (which < lensnum) {
       mat2 rotScale = uLensRotScale[which];
       vec2 translate = uLensTranslate[which];
-      
-      // Apply transformation: new_xy = (rotScale * old_xy + translate) / 1024.0
       vec2 current_xy = vec2(x, y);
       vec2 transformed_xy = rotScale * current_xy + translate;
-
       x = transformed_xy.x / 1024.0;
       y = transformed_xy.y / 1024.0;
       p = which;
     }
   }
-  
-  // Convert to normalized coordinates
+
   float normX = x / (uWidth * 256.0) * 2.0 - 1.0;
   float normY = y / (uHeight * 256.0) * 2.0 - 1.0;
-  
-  // Apply view transformation
   float finalX = (normX - uViewX) * uZoom;
   float finalY = (normY - uViewY) * uZoom;
-  
+
   // Frustum culling in vertex shader - discard points outside view
   if (abs(finalX) > 1.2 || abs(finalY) > 1.2) {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0); // Move outside clip space
@@ -784,17 +735,62 @@ const prog = createProgram(gl, vertSrc, fragSrc);
 const indexBuffer = gl.createBuffer();
 const aIndexLoc = gl.getAttribLocation(prog, "aIndex");
 
-function recreateIndexBuffer() {
-  // Create buffer for the maximum possible points we might draw
-  let indices = new Float32Array(ACTUAL_BUFFER_CAPACITY);
-  for (let i = 0; i < ACTUAL_BUFFER_CAPACITY; ++i) indices[i] = i;
-  
-  gl.bindBuffer(gl.ARRAY_BUFFER, indexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+// Restore dynamic buffer sizing function
+function ensureIndexBufferIsLargeEnough(requiredSize) {
+  // Cap requiredSize at our absolute maximum
+  requiredSize = Math.min(requiredSize, MAX_POSSIBLE_GPU_BUFFER_SIZE);
+
+  if (requiredSize > currentAllocatedBufferCapacity) {
+    console.log(`Resizing index buffer from ${currentAllocatedBufferCapacity} to ${requiredSize} points.`);
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, indexBuffer);
+
+    try {
+      // Allocate GPU buffer storage (size in bytes, no initial JS array data)
+      gl.bufferData(gl.ARRAY_BUFFER, requiredSize * Float32Array.BYTES_PER_ELEMENT, gl.STATIC_DRAW);
+    } catch (e) {
+      console.error(`Failed to allocate GPU buffer of ${requiredSize * Float32Array.BYTES_PER_ELEMENT} bytes:`, e);
+      // If GPU allocation itself fails, we can't proceed. Keep old buffer capacity.
+      // Might want to alert the user or try a smaller size.
+      gl.bindBuffer(gl.ARRAY_BUFFER, null); // Unbind
+      return;
+    }
+
+    // Fill the allocated GPU buffer in manageable chunks
+    const chunkSize = 50000000; // 50 million floats (~200MB JS array). Adjust if necessary.
+    let dataChunk = new Float32Array(chunkSize); // Reusable JS array for preparing chunk data
+
+    console.log(`Populating GPU buffer of ${requiredSize} points in chunks of up to ${chunkSize}...`);
+    for (let bufferOffset = 0; bufferOffset < requiredSize; bufferOffset += chunkSize) {
+      const countInThisChunk = Math.min(chunkSize, requiredSize - bufferOffset);
+      
+      // Populate the dataChunk (or a part of it)
+      for (let i = 0; i < countInThisChunk; ++i) {
+        dataChunk[i] = bufferOffset + i; // Calculate global index for this point
+      }
+      
+      // Get the correct view for gl.bufferSubData (either full chunk or partial)
+      const uploadView = (countInThisChunk === chunkSize) ? dataChunk : dataChunk.subarray(0, countInThisChunk);
+      
+      try {
+        gl.bufferSubData(gl.ARRAY_BUFFER, bufferOffset * Float32Array.BYTES_PER_ELEMENT, uploadView);
+      } catch (e) {
+        console.error(`Failed to gl.bufferSubData at offset ${bufferOffset * Float32Array.BYTES_PER_ELEMENT} for chunk of ${countInThisChunk} elements:`, e);
+        // This is a more critical error, potentially GPU OOM during sub-data upload.
+        // Stop further attempts to fill. The buffer might be partially filled.
+        gl.bindBuffer(gl.ARRAY_BUFFER, null); // Unbind
+        return;
+      }
+    }
+    
+    currentAllocatedBufferCapacity = requiredSize;
+    console.log(`Index buffer resized and populated. New capacity: ${currentAllocatedBufferCapacity}`);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null); // Unbind after operations
+  }
 }
 
-// Initialize with default MAX_POINTS
-recreateIndexBuffer(); // Call once to create max-sized buffer
+// Remove initializeMaxIndexBuffer();
+// currentAllocatedBufferCapacity starts at 0, first render will size it.
 
 // --- Uniform locations ---
 const uWidthLoc = gl.getUniformLocation(prog, "uWidth");
@@ -855,34 +851,35 @@ function render(currentTime) {
     for (let l of lenses) l.mutate();
   }
   
-  // Calculate adaptive point count based on zoom - simplified LOD system
-  const zoomFactor = Math.max(0.1, Math.min(zoom, 10.0));
+  // Calculate base points needed for the current detail level
   const pointsNeededForDetail = Math.pow(lensnum, detail);
-  const zoomAdjustedBaseDensity = Math.floor(BASE_POINTS * Math.sqrt(zoomFactor)); 
-  
-  // Use max of zoom-adjusted density and detail requirements
-  const basePoints = Math.max(zoomAdjustedBaseDensity, pointsNeededForDetail);
-  
-  let effectivePointCap;
-  if (isUnlimitedDetailMode) {
-    effectivePointCap = ACTUAL_BUFFER_CAPACITY;
-  } else {
-    effectivePointCap = currentMaxPointsCapSetting;
+  // basePoints is now directly lensnum^detail, capped by our new absolute max
+  const basePoints = Math.min(pointsNeededForDetail, MAX_POSSIBLE_GPU_BUFFER_SIZE);
+
+  // Ensure the WebGL buffer is large enough for these basePoints
+  ensureIndexBufferIsLargeEnough(basePoints); // Restore this call
+
+  // --- LOD sampling: evenly distributed points ---
+  let drawCount = basePoints; // If LOD is off or quality is 1.0, drawCount remains basePoints
+  let stride = 1;
+  if (lodEnabled && quality < 1.0) { // Only apply LOD if quality < 100%
+    // Use quality to determine how many points to draw
+    drawCount = Math.floor(basePoints * quality);
+    drawCount = Math.max(1, Math.min(drawCount, basePoints));
+    stride = Math.floor(basePoints / drawCount);
+    stride = Math.max(1, stride);
+    drawCount = Math.floor(basePoints / stride);
   }
-  
-  const adaptivePointCount = Math.min(basePoints, effectivePointCap);
-  
-  // Update points display - show actual points being processed
-  let displayPoints = adaptivePointCount;
-  if (lodEnabled) {
-    displayPoints = Math.floor(adaptivePointCount * quality); // Approximate visible points
-  }
-  
+  // No artificial cap - always use the calculated drawCount
+
+  // Update points display
+  let displayPoints = drawCount;
   const pointsK = Math.floor(displayPoints / 1000);
   document.getElementById('pointsDisplay').textContent = 
     pointsK >= 1000 ? (pointsK / 1000).toFixed(1) + 'M' : pointsK + 'k';
   
   // Use configurable min/max point sizes
+  const zoomFactor = Math.max(0.1, Math.min(zoom, 10.0)); // <-- Add this line
   const pointScale = Math.max(minPointSize, Math.min(maxPointSize, maxPointSize / zoomFactor));
   
   // Upload parameters as uniforms
@@ -900,6 +897,8 @@ function render(currentTime) {
   gl.uniform1f(uPointScaleLoc, pointScale);
   gl.uniform1i(uLodEnabledLoc, lodEnabled ? 1 : 0);
   gl.uniform1f(uQualityLoc, quality);
+  gl.uniform1i(gl.getUniformLocation(prog, "uStride"), stride);
+  gl.uniform1i(gl.getUniformLocation(prog, "uBasePoints"), basePoints);
   
   // Upload lens parameters
   let lensRotScaleArr = [];
@@ -922,11 +921,11 @@ function render(currentTime) {
   gl.bindBuffer(gl.ARRAY_BUFFER, indexBuffer);
   gl.enableVertexAttribArray(aIndexLoc);
   gl.vertexAttribPointer(aIndexLoc, 1, gl.FLOAT, false, 0, 0);
-  
+
   gl.clearColor(0,0,0,1);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.POINTS, 0, adaptivePointCount);
-  
+  gl.drawArrays(gl.POINTS, 0, drawCount);
+
   // Only increment frame when not paused for color cycling
   if (!isAnimationPaused) {
     frame = (frame + 1) % 10000;
@@ -934,12 +933,10 @@ function render(currentTime) {
 }
 
 // Initialize value displays
-updateMaxDotsDisplay();
-document.getElementById('qualityValue').textContent = quality.toFixed(1); // Updated default
+document.getElementById('qualityValue').textContent = quality.toFixed(1);
 document.getElementById('minPointSizeValue').textContent = minPointSize.toFixed(1);
 document.getElementById('maxPointSizeValue').textContent = maxPointSize.toFixed(1);
 
 render();
-</script>
+</script>cument.getElementById('qualityValue').textContent = quality.toFixed(1); // Updated default
 </body>
-</html>
