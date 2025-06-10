@@ -36,6 +36,7 @@
       border-top: 1px solid rgba(255,255,255,0.2);
       padding-top: 12px;
       margin-top: 8px;
+      display: none; /* Hide by default */
     }
     .control-group {
       display: flex;
@@ -148,27 +149,46 @@
     <a href="../../index.html" class="home-link">&larr; Home</a>
     <button id="toggleConfigButton" style="padding: 4px 8px;">Show Config</button> 
   </div>
-  <div id="configPanel"> 
+  <div id="configPanel" style="display: none;"> 
     <!-- Fractal Parameters Group -->
     <div class="control-group">
       <div class="control-group-title">Fractal Parameters</div>
       <div class="control-row">
         <label>Functions:
-          <input id="functions" type="number" min="2" max="16" value="4" style="width:40px;">
+          <input id="functions" type="number" min="2" max="6" value="4" style="width:40px;">
         </label>
         <label>Detail:
           <input id="detail" type="number" min="2" max="12" value="6" style="width:40px;">
         </label>
         <label>Quality of LODs:
-          <input id="quality" type="range" min="0.1" max="1.0" step="0.1" value="0.7" style="width:80px;">
-          <span id="qualityValue" class="value-display">0.7</span>
+          <input id="quality" type="range" min="0.001" max="1.0" step="0.001" value="0.3" style="width:80px;">
+          <span id="qualityValue" class="value-display">0.30</span>
         </label>
         <label>
           <input id="lodEnabled" type="checkbox"> LOD
         </label>
-        <label>
-          <input id="multi" type="checkbox" checked> Multi-color
+
+      </div>
+            <div class="control-row">
+        <label>Render Scale:
+          <input id="renderScale" type="range" min="0.1" max="1.0" step="0.05" value="0.75" style="width:80px;">
+          <span id="renderScaleValue" class="value-display">75%</span>
         </label>
+        <label>Presets:
+          <select id="presets" style="width:170px;">
+            <option value="custom">Custom</option>
+            <option value="lowest">One dot (2/2/0.001)</option>
+            <option value="low">A few specs (4/4/0.1)</option>
+            <option value="default" selected>Default (4/6/0.3)</option>
+            <option value="mediumlow">Medium Low (4/12/0.001)</option>
+            <option value="medium">Medium (4/12/0.01)</option>
+            <option value="high">High (6/10/0.1)</option>
+            <option value="higher">Higher (6/12/0.01)</option>
+            <option value="mega">The Highest you can acctualy run it (6/12/0.019)</option>
+            <option value="highest">Higher even still (6/12/0.1)</option>
+            <option value="ultra">Oh ok, so you have a NASA computer huh? (6/12/0.5)</option>
+            <option value="mostest">The MostestUltraMostHighest (6/12/1.0)</option>
+          </select>
       </div>
     </div>
 
@@ -176,10 +196,15 @@
     <div class="control-group">
       <div class="control-group-title">Rendering</div>
       <div class="control-row">
-        <label>Max FPS:
-          <input id="maxFps" type="number" min="1" max="120" value="60" style="width:50px;">
+      
         </label>
-        <button id="resetView" style="padding: 3px 8px;">Reset View</button>
+        <label>Max FPS:
+<input id="maxFps" type="number" min="1" max="60" value="60" style="width:50px;">
+        </label>
+      </div>
+
+      <div class="control-row">
+        <div id="resetView" style="padding: 3px 8px;"></div>
         <button id="pauseAnimation" style="padding: 3px 8px;">Pause Animation</button>
       </div>
       <div class="control-row">
@@ -199,18 +224,21 @@
       <div class="control-row">
         <label><input id="animateRotation" type="checkbox" checked> Rotation</label>
         <span style="font-size: 11px;">Speed:</span>
-        <input id="rotationSpeed" type="range" min="0.001" max="0.05" step="0.001" value="0.01" style="width:80px;">
+        <input id="rotationSpeed" type="range" min="0.001" max="0.05" step="0.001" value="0.002" style="width:80px;">
       </div>
       <div class="control-row">
         <label><input id="animateScale" type="checkbox" checked> Scale</label>
         <span style="font-size: 11px;">Speed:</span>
-        <input id="scaleSpeed" type="range" min="0.001" max="0.05" step="0.001" value="0.01" style="width:80px;">
+        <input id="scaleSpeed" type="range" min="0.001" max="0.05" step="0.001" value="0.002" style="width:80px;">
       </div>
       <div class="control-row">
         <label><input id="animateTranslation" type="checkbox" checked> Translation</label>
         <span style="font-size: 11px;">Magnitude:</span>
         <input id="translationMagnitude" type="range" min="0.0001" max="0.01" step="0.0001" value="0.004" style="width:80px;">
       </div>
+              <label>
+          <input id="multi" type="checkbox" checked> Multi-color
+        </label>
     </div>
 
     <!-- Info Group -->
@@ -240,19 +268,56 @@
   <span style="font-size:11px;">Original copyright &copy; Chris Le Sueur and Robby Griffin, 2005-2006</span>
 </div>
 <script>
+const debugMode = false; // Set to true for debugging, false for production
 // --- Parameters and UI ---
 const canvas = document.getElementById('ifs');
 const gl = canvas.getContext('webgl', {antialias: false});
 let width = window.innerWidth, height = window.innerHeight;
+
+// FBO variables
+let fbo, fboTexture;
+let fboWidth, fboHeight; // Dimensions for the offscreen buffer
+
 function resize() {
   width = window.innerWidth;
   height = window.innerHeight;
   canvas.width = width;
   canvas.height = height;
-  gl.viewport(0, 0, width, height);
+  // Main canvas viewport is set in the upscale pass
+
+  // FBO dimensions (controlled by renderScale slider)
+  fboWidth = Math.floor(width * renderScale);
+  fboHeight = Math.floor(height * renderScale);
+
+  // Configure FBO Texture
+  if (!fboTexture) fboTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, fboTexture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fboWidth, fboHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); // Optimized
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); // Optimized
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+  // Configure FBO
+  if (!fbo) fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTexture, 0);
+
+  // Check FBO status
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+    console.error("Framebuffer is not complete");
+  }
+
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  // Lens matrices depend on width/height, re-update them if lenses exist
+  if (lenses && lenses.length > 0) {
+    for (let l of lenses) l.updateMatrix();
+  }
 }
 window.addEventListener('resize', resize);
-resize();
+// resize(); // Call resize after FBO setup and upscaleProg is ready
 
 // --- View State ---
 let viewX = -1.5; // Moved left by about half a 1080p width (changed from 0.0)
@@ -378,122 +443,94 @@ function handleKeyboardInput() {
 let lensnum = 4;
 let detail = 6; // Changed back from 7 to 6
 let multi = true;
-const MAX_LENSES = 16; // Allow up to 16 functions
-const MAX_COLORS = 200;
+const MAX_LENSES = 6; // Increased from 4 to match new max functions
+const MAX_COLORS = 20; // Further reduced from 20
 
 // const ACTUAL_BUFFER_CAPACITY = 100000000; // Remove this
-const MAX_POSSIBLE_GPU_BUFFER_SIZE = 3000000000; // ~3 billion points (~11GB VRAM)
-let currentAllocatedBufferCapacity = 0; // Restore this to track current GPU buffer size
+const MAX_POSSIBLE_GPU_BUFFER_SIZE = Math.pow(6, 40); // Fine then! Keep your insane limit for crazy GPUs
+let currentAllocatedBufferCapacity = 0;
 
 // const BASE_POINTS = 8192; // Remove this, basePoints will be lensnum^detail
 
 // --- New UI controlled parameters ---
-let maxFps = 60;
+let maxFps = 60; // Changed from 512 to 60 for default
+let renderScale = 0.75; // Changed from 0.25 to 0.75 (75%)
 let animateRotation = true;
-let rotationSpeed = 0.01;
+let rotationSpeed = 0.002;
 let animateScale = true;
-let scaleSpeed = 0.01;
+let scaleSpeed = 0.002;
 let animateTranslation = true;
 let translationMagnitude = 0.004;
 let minPointSize = 0.5;
 let maxPointSize = 1.0; // Changed default from 2.0
-let quality = 0.5; // Changed default to 90% (10% removal)
+let quality = 0.3; // Changed default to 90% (10% removal)
 let lodEnabled = true; // LOD starts enabled
-let isAnimationPaused = false; // New state variable for pausing
+let isAnimationPaused = false; // Declare and initialize isAnimationPaused
+
+document.getElementById('lodEnabled').onchange = e => {
+  lodEnabled = e.target.checked;
+};
 
 // Performance monitoring
 let frameCount = 0;
 let lastFpsTime = 0;
 let currentFps = 0;
+let lastDomUpdateTime = 0;
+const DOM_UPDATE_INTERVAL = 250; // Update DOM every 250ms instead of 10 seconds
+
+// Cache expensive calculations
+let cachedPointScale = null;
+let cachedZoomFactor = null;
+let lastZoomForPointScale = null;
+
+// Color cycling optimization
+let cachedColorIndex = 0;
+let lastFrameForColor = -1;
+let colorUpdateInterval = 7; // Update color every N frames for smoother cycling
 
 // --- UI controls ---
 document.getElementById('functions').oninput = e => {
   lensnum = Math.max(2, Math.min(MAX_LENSES, parseInt(e.target.value)||4));
   randomizeLenses(); // Add this line to re-initialize lenses
 };
-document.getElementById('functions').setAttribute('max', MAX_LENSES); // Update UI max
+document.getElementById('functions').setAttribute('max', MAX_LENSES); // Update UI max to match new constant
 document.getElementById('detail').oninput = e => {
-  const newDetail = Math.max(2, Math.min(12, parseInt(e.target.value)||6));
+  const newDetail = Math.max(2, Math.min(12, parseInt(e.target.value)||6)); // Max detail increased to 12
   detail = newDetail;
   
   // Remove auto-enable LOD behavior - let user control it manually
 };
 document.getElementById('quality').oninput = e => {
-  quality = parseFloat(e.target.value) || 0.9;
-  document.getElementById('qualityValue').textContent = quality.toFixed(1);
+  quality = parseFloat(e.target.value) || 0.3;
+  document.getElementById('qualityValue').textContent = quality.toFixed(3); // Show 3 decimal places for smaller values
 };
 document.getElementById('lodEnabled').checked = true; // LOD enabled by default
 document.getElementById('lodEnabled').onchange = e => {
   lodEnabled = e.target.checked;
-  // No lag: nothing else needed, render loop will adapt instantly
-};
-document.getElementById('multi').onchange = e => {
-  multi = e.target.checked;
 };
 
-document.getElementById('maxFps').oninput = e => {
-  maxFps = parseInt(e.target.value) || 60;
-};
-document.getElementById('resetView').onclick = () => {
-  viewX = -0.5; // Use same adjusted default position
-  viewY = 0.0;
-  zoom = 1.2; // Use better default zoom
-};
-
-document.getElementById('pauseAnimation').onclick = () => {
-  isAnimationPaused = !isAnimationPaused;
-  document.getElementById('pauseAnimation').textContent = isAnimationPaused ? "Resume Animation" : "Pause Animation";
-};
-
-// New controls for performance tuning
-const toggleConfigButton = document.getElementById('toggleConfigButton');
+// Toggle Config Panel Visibility
+const toggleButton = document.getElementById('toggleConfigButton');
 const configPanel = document.getElementById('configPanel');
 
-// Initialize config panel visibility (e.g., start hidden or visible)
-// Let's start it hidden, matching the button text "Show Config"
-configPanel.style.display = 'none'; 
-
-toggleConfigButton.onclick = () => {
-  const isHidden = configPanel.style.display === 'none';
-  if (isHidden) {
-    configPanel.style.display = 'flex';
-    toggleConfigButton.textContent = 'Hide Config';
+toggleButton.addEventListener('click', () => {
+  if (configPanel.style.display === 'none' || configPanel.style.display === '') {
+    configPanel.style.display = 'flex'; // Use 'flex' due to flex-direction in CSS
+    toggleButton.textContent = 'Hide Config';
   } else {
     configPanel.style.display = 'none';
-    toggleConfigButton.textContent = 'Show Config';
+    toggleButton.textContent = 'Show Config';
   }
-};
+});
 
-// --- UI controlled parameters ---
-document.getElementById('minPointSize').oninput = e => {
-  minPointSize = parseFloat(e.target.value) || 1.0;
-  document.getElementById('minPointSizeValue').textContent = minPointSize.toFixed(1);
-};
-document.getElementById('maxPointSize').oninput = e => {
-  maxPointSize = parseFloat(e.target.value) || 4.0;
-  document.getElementById('maxPointSizeValue').textContent = maxPointSize.toFixed(1);
-};
 
-document.getElementById('animateRotation').onchange = e => {
-  animateRotation = e.target.checked;
-};
-document.getElementById('rotationSpeed').oninput = e => {
-  rotationSpeed = parseFloat(e.target.value);
-};
-document.getElementById('animateScale').onchange = e => {
-  animateScale = e.target.checked;
-};
-document.getElementById('scaleSpeed').oninput = e => {
-  scaleSpeed = parseFloat(e.target.value);
-};
-document.getElementById('animateTranslation').onchange = e => {
-  animateTranslation = e.target.checked;
-};
-document.getElementById('translationMagnitude').oninput = e => {
-  translationMagnitude = parseFloat(e.target.value);
-};
+// --- Parameters for rendering ---
+let lensRotScaleBuffer = new Float32Array(MAX_LENSES * 4);
+let lensTranslateBuffer = new Float32Array(MAX_LENSES * 2);
+let lensBuffersDirty = true; // Track if lens buffers need updating
 
-// Removed randomize button functionality and preset configurations
+// --- Initialization ---
+// resize(); // Removed redundant initial resize call
 
 // --- Color palette using original xscreensaver smooth colormap approach ---
 function makePalette(n) {
@@ -519,18 +556,31 @@ function makePalette(n) {
   return arr;
 }
 
-function hsv2rgb(h, s, v) {
-  let f = (n, k = (h * 6 + n) % 6) => v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
-  return [f(5), f(3), f(1)];
-}
+// --- Diagnostic logs for palette creation ---
+console.log("[DIAGNOSTIC] Before palette creation: typeof makePalette =", typeof makePalette, ", typeof MAX_COLORS =", typeof MAX_COLORS, ", MAX_COLORS value =", MAX_COLORS);
 const palette = makePalette(MAX_COLORS);
+console.log("[DIAGNOSTIC] After palette creation: typeof palette =", typeof palette, ", palette value:", palette, ", Is palette Array:", Array.isArray(palette));
+
+
+function hsv2rgb(h, s, v) {
+  let r, g, b;
+
+  // RGB values are calculated in the range 0-1
+  let f = (n, k = (h * 6) % 6) => v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
+  [r, g, b] = [f(5), f(3), f(1)];
+
+  return [r, g, b];
+}
+
+// --- Initialization ---
+// resize(); // Removed redundant initial resize call
 
 // --- Lens structure (for animation only) ---
 class Lens {
   constructor(r, s, tx, ty) {
     this.r = r; this.s = s; this.tx = tx; this.ty = ty;
-    this.ro = r; this.rt = r; this.rc = 1;
-    this.so = s; this.st = s; this.sc = 1;
+    this.ro = r; this.rt = r; this.rc = 1; // Restored for smooth rotation
+    this.so = s; this.st = s; this.sc = 1; // Restored for smooth scale
     this.sa = 0; this.txa = 0; this.tya = 0;
     // For mat2 and vec2 uniforms
     this.rotScaleMatrix = [1,0,0,1]; // mat2 identity
@@ -559,11 +609,15 @@ class Lens {
     this.rotScaleMatrix[2] = -s_1024 * sin_r; // ub
     this.rotScaleMatrix[3] = s_1024 * cos_r; // ud
 
-    // For vec2 uLensTranslate
+    // For vec2 uLensTranslate - use fboWidth and fboHeight
     const s_cos_r_term = this.s * cos_r;
     const s_sin_r_term = this.s * sin_r;
-    this.translateVector[0] = 131072.0 * width * (s_sin_r_term - s_cos_r_term + this.tx / 16.0);
-    this.translateVector[1] = 131072.0 * height * (s_sin_r_term + s_cos_r_term + this.ty / 16.0);
+    // Use fboWidth and fboHeight if available, otherwise fallback to canvas width/height
+    // This is important for initial setup before first resize might have set fboWidth/Height
+    const currentRenderWidth = fboWidth || width;
+    const currentRenderHeight = fboHeight || height;
+    this.translateVector[0] = 131072.0 * currentRenderWidth * (s_sin_r_term - s_cos_r_term + this.tx / 16.0);
+    this.translateVector[1] = 131072.0 * currentRenderHeight * (s_sin_r_term + s_cos_r_term + this.ty / 16.0);
   }
   mutate() {
     // Animate rotation
@@ -582,13 +636,13 @@ class Lens {
       if (this.sc >= 1) {
         this.sc = 0;
         this.so = this.st;
-        this.st = Math.random(); // Keep scale target between 0 and 1 for stability
+        this.st = Math.random() * 0.5 + 0.25; // Keep scale target reasonable
       }
       let factor = (Math.sin(-Math.PI/2 + Math.PI * this.sc) + 1) / 2;
       this.s = this.so + (this.st - this.so) * factor;
       this.sc += scaleSpeed;
     }
-    // Animate translation
+    // Animate translation (original logic retained, could also be simplified)
     if (animateTranslation) {
       this.txa += Math.random() * translationMagnitude - translationMagnitude / 2;
       this.tya += Math.random() * translationMagnitude - translationMagnitude / 2;
@@ -622,85 +676,79 @@ randomizeLenses();
 
 // --- GPU-based WebGL Shaders ---
 const vertSrc = `
-precision highp float;
+precision mediump float;
 attribute float aIndex;
 uniform float uWidth, uHeight;
 uniform float uViewX, uViewY, uZoom;
 uniform int uLensNum;
 uniform int uDetail;
 uniform bool uMulti;
-uniform float uTime;
+uniform int uColorIndex;
 uniform vec3 uPalette[${MAX_COLORS}];
 uniform mat2 uLensRotScale[${MAX_LENSES}];
 uniform vec2 uLensTranslate[${MAX_LENSES}];
 uniform float uPointScale;
 uniform bool uLodEnabled;
-uniform float uQuality;
 uniform int uStride;
 uniform int uBasePoints;
 
 varying vec3 vColor;
 
-// Simple hash function for pseudo-random number generation
-float hash(float n) {
-  return fract(sin(n) * 43758.5453123);
-}
-
 void main() {
   int lensnum = uLensNum;
   int detail = uDetail;
 
-  // --- LOD: sample every Nth point, not just the first N ---
+  // FIXED: Calculate the real fractal point index we want
   float realIndex = aIndex;
   if (uLodEnabled) {
+    // Skip points by multiplying to stride - this gives us every Nth point
     realIndex = aIndex * float(uStride);
-    if (realIndex >= float(uBasePoints)) {
-      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-      gl_PointSize = 0.0;
-      vColor = vec3(0.0);
-      return;
-    }
   }
 
-  float x = uWidth * 128.0;
-  float y = uHeight * 128.0;
+  // Pre-compute constants outside the loop
+  vec2 xy = vec2(uWidth * 128.0, uHeight * 128.0);
+  float invNormFactor = 1.0 / 256.0;
+  vec2 invScreenSize = 2.0 / vec2(uWidth, uHeight);
+  float flensnum = float(lensnum);
+  const float inv1024 = 1.0 / 1024.0;
+  
   int p = 0;
   float idx = realIndex;
 
+  // Optimized IFS iteration loop
   for (int d = 0; d < 12; ++d) {
     if (d >= detail) break;
-    int which = int(mod(idx, float(lensnum)));
-    idx = floor(idx / float(lensnum));
+    
+    float fidx = floor(idx / flensnum);
+    int which = int(idx - fidx * flensnum);
+    idx = fidx;
+    
     if (which < lensnum) {
       mat2 rotScale = uLensRotScale[which];
       vec2 translate = uLensTranslate[which];
-      vec2 current_xy = vec2(x, y);
-      vec2 transformed_xy = rotScale * current_xy + translate;
-      x = transformed_xy.x / 1024.0;
-      y = transformed_xy.y / 1024.0;
+      xy = (rotScale * xy + translate) * inv1024;
       p = which;
     }
   }
 
-  float normX = x / (uWidth * 256.0) * 2.0 - 1.0;
-  float normY = y / (uHeight * 256.0) * 2.0 - 1.0;
-  float finalX = (normX - uViewX) * uZoom;
-  float finalY = (normY - uViewY) * uZoom;
+  // Combined normalization and view transformation
+  vec2 norm = xy * invNormFactor * invScreenSize - 1.0;
+  vec2 final = (norm - vec2(uViewX, uViewY)) * uZoom;
 
-  // Frustum culling in vertex shader - discard points outside view
-  if (abs(finalX) > 1.2 || abs(finalY) > 1.2) {
-    gl_Position = vec4(2.0, 2.0, 2.0, 1.0); // Move outside clip space
+  // Optimized frustum culling
+  vec2 absPos = abs(final);
+  if (max(absPos.x, absPos.y) > 1.05) {
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     gl_PointSize = 0.0;
   } else {
-    gl_Position = vec4(finalX, finalY, 0.0, 1.0);
-    gl_PointSize = uPointScale; // Adaptive point size
+    gl_Position = vec4(final, 0.0, 1.0);
+    gl_PointSize = uPointScale;
   }
   
   // Color calculation
   int colorIdx = uMulti ? 
-    int(mod(uTime * float(p + 1), float(${MAX_COLORS}))) :
-    int(mod(uTime, float(${MAX_COLORS})));
-  colorIdx = int(clamp(float(colorIdx), 0.0, float(${MAX_COLORS - 1})));
+    int(mod(float(uColorIndex + p), float(${MAX_COLORS}))) :
+    uColorIndex;
   vColor = uPalette[colorIdx];
 }
 `;
@@ -731,6 +779,48 @@ function createProgram(gl, vs, fs) {
   return prog;
 }
 const prog = createProgram(gl, vertSrc, fragSrc);
+
+// --- Shaders for Upscaling Pass ---
+const upscaleVertSrc = `
+  attribute vec2 aPosition;
+  attribute vec2 aTexCoord;
+  varying vec2 vTexCoord;
+  void main() {
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+    vTexCoord = aTexCoord;
+  }
+`;
+const upscaleFragSrc = `
+  precision mediump float;
+  varying vec2 vTexCoord;
+  uniform sampler2D uSampler;
+  void main() {
+    gl_FragColor = texture2D(uSampler, vTexCoord);
+  }
+`;
+const upscaleProg = createProgram(gl, upscaleVertSrc, upscaleFragSrc);
+
+// --- Cache upscale shader locations ---
+const uSamplerLoc = gl.getUniformLocation(upscaleProg, "uSampler");
+const aPositionLocUpscale = gl.getAttribLocation(upscaleProg, "aPosition");
+const aTexCoordLocUpscale = gl.getAttribLocation(upscaleProg, "aTexCoord");
+
+// --- Buffers for Fullscreen Quad (for upscaling pass) ---
+const quadBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1, -1,  1, -1,  -1, 1,
+  -1, 1,   1, -1,   1, 1
+]), gl.STATIC_DRAW);
+
+const texCoordBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  0, 0,  1, 0,  0, 1,
+  0, 1,  1, 0,  1, 1
+]), gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
 
 // --- Static index buffer (uploaded once) ---
 const indexBuffer = gl.createBuffer();
@@ -810,24 +900,79 @@ const uLensTranslateLoc = gl.getUniformLocation(prog, "uLensTranslate");
 const uPointScaleLoc = gl.getUniformLocation(prog, "uPointScale");
 const uLodEnabledLoc = gl.getUniformLocation(prog, "uLodEnabled");
 const uQualityLoc = gl.getUniformLocation(prog, "uQuality");
+const uStrideLoc = gl.getUniformLocation(prog, "uStride");
+const uBasePointsLoc = gl.getUniformLocation(prog, "uBasePoints");
+const uColorIndexLoc = gl.getUniformLocation(prog, "uColorIndex");
 
-// --- Upload palette once ---
-let flatPalette = [].concat(...palette);
-gl.useProgram(prog);
-gl.uniform3fv(uPaletteLoc, new Float32Array(flatPalette));
+// --- Function to initialize palette uniform ---
+function initializePaletteUniform() {
+  console.log("[DIAGNOSTIC] Inside initializePaletteUniform - typeof palette:", typeof palette, ", palette value:", palette, ", Is palette Array:", Array.isArray(palette)); // Diagnostic log
+  if (typeof palette === 'undefined') {
+    console.error("CRITICAL: palette is undefined at the time of flatPalette creation. Ensure 'const palette = makePalette(...)' executed correctly.");
+    return; // Stop if palette is not defined
+  }
+  if (!prog) {
+    console.error("CRITICAL: WebGL program 'prog' is undefined before attempting to upload palette uniform.");
+    return;
+  }
+  if (uPaletteLoc === null) { 
+    // Note: gl.getUniformLocation returns null if the uniform is not found or inactive.
+    // It doesn't necessarily mean uPaletteLoc variable itself is undefined if it was declared.
+    console.error("CRITICAL: uPaletteLoc is null. Uniform 'uPalette' may not be found or active in the shader program 'prog'.");
+    return;
+  }
+
+  let flatPalette;
+  try {
+    flatPalette = [].concat(...palette);
+  } catch (e) {
+    console.error("Error spreading palette. Is palette an iterable? Current palette:", palette, e);
+    return;
+  }
+  
+  gl.useProgram(prog); // Ensure correct program is active
+  try {
+    gl.uniform3fv(uPaletteLoc, new Float32Array(flatPalette));
+    // console.log("Palette uniform initialized successfully."); // Optional: for debugging
+  } catch (e) {
+    console.error("Error uploading palette uniform:", e);
+  }
+}
+
+// Call resize now that FBO and upscaleProg are potentially set up
+// resize(); // This was already commented out, but ensure it's called after GL setup if needed.
+           // The current call to resize() is later, which is fine.
+
+// --- Initialize palette uniform after all dependencies are defined ---
+initializePaletteUniform();
+
+// Call resize now that FBO and upscaleProg are potentially set up
+resize(); 
+
+// --- Cached uniform values to minimize redundant uploads ---
+let lastViewX_uploaded = null, lastViewY_uploaded = null, lastZoom_uploaded = null;
+let lastPointScale_uploaded = null;
+let lastColorIndex_uploaded = null;
+let lastIsAnimationPaused_forTime = null;
+let lastFboWidth_uploaded = null, lastFboHeight_uploaded = null;
+let lastLensNum_uploaded = null, lastDetail_uploaded = null, lastMulti_uploaded = null;
+let lastLodEnabled_uploaded = null, lastQuality_uploaded = null;
+let lastStride_uploaded = null, lastBasePoints_uploaded = null;
 
 // --- Animation loop ---
 let frame = 0;
 let lastFrameTime = 0;
+let renderTimeoutId = null;
 
 function render(currentTime) {
-  requestAnimationFrame(render);
-  
   const now = currentTime || performance.now();
   const elapsed = now - lastFrameTime;
   const frameInterval = 1000 / maxFps;
   
   if (elapsed < frameInterval) {
+    // Schedule next frame more precisely
+    const remainingTime = frameInterval - elapsed;
+    renderTimeoutId = setTimeout(() => render(performance.now()), remainingTime);
     return;
   }
   lastFrameTime = now - (elapsed % frameInterval);
@@ -838,10 +983,13 @@ function render(currentTime) {
     currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
     frameCount = 0;
     lastFpsTime = now;
-    
-    // Update performance display
+  }
+  
+  // Update DOM less frequently to reduce layout thrashing
+  if (now - lastDomUpdateTime >= DOM_UPDATE_INTERVAL) {
     document.getElementById('fpsDisplay').textContent = currentFps;
     document.getElementById('zoomDisplay').textContent = zoom.toFixed(2) + 'x';
+    lastDomUpdateTime = now;
   }
   
   // Handle smooth keyboard input
@@ -850,94 +998,357 @@ function render(currentTime) {
   // Animate lenses (only animation happens on CPU)
   if (!isAnimationPaused) {
     for (let l of lenses) l.mutate();
+    lensBuffersDirty = true;
   }
   
   // Calculate base points needed for the current detail level
   const pointsNeededForDetail = Math.pow(lensnum, detail);
-  // basePoints is now directly lensnum^detail, capped by our new absolute max
-  const basePoints = Math.min(pointsNeededForDetail, MAX_POSSIBLE_GPU_BUFFER_SIZE);
-
-  // Ensure the WebGL buffer is large enough for these basePoints
-  ensureIndexBufferIsLargeEnough(basePoints); // Restore this call
-
-  // --- LOD sampling: evenly distributed points ---
-  let drawCount = basePoints; // If LOD is off or quality is 1.0, drawCount remains basePoints
-  let stride = 1;
-  if (lodEnabled && quality < 1.0) { // Only apply LOD if quality < 100%
-    // Use quality to determine how many points to draw
-    drawCount = Math.floor(basePoints * quality);
-    drawCount = Math.max(1, Math.min(drawCount, basePoints));
-    stride = Math.floor(basePoints / drawCount);
-    stride = Math.max(1, stride);
-    drawCount = Math.floor(basePoints / stride);
+  
+  // CRITICAL FIX: Calculate ACTUAL points to process BEFORE any GPU work
+  let actualPointsToProcess, stride;
+  
+  if (lodEnabled && quality < 1.0) {
+    // TRUE LOD: Only process a fraction of points from the start
+    stride = Math.max(1, Math.floor(1 / quality));
+    actualPointsToProcess = Math.ceil(pointsNeededForDetail / stride);
+    if (debugMode) {
+        console.log(`LOD: Processing ${actualPointsToProcess.toLocaleString()} out of ${pointsNeededForDetail.toLocaleString()} points (stride=${stride})`);
+    }
+  } else {
+    stride = 1;
+    actualPointsToProcess = Math.min(pointsNeededForDetail, MAX_POSSIBLE_GPU_BUFFER_SIZE);
   }
-  // No artificial cap - always use the calculated drawCount
 
-  // Update points display
-  let displayPoints = drawCount;
-  const pointsK = Math.floor(displayPoints / 1000);
+  // Only allocate GPU memory for points we actually process
+  ensureIndexBufferIsLargeEnough(actualPointsToProcess);
+
+  // Cache expensive point scale calculation
+  if (zoom !== lastZoomForPointScale) {
+    cachedZoomFactor = Math.max(0.1, Math.min(zoom, 10.0));
+    cachedPointScale = Math.max(minPointSize, Math.min(maxPointSize, maxPointSize / cachedZoomFactor));
+    lastZoomForPointScale = zoom;
+  }
+  
+  // Update points display every frame
+  const pointsK = Math.floor(actualPointsToProcess / 1000);
   document.getElementById('pointsDisplay').textContent = 
     pointsK >= 1000 ? (pointsK / 1000).toFixed(1) + 'M' : pointsK + 'k';
-  
-  // Use configurable min/max point sizes
-  const zoomFactor = Math.max(0.1, Math.min(zoom, 10.0)); // <-- Add this line
-  const pointScale = Math.max(minPointSize, Math.min(maxPointSize, maxPointSize / zoomFactor));
-  
-  // Upload parameters as uniforms
+
+  // --- Fractal Pass (Render to FBO) ---
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.viewport(0, 0, fboWidth, fboHeight);
+  gl.clearColor(0,0,0,1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
   gl.useProgram(prog);
-  gl.uniform1f(uWidthLoc, width);
-  gl.uniform1f(uHeightLoc, height);
-  gl.uniform1f(uViewXLoc, viewX);
-  gl.uniform1f(uViewYLoc, viewY);
-  gl.uniform1f(uZoomLoc, zoom);
-  gl.uniform1i(uLensNumLoc, lensnum);
-  gl.uniform1i(uDetailLoc, detail);
-  gl.uniform1i(uMultiLoc, multi ? 1 : 0);
-  // Use consistent time value - when paused, use the current frame value
-  gl.uniform1f(uTimeLoc, frame * 0.03); // Same calculation regardless of pause state
-  gl.uniform1f(uPointScaleLoc, pointScale);
-  gl.uniform1i(uLodEnabledLoc, lodEnabled ? 1 : 0);
-  gl.uniform1f(uQualityLoc, quality);
-  gl.uniform1i(gl.getUniformLocation(prog, "uStride"), stride);
-  gl.uniform1i(gl.getUniformLocation(prog, "uBasePoints"), basePoints);
-  
-  // Upload lens parameters
-  let lensRotScaleArr = [];
-  let lensTranslateArr = [];
-  for (let i = 0; i < MAX_LENSES; ++i) {
-    if (i < lenses.length) {
-      let l = lenses[i];
-      lensRotScaleArr.push(...l.rotScaleMatrix); // Spread the 4 elements
-      lensTranslateArr.push(...l.translateVector); // Spread the 2 elements
-    } else {
-      // Push identity for mat2 and zero for vec2 for unused lenses
-      lensRotScaleArr.push(1,0,0,1);
-      lensTranslateArr.push(0,0);
-    }
+
+  // Conditionally update FBO width and height uniforms
+  if (fboWidth !== lastFboWidth_uploaded) {
+    gl.uniform1f(uWidthLoc, fboWidth);
+    lastFboWidth_uploaded = fboWidth;
   }
-  gl.uniformMatrix2fv(uLensRotScaleLoc, false, new Float32Array(lensRotScaleArr));
-  gl.uniform2fv(uLensTranslateLoc, new Float32Array(lensTranslateArr));
+  if (fboHeight !== lastFboHeight_uploaded) {
+    gl.uniform1f(uHeightLoc, fboHeight);
+    lastFboHeight_uploaded = fboHeight;
+  }
+
+  // Conditionally update view uniforms
+  if (viewX !== lastViewX_uploaded) {
+    gl.uniform1f(uViewXLoc, viewX);
+    lastViewX_uploaded = viewX;
+  }
+  if (viewY !== lastViewY_uploaded) {
+    gl.uniform1f(uViewYLoc, viewY);
+    lastViewY_uploaded = viewY;
+  }
+  if (zoom !== lastZoom_uploaded) {
+    gl.uniform1f(uZoomLoc, zoom);
+    lastZoom_uploaded = zoom;
+  }
+  
+  // Conditionally update less frequent uniforms
+  if (lensnum !== lastLensNum_uploaded) {
+    gl.uniform1i(uLensNumLoc, lensnum);
+    lastLensNum_uploaded = lensnum;
+  }
+  if (detail !== lastDetail_uploaded) {
+    gl.uniform1i(uDetailLoc, detail);
+    lastDetail_uploaded = detail;
+  }
+  if (multi !== lastMulti_uploaded) {
+    gl.uniform1i(uMultiLoc, multi ? 1 : 0);
+    lastMulti_uploaded = multi;
+  }
+  
+  // Optimized color cycling - update less frequently and cache
+  if (!isAnimationPaused && (frame !== lastFrameForColor && frame % colorUpdateInterval === 0)) {
+    cachedColorIndex = Math.floor((frame / colorUpdateInterval) * 0.15) % MAX_COLORS;
+    lastFrameForColor = frame;
+  }
+  
+  if (cachedColorIndex !== lastColorIndex_uploaded) {
+    gl.uniform1i(uColorIndexLoc, cachedColorIndex);
+    lastColorIndex_uploaded = cachedColorIndex;
+  }
+  
+  // Conditionally update point scale uniform
+  if (cachedPointScale !== lastPointScale_uploaded) {
+    gl.uniform1f(uPointScaleLoc, cachedPointScale);
+    lastPointScale_uploaded = cachedPointScale;
+  }
+
+  // Upload LOD parameters
+  if (lodEnabled !== lastLodEnabled_uploaded) {
+    gl.uniform1i(uLodEnabledLoc, lodEnabled ? 1 : 0);
+    lastLodEnabled_uploaded = lodEnabled;
+  }
+  if (stride !== lastStride_uploaded) {
+    gl.uniform1i(uStrideLoc, stride);
+    lastStride_uploaded = stride;
+  }
+  if (pointsNeededForDetail !== lastBasePoints_uploaded) {
+    gl.uniform1i(uBasePointsLoc, pointsNeededForDetail);
+    lastBasePoints_uploaded = pointsNeededForDetail;
+  }
+  
+  // Optimized lens uniform upload - only when dirty
+  if (lensBuffersDirty) {
+    let rotScaleOffset = 0;
+    let translateOffset = 0;
+    for (let i = 0; i < MAX_LENSES; ++i) {
+      if (i < lenses.length) {
+        const l = lenses[i];
+        lensRotScaleBuffer.set(l.rotScaleMatrix, rotScaleOffset);
+        lensTranslateBuffer.set(l.translateVector, translateOffset);
+      } else {
+        // Identity matrix and zero vector for unused lenses
+        lensRotScaleBuffer.set([1,0,0,1], rotScaleOffset);
+        lensTranslateBuffer.set([0,0], translateOffset);
+      }
+      rotScaleOffset += 4; // 4 floats for mat2
+      translateOffset += 2; // 2 floats for vec2
+    }
+    gl.uniformMatrix2fv(uLensRotScaleLoc, false, lensRotScaleBuffer);
+    gl.uniform2fv(uLensTranslateLoc, lensTranslateBuffer);
+    lensBuffersDirty = false; // Clear dirty flag
+  }
   
   // Bind static index buffer
   gl.bindBuffer(gl.ARRAY_BUFFER, indexBuffer);
   gl.enableVertexAttribArray(aIndexLoc);
   gl.vertexAttribPointer(aIndexLoc, 1, gl.FLOAT, false, 0, 0);
 
+  // Draw only the points we actually want to process
+  gl.drawArrays(gl.POINTS, 0, actualPointsToProcess);
+  gl.disableVertexAttribArray(aIndexLoc);
+
+  // --- Upscale Pass (Render FBO texture to canvas) ---
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, canvas.width, canvas.height);
   gl.clearColor(0,0,0,1);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.POINTS, 0, drawCount);
+
+  gl.useProgram(upscaleProg);
+
+  // Bind FBO texture
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, fboTexture);
+  gl.uniform1i(uSamplerLoc, 0);
+
+  // Bind quad buffers
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+  gl.enableVertexAttribArray(aPositionLocUpscale);
+  gl.vertexAttribPointer(aPositionLocUpscale, 2, gl.FLOAT, false, 0, 0);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+  gl.enableVertexAttribArray(aTexCoordLocUpscale);
+  gl.vertexAttribPointer(aTexCoordLocUpscale, 2, gl.FLOAT, false, 0, 0);
+  
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  gl.disableVertexAttribArray(aPositionLocUpscale);
+  gl.disableVertexAttribArray(aTexCoordLocUpscale);
 
   // Only increment frame when not paused for color cycling
   if (!isAnimationPaused) {
     frame = (frame + 1) % 10000;
   }
+  
+  // Schedule next frame using setTimeout instead of requestAnimationFrame
+  renderTimeoutId = setTimeout(() => render(performance.now()), 0);
 }
 
+// Add missing UI event handlers
+document.getElementById('presets').onchange = e => {
+  const preset = e.target.value;
+  
+  if (preset === 'custom') return; // Don't change anything for custom
+  
+  // Define preset configurations: [functions, detail, quality]
+  const presets = {
+    'lowest': [2, 2, 0.001],
+    'low': [4, 4, 0.1],
+    'default': [4, 6, 0.3],
+    'mediumlow': [4, 12, 0.001],
+    'medium': [4, 12, 0.01],
+    'high': [6, 10, 0.1],
+    'higher': [6, 12, 0.01],
+    'highest': [6, 12, 0.1],
+    'mega': [6, 12, 0.019],
+    'ultra': [6, 12, 0.5],
+    'mostest': [6, 12, 1.0]
+  };
+  
+  if (presets[preset]) {
+    const [newFunctions, newDetail, newQuality] = presets[preset];
+    
+    // Update the values
+    lensnum = newFunctions;
+    detail = newDetail;
+    quality = newQuality;
+    
+    // Update the UI controls
+    document.getElementById('functions').value = newFunctions;
+    document.getElementById('detail').value = newDetail;
+    document.getElementById('quality').value = newQuality;
+    document.getElementById('qualityValue').textContent = newQuality.toFixed(3);
+    
+    // Enable LOD for presets that need it (quality < 1.0)
+    if (newQuality < 1.0) {
+      lodEnabled = true;
+      document.getElementById('lodEnabled').checked = true;
+    }
+    
+    // Regenerate lenses for new function count
+    randomizeLenses();
+    
+    console.log(`Applied preset "${preset}": ${newFunctions} functions, ${newDetail} detail, ${newQuality} quality`);
+  }
+};
+
+// Update preset dropdown when individual controls change
+function updatePresetDropdown() {
+  const current = [lensnum, detail, quality];
+  const presets = {
+    'lowest': [2, 2, 0.001],
+    'low': [4, 4, 0.1],
+    'default': [4, 6, 0.3],
+    'mediumlow': [4, 12, 0.001],
+    'medium': [4, 12, 0.01],
+    'high': [6, 10, 0.1],
+    'higher': [6, 12, 0.01],
+    'highest': [6, 12, 0.1],
+    'mega': [6, 12, 0.019],
+    'ultra': [6, 12, 0.5],
+    'mostest': [6, 12, 1.0]
+  };
+  
+  // Check if current settings match any preset
+  for (const [name, [f, d, q]] of Object.entries(presets)) {
+    if (f === current[0] && d === current[1] && Math.abs(q - current[2]) < 0.001) {
+      document.getElementById('presets').value = name;
+      return;
+    }
+  }
+  
+  // If no match, set to custom
+  document.getElementById('presets').value = 'custom';
+}
+
+// Modify existing UI controls to update preset dropdown
+document.getElementById('functions').oninput = e => {
+  lensnum = Math.max(2, Math.min(MAX_LENSES, parseInt(e.target.value)||4));
+  randomizeLenses();
+  updatePresetDropdown();
+};
+
+document.getElementById('detail').oninput = e => {
+  const newDetail = Math.max(2, Math.min(12, parseInt(e.target.value)||6));
+  detail = newDetail;
+  updatePresetDropdown();
+};
+
+document.getElementById('quality').oninput = e => {
+  quality = parseFloat(e.target.value) || 0.3;
+  document.getElementById('qualityValue').textContent = quality.toFixed(3);
+  updatePresetDropdown();
+};
+
+// Add missing UI event handlers
+document.getElementById('renderScale').oninput = e => {
+  renderScale = parseFloat(e.target.value) || 0.25;
+  document.getElementById('renderScaleValue').textContent = Math.round(renderScale * 100) + '%';
+  
+  // Trigger resize to update FBO dimensions
+  resize();
+  
+  // Update lens matrices since FBO size changed
+  if (lenses && lenses.length > 0) {
+    for (let l of lenses) l.updateMatrix();
+    lensBuffersDirty = true;
+  }
+  
+  console.log(`Render scale changed to ${Math.round(renderScale * 100)}% (${fboWidth}x${fboHeight})`);
+};
+
+document.getElementById('maxFps').oninput = e => {
+  maxFps = Math.max(1, Math.min(60, parseInt(e.target.value) || 60)); // Changed max from 512 to 60
+};
+
+document.getElementById('minPointSize').oninput = e => {
+  minPointSize = parseFloat(e.target.value) || 0.5;
+  document.getElementById('minPointSizeValue').textContent = minPointSize.toFixed(1);
+};
+
+document.getElementById('maxPointSize').oninput = e => {
+  maxPointSize = parseFloat(e.target.value) || 1.0;
+  document.getElementById('maxPointSizeValue').textContent = maxPointSize.toFixed(1);
+};
+
+document.getElementById('multi').onchange = e => {
+  multi = e.target.checked;
+};
+
+document.getElementById('resetView').onclick = () => {
+  viewX = -1.5;
+  viewY = 0.4;
+  zoom = 0.5;
+};
+
+document.getElementById('pauseAnimation').onclick = () => {
+  isAnimationPaused = !isAnimationPaused;
+  document.getElementById('pauseAnimation').textContent = isAnimationPaused ? "Resume Animation" : "Pause Animation";
+};
+
+// Animation speed controls
+document.getElementById('animateRotation').onchange = e => {
+  animateRotation = e.target.checked;
+};
+document.getElementById('rotationSpeed').oninput = e => {
+  rotationSpeed = parseFloat(e.target.value) || 0.002;
+};
+document.getElementById('animateScale').onchange = e => {
+  animateScale = e.target.checked;
+};
+document.getElementById('scaleSpeed').oninput = e => {
+  scaleSpeed = parseFloat(e.target.value) || 0.002;
+};
+document.getElementById('animateTranslation').onchange = e => {
+  animateTranslation = e.target.checked;
+};
+document.getElementById('translationMagnitude').oninput = e => {
+  translationMagnitude = parseFloat(e.target.value) || 0.004;
+};
+
 // Initialize value displays
-document.getElementById('qualityValue').textContent = quality.toFixed(1);
+document.getElementById('renderScaleValue').textContent = Math.round(renderScale * 100) + '%';
+document.getElementById('qualityValue').textContent = quality.toFixed(3);
 document.getElementById('minPointSizeValue').textContent = minPointSize.toFixed(1);
 document.getElementById('maxPointSizeValue').textContent = maxPointSize.toFixed(1);
 
+// Start the render loop
 render();
-</script>cument.getElementById('qualityValue').textContent = quality.toFixed(1); // Updated default
+</script>
 </body>
+</html>
+
