@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <script src="/-Projects/esc-to-index.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Viewer - Family Tree</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: bisque;
+        }
+        /* Existing H1 outside the tree, if you want to keep it */
+        body > h1:first-child {
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        #array-container {
+            /* Container for the tree */
+        }
+
+        #array-container ul {
+            list-style-type: none;
+            padding-left: 0; /* Base UL has no padding, children will */
+            margin: 0;
+        }
+        
+        .tree-node {
+            position: relative;
+            padding-left: 25px; /* Space for connector lines */
+            margin-top: 2px; /* Small space between nodes */
+        }
+
+        .tree-node h1 {
+            font-size: 0.9em; /* Smaller for tree view */
+            font-weight: bold;
+            padding: 4px 8px;
+            margin: 0;
+            display: inline-block;
+            border: 1px solid #a0a0a0;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            position: relative; /* For z-index to sit above lines */
+            z-index: 1;
+            color: #333;
+        }
+
+        .tree-node > span { /* For primitive values or messages */
+            margin-left: 8px;
+            font-style: italic;
+            color: #444;
+            background-color: #fff; /* Ensure it's above lines */
+            position: relative;
+            z-index: 1;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+        .tree-node > span.warning-message {
+            color: #c09853;
+            background-color: #fcf8e3;
+            border: 1px solid #fbeed5;
+        }
+         .tree-node > span.info-message {
+            color: #3a87ad;
+            background-color: #d9edf7;
+            border: 1px solid #bce8f1;
+        }
+
+
+        /* L-shaped connector lines for each node */
+        .tree-node::before, .tree-node::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            background-color: #a0a0a0;
+            z-index: 0;
+        }
+
+        /* Vertical part of the L */
+        .tree-node::before {
+            top: 0;
+            width: 1px;
+            height: 100%;
+        }
+
+        /* Horizontal part of the L */
+        .tree-node::after {
+            top: 1em; /* Align with middle of H1, adjust if H1 padding/line-height changes */
+            width: 15px; /* Length of horizontal line */
+            height: 1px;
+        }
+
+        /* Root UL doesn't need padding for lines drawn by its children */
+        #array-container > ul {
+            padding-left: 0;
+        }
+
+        /* Root node (the very first li.tree-node) */
+        #array-container > ul > .tree-node.tree-root {
+            padding-left: 0; /* No indent */
+        }
+        #array-container > ul > .tree-node.tree-root::before,
+        #array-container > ul > .tree-node.tree-root::after {
+            display: none; /* No connector lines for the root itself */
+        }
+
+        /* Children of the root node need their UL indented */
+         #array-container > ul > .tree-node.tree-root > ul {
+            padding-left: 25px;
+        }
+
+
+        /* For the first child in any list, its vertical line starts from the horizontal line */
+        ul > .tree-node:first-child::before {
+            top: 1em; 
+            height: calc(100% - 1em);
+        }
+
+        /* For the last child in any list, its vertical line ends at its horizontal line */
+        ul > .tree-node:last-child::before {
+            height: 1em;
+        }
+        
+        /* If a node is the only child, its vertical line is just a stub for the T-junction */
+        ul > .tree-node:only-child::before {
+            top: 1em;
+            height: 1px; /* Effectively makes it part of the horizontal line */
+        }
+
+        /* Special message nodes might not need full connectors if they don't have children */
+        .tree-node.special-message-node > ul, /* Hide UL if it was accidentally added */
+        .tree-node.message-node > ul {
+            display: none;
+        }
+        /* If special/message nodes are guaranteed to be leaves, their vertical line should also be short */
+        .tree-node.special-message-node::before,
+        .tree-node.message-node::before {
+             height: 1em; /* Only if they are treated as last children graphically */
+        }
+        /* If they are always leaves, they are effectively :last-child in terms of line drawing */
+         ul > .tree-node.special-message-node:not(:only-child)::before,
+         ul > .tree-node.message-node:not(:only-child)::before {
+            /* This ensures that if they are not the only child, but are leaves,
+               their vertical line is still short. The :last-child rule handles most of this.
+               This might be overly complex if :last-child is sufficient.
+            */
+         }
+
+
+    </style>
+</head>
+<body>
+    <h1>Ma? Why isn't the array renderin'?</h1> <!-- This H1 is styled by body > h1:first-child -->
+    <div id="array-container"></div>
+
+    <script>
+const aMajesticMuffin = "blueberry";
+const aDancingDonut = 7;
+const aSingingSausage = ["do", "re", "mi"];
+const tacoArray = ["taco", "burrito", "quesadilla", "nachos", "salsa"];
+const arrA = [aMajesticMuffin, aDancingDonut, aSingingSausage];
+const arrB = [arrA, "undefinedValue"]; // Replace 'd' with a valid value or placeholder
+const arrC = [arrB, arrA];
+const arrD = [arrC, arrB];
+const arrE = [arrD, arrC];
+const arrF = [arrE, arrD];
+const arrG = [arrF, arrE];
+const arrH = [arrG, arrF];
+const arrI = [arrH, arrG];
+const arrJ = [arrI, arrH];
+const arrK = [arrJ, arrI];
+const arrL = [arrK, arrJ];
+const arrM = [arrL, arrK];
+const arrN = [arrM, arrL];
+const arrO = [arrN, arrM];
+const arrP = [arrO, arrN];
+const arrQ = [arrP, arrO];
+const arrR = [arrQ, arrP];
+const arrS = [arrR, arrQ];
+const arrT = [arrS, arrR];
+const arrU = [arrT, arrS];
+const arrV = [arrU, arrT];
+const arrW = [arrV, arrU];
+const arrX = [arrW, arrV];
+const arrY = [arrX, arrW];
+const arrZ = [arrY, arrX];
+const arrAA = [arrZ, arrY];
+const arrBB = [arrAA, arrZ];
+const arrCC = [arrBB, arrAA];
+const arrDD = [arrCC, arrBB];
+const arrEE = [arrDD, arrCC];
+const arrFF = [arrEE, arrDD];
+const arrGG = [arrFF, arrEE];
+const arrHH = [arrGG, arrFF];
+const arrII = [arrHH, arrGG];
+const arrJJ = [arrII, arrHH];
+const arrKK = [arrJJ, arrII];
+const arrLL = [arrKK, arrJJ];
+const arrMM = [arrLL, arrKK];
+const arrNN = [arrMM, arrLL];
+const arrOO = [arrNN, arrMM];
+const arrPP = [arrOO, arrNN];
+const arrQQ = [arrPP, arrOO];
+const arrRR = [arrQQ, arrPP];
+const arrSS = [arrRR, arrQQ];
+const arrTT = [arrSS, arrRR];
+const arrUU = [arrTT, arrSS];
+const arrVV = [arrUU, arrTT];
+const arrWW = [arrVV, arrUU];
+const arrXX = [arrWW, arrVV];
+const arrYY = [arrXX, arrWW];
+const arrZX = [arrYY, arrXX];
+const arrZY = [arrZX, arrYY];
+const arrZZ = [arrZY, arrZX];
+
+// Master array containing all previous arrays
+const masterArr = [arrA, arrB, arrC, arrD, 
+    arrE, arrF, arrG, arrH, arrI, arrJ, 
+    arrK, arrL, arrM, arrN, arrO, arrP, 
+    arrQ, arrR, arrS, arrT, arrU, arrV, 
+    arrW, arrX, arrY, arrZ, arrAA, arrBB, 
+    arrCC, arrDD, arrEE, arrFF, arrGG, arrHH, 
+    arrII, arrJJ, arrKK, arrLL, arrMM, arrNN, 
+    arrOO, arrPP, arrQQ, arrRR, arrSS, arrTT, 
+    arrUU, arrVV, arrWW, arrXX, arrYY, arrZX, 
+    arrZY, arrZZ];
+
+// Bigger nested array series
+const nestedA = [masterArr, arrZZ];
+const nestedB = [nestedA, masterArr];
+const nestedC = [nestedB, nestedA];
+const nestedD = [nestedC, nestedB];
+const nestedE = [nestedD, nestedC];
+const nestedF = [nestedE, nestedD];
+const nestedG = [nestedF, nestedE];
+const nestedH = [nestedG, nestedF];
+const nestedI = [nestedH, nestedG];
+const nestedJ = [nestedI, nestedH];
+const nestedK = [nestedJ, nestedI];
+const nestedL = [nestedK, nestedJ];
+const nestedM = [nestedL, nestedK];
+const nestedN = [nestedM, nestedL];
+const nestedO = [nestedN, nestedM];
+const nestedP = [nestedO, nestedN];
+const nestedQ = [nestedP, nestedO];
+const nestedR = [nestedQ, nestedP];
+const nestedS = [nestedR, nestedQ];
+const nestedT = [nestedS, nestedR];
+const nestedU = [nestedT, nestedS];
+const nestedV = [nestedU, nestedT];
+const nestedW = [nestedV, nestedU];
+const nestedX = [nestedW, nestedV];
+const nestedY = [nestedX, nestedW];
+const nestedZ = [nestedY, nestedX];
+const nestedAA = [nestedZ, nestedY];
+const nestedBB = [nestedAA, nestedZ];
+const nestedCC = [nestedBB, nestedAA];
+const nestedDD = [nestedCC, nestedBB];
+const nestedEE = [nestedDD, nestedCC];
+const nestedFF = [nestedEE, nestedDD];
+const nestedGG = [nestedFF, nestedEE];
+const nestedHH = [nestedGG, nestedFF];
+const nestedII = [nestedHH, nestedGG];
+const nestedJJ = [nestedII, nestedHH];
+const nestedKK = [nestedJJ, nestedII];
+const nestedLL = [nestedKK, nestedJJ];
+const nestedMM = [nestedLL, nestedKK];
+const nestedNN = [nestedMM, nestedLL];
+const nestedOO = [nestedNN, nestedMM];
+const nestedPP = [nestedOO, nestedNN];
+const nestedQQ = [nestedPP, nestedOO];
+const nestedRR = [nestedQQ, nestedPP];
+const nestedSS = [nestedRR, nestedQQ];
+const nestedTT = [nestedSS, nestedRR];
+const nestedUU = [nestedTT, nestedSS];
+const nestedVV = [nestedUU, nestedTT];
+const nestedWW = [nestedVV, nestedUU];
+const nestedXX = [nestedWW, nestedVV];
+const nestedYY = [nestedXX, nestedWW];
+const nestedZZ = [nestedYY, nestedXX];
+const nestedAAA = [nestedZZ, nestedYY];
+const nestedBBB = [nestedAAA, nestedZZ];
+const nestedCCC = [nestedBBB, nestedAAA];
+const nestedDDD = [nestedCCC, nestedBBB];
+const nestedEEE = [nestedDDD, nestedCCC];
+const nestedFFF = [nestedEEE, nestedDDD];
+const nestedGGG = [nestedFFF, nestedEEE];
+const nestedHHH = [nestedGGG, nestedFFF];
+const nestedIII = [nestedHHH, nestedGGG];
+const nestedJJJ = [nestedIII, nestedHHH];
+const nestedKKK = [nestedJJJ, nestedIII];
+const nestedLLL = [nestedKKK, nestedJJJ];
+const nestedMMM = [nestedLLL, nestedKKK];
+const nestedNNN = [nestedMMM, nestedLLL];
+const nestedOOO = [nestedNNN, nestedMMM];
+const nestedPPP = [nestedOOO, nestedNNN];
+const nestedQQQ = [nestedPPP, nestedOOO];
+const nestedRRR = [nestedQQQ, nestedPPP];
+const nestedSSS = [nestedRRR, nestedQQQ];
+const nestedTTT = [nestedSSS, nestedRRR];
+const nestedUUU = [nestedTTT, nestedSSS];
+const nestedVVV = [nestedUUU, nestedTTT];
+const nestedWWW = [nestedVVV, nestedUUU];
+const nestedXXX = [nestedWWW, nestedVVV];
+const nestedYYY = [nestedXXX, nestedWWW];
+const nestedZZZ = [nestedYYY, nestedXXX];
+
+// Even Sillier Array Series of Utter Nonsense
+const arrWobblyWombat = [nestedZZZ, masterArr];
+const arrGigglingGnome = [arrWobblyWombat, nestedZZZ];
+const arrSnortingSphinx = [arrGigglingGnome, arrWobblyWombat];
+const arrBumblingBadger = [arrSnortingSphinx, arrGigglingGnome];
+const arrChortlingChicken = [arrBumblingBadger, arrSnortingSphinx];
+const arrDaringDodo = [arrChortlingChicken, arrBumblingBadger];
+const arrEnergeticEmu = [arrDaringDodo, arrChortlingChicken];
+const arrFluffyFerret = [arrEnergeticEmu, arrDaringDodo];
+const arrGrumpyGoat = [arrFluffyFerret, arrEnergeticEmu];
+const arrHappyHippo = [arrGrumpyGoat, arrFluffyFerret];
+const arrInvisibleIguana = [arrHappyHippo, arrGrumpyGoat];
+const arrJollyJellyfish = [arrInvisibleIguana, arrHappyHippo];
+const arrKookyKangaroo = [arrJollyJellyfish, arrInvisibleIguana];
+const arrLazyLlama = [arrKookyKangaroo, arrJollyJellyfish];
+const arrMysticMeerkat = [arrLazyLlama, arrKookyKangaroo];
+const arrNappingNarwhal = [arrMysticMeerkat, arrLazyLlama];
+const arrOutgoingOctopus = [arrNappingNarwhal, arrMysticMeerkat];
+const arrPlayfulPenguin = [arrOutgoingOctopus, arrNappingNarwhal];
+const arrQuietQuokka = [arrPlayfulPenguin, arrOutgoingOctopus];
+const arrRacingRabbit = [arrQuietQuokka, arrPlayfulPenguin];
+const arrSleepySloth = [arrRacingRabbit, arrQuietQuokka];
+const arrTalkingTurtle = [arrSleepySloth, arrRacingRabbit];
+const arrUnusualUnicorn = [arrTalkingTurtle, arrSleepySloth];
+const arrVividViper = [arrUnusualUnicorn, arrTalkingTurtle];
+const arrWittyWalrus = [arrVividViper, arrUnusualUnicorn];
+const arrXenialXerus = [arrWittyWalrus, arrVividViper];
+const arrYawningYak = [arrXenialXerus, arrWittyWalrus];
+const arrZanyZebra = [arrYawningYak, arrXenialXerus];
+const arrChucklingChimpanzee = [arrZanyZebra, arrYawningYak];
+const arrDancingDolphin = [arrChucklingChimpanzee, arrZanyZebra];
+const arrPrancingPangolin = [arrDancingDolphin, arrChucklingChimpanzee];
+const arrGallopingGazelle = [arrPrancingPangolin, arrDancingDolphin];
+const arrHoppingHare = [arrGallopingGazelle, arrPrancingPangolin];
+const arrJumpingJerboa = [arrHoppingHare, arrGallopingGazelle];
+const arrLeapingLemur = [arrJumpingJerboa, arrHoppingHare];
+const arrMunchingMongoose = [arrLeapingLemur, arrJumpingJerboa];
+const arrNoodlingNewt = [arrMunchingMongoose, arrLeapingLemur];
+const arrOglingOstrich = [arrNoodlingNewt, arrMunchingMongoose];
+const arrPonderingPlatypus = [arrOglingOstrich, arrNoodlingNewt];
+const arrQuiveringQuail = [arrPonderingPlatypus, arrOglingOstrich];
+const arrRamblingRaccoon = [arrQuiveringQuail, arrPonderingPlatypus];
+const arrSneezingSalamander = [arrRamblingRaccoon, arrQuiveringQuail];
+const arrTumblingTapir = [arrSneezingSalamander, arrRamblingRaccoon];
+const arrWanderingWarthog = [arrTumblingTapir, arrSneezingSalamander];
+const arrZippingZorilla = [arrWanderingWarthog, arrTumblingTapir];
+
+// The Grand Expansion: 100 New Arrays of Ultimate Silliness
+const arrBouncingBacon = [arrZippingZorilla, tacoArray];
+const arrWhistlingWaffle = [arrBouncingBacon, arrZippingZorilla];
+const arrTicklingToast = [arrWhistlingWaffle, arrBouncingBacon];
+const arrGigglingGravy = [arrTicklingToast, arrWhistlingWaffle];
+const arrChortlingCheese = [arrGigglingGravy, arrTicklingToast];
+const arrSnickingSpaghetti = [arrChortlingCheese, arrGigglingGravy];
+const arrBubblingBurrito = [arrSnickingSpaghetti, arrChortlingCheese];
+const arrCacklingCupcake = [arrBubblingBurrito, arrSnickingSpaghetti];
+const arrHooteringHotdog = [arrCacklingCupcake, arrBubblingBurrito];
+const arrGuffawingGumbo = [arrHooteringHotdog, arrCacklingCupcake];
+const arrSnortingStrudel = [arrGuffawingGumbo, arrHooteringHotdog];
+const arrBellowingBagel = [arrSnortingStrudel, arrGuffawingGumbo];
+const arrRoaringRavioli = [arrBellowingBagel, arrSnortingStrudel];
+const arrHowlingHamburger = [arrRoaringRavioli, arrBellowingBagel];
+const arrYellingYogurt = [arrHowlingHamburger, arrRoaringRavioli];
+const arrScreamingSalad = [arrYellingYogurt, arrHowlingHamburger];
+const arrWailingWater = [arrScreamingSalad, arrYellingYogurt];
+const arrSobbingSoup = [arrWailingWater, arrScreamingSalad];
+const arrWeepingWine = [arrSobbingSoup, arrWailingWater];
+const arrCryingCola = [arrWeepingWine, arrSobbingSoup];
+const arrBawlingBeer = [arrCryingCola, arrWeepingWine];
+const arrMournfulMilk = [arrBawlingBeer, arrCryingCola];
+const arrLamentingLemonade = [arrMournfulMilk, arrBawlingBeer];
+const arrGrievingGatorade = [arrLamentingLemonade, arrMournfulMilk];
+const arrWhimperingWhiskey = [arrGrievingGatorade, arrLamentingLemonade];
+const arrSnifflingSprite = [arrWhimperingWhiskey, arrGrievingGatorade];
+const arrHiccupingHotChocolate = [arrSnifflingSprite, arrWhimperingWhiskey];
+const arrBurpingBrandy = [arrHiccupingHotChocolate, arrSnifflingSprite];
+const arrGurglingGin = [arrBurpingBrandy, arrHiccupingHotChocolate];
+const arrGarglingVodka = [arrGurglingGin, arrBurpingBrandy];
+const arrSlurpingSlurpee = [arrGarglingVodka, arrGurglingGin];
+const arrGulpingGrapeJuice = [arrSlurpingSlurpee, arrGarglingVodka];
+const arrSippingSoda = [arrGulpingGrapeJuice, arrSlurpingSlurpee];
+const arrDrinkingDrPepper = [arrSippingSoda, arrGulpingGrapeJuice];
+const arrGuzzlingGingerAle = [arrDrinkingDrPepper, arrSippingSoda];
+const arrChuggingCoffee = [arrGuzzlingGingerAle, arrDrinkingDrPepper];
+const arrSlammingShake = [arrChuggingCoffee, arrGuzzlingGingerAle];
+const arrDowningDaiquiri = [arrSlammingShake, arrChuggingCoffee];
+const arrNippingNectar = [arrDowningDaiquiri, arrSlammingShake];
+const arrTastingTea = [arrNippingNectar, arrDowningDaiquiri];
+const arrSavoringSmoothie = [arrTastingTea, arrNippingNectar];
+const arrRelishingRootBeer = [arrSavoringSmoothie, arrTastingTea];
+const arrEnjoyingEspresso = [arrRelishingRootBeer, arrSavoringSmoothie];
+const arrAppreciatingAppleJuice = [arrEnjoyingEspresso, arrRelishingRootBeer];
+const arrDelightingInDietCoke = [arrAppreciatingAppleJuice, arrEnjoyingEspresso];
+const arrRevelingInRedBull = [arrDelightingInDietCoke, arrAppreciatingAppleJuice];
+const arrBaskingInBubbleTea = [arrRevelingInRedBull, arrDelightingInDietCoke];
+const arrSoakingInSeltzer = [arrBaskingInBubbleTea, arrRevelingInRedBull];
+const arrBathingInButtermilk = [arrSoakingInSeltzer, arrBaskingInBubbleTea];
+const arrSwimmingInSyrup = [arrBathingInButtermilk, arrSoakingInSeltzer];
+const arrDivingIntoDonutGlaze = [arrSwimmingInSyrup, arrBathingInButtermilk];
+const arrPlungingIntoPizza = [arrDivingIntoDonutGlaze, arrSwimmingInSyrup];
+const arrCannonballingIntoCake = [arrPlungingIntoPizza, arrDivingIntoDonutGlaze];
+const arrBellyfloppingIntoBrownies = [arrCannonballingIntoCake, arrPlungingIntoPizza];
+const arrBackflippingIntoBread = [arrBellyfloppingIntoBrownies, arrCannonballingIntoCake];
+const arrSomersaultingIntoSandwiches = [arrBackflippingIntoBread, arrBellyfloppingIntoBrownies];
+const arrCartwheelingIntoCookies = [arrSomersaultingIntoSandwiches, arrBackflippingIntoBread];
+const arrHandstandingIntoHam = [arrCartwheelingIntoCookies, arrSomersaultingIntoSandwiches];
+const arrWalkingOnWaffles = [arrHandstandingIntoHam, arrCartwheelingIntoCookies];
+const arrRunningOnRice = [arrWalkingOnWaffles, arrHandstandingIntoHam];
+const arrJoggingOnJam = [arrRunningOnRice, arrWalkingOnWaffles];
+const arrSprintingOnSpaghetti = [arrJoggingOnJam, arrRunningOnRice];
+const arrDashingOnDonuts = [arrSprintingOnSpaghetti, arrJoggingOnJam];
+const arrRacingOnRaisins = [arrDashingOnDonuts, arrSprintingOnSpaghetti];
+const arrGallopingOnGrapes = [arrRacingOnRaisins, arrDashingOnDonuts];
+const arrCanteringOnCroutons = [arrGallopingOnGrapes, arrRacingOnRaisins];
+const arrTrottingOnTacos = [arrCanteringOnCroutons, arrGallopingOnGrapes];
+const arrPrancingOnPancakes = [arrTrottingOnTacos, arrCanteringOnCroutons];
+const arrSkippingOnSkittles = [arrPrancingOnPancakes, arrTrottingOnTacos];
+const arrHoppingOnHotdogs = [arrSkippingOnSkittles, arrPrancingOnPancakes];
+const arrBouncingOnBurgers = [arrHoppingOnHotdogs, arrSkippingOnSkittles];
+const arrLeapingOnLasagna = [arrBouncingOnBurgers, arrHoppingOnHotdogs];
+const arrJumpingOnJelly = [arrLeapingOnLasagna, arrBouncingOnBurgers];
+const arrVaultingOverVeggies = [arrJumpingOnJelly, arrLeapingOnLasagna];
+const arrPoleVaultingOverPasta = [arrVaultingOverVeggies, arrJumpingOnJelly];
+const arrHighJumpingOverHoney = [arrPoleVaultingOverPasta, arrVaultingOverVeggies];
+const arrLongJumpingOverLollipops = [arrHighJumpingOverHoney, arrPoleVaultingOverPasta];
+const arrTripleJumpingOverTofu = [arrLongJumpingOverLollipops, arrHighJumpingOverHoney];
+const arrBroadJumpingOverBroccoli = [arrTripleJumpingOverTofu, arrLongJumpingOverLollipops];
+const arrHurdlingOverHummus = [arrBroadJumpingOverBroccoli, arrTripleJumpingOverTofu];
+const arrSteeplechasingOverSalami = [arrHurdlingOverHummus, arrBroadJumpingOverBroccoli];
+const arrCrawlingUnderCheese = [arrSteeplechasingOverSalami, arrHurdlingOverHummus];
+const arrSlitheringUnderSushi = [arrCrawlingUnderCheese, arrSteeplechasingOverSalami];
+const arrWrigglingUnderWasabi = [arrSlitheringUnderSushi, arrCrawlingUnderCheese];
+const arrSquirmingUnderSquash = [arrWrigglingUnderWasabi, arrSlitheringUnderSushi];
+const arrTwistingUnderTurnips = [arrSquirmingUnderSquash, arrWrigglingUnderWasabi];
+const arrContortingUnderCorn = [arrTwistingUnderTurnips, arrSquirmingUnderSquash];
+const arrBendingUnderBeets = [arrContortingUnderCorn, arrTwistingUnderTurnips];
+const arrFlexingUnderFruits = [arrBendingUnderBeets, arrContortingUnderCorn];
+const arrStretchingUnderStrawberries = [arrFlexingUnderFruits, arrBendingUnderBeets];
+const arrYogaingUnderYams = [arrStretchingUnderStrawberries, arrFlexingUnderFruits];
+const arrMeditatingUnderMangoes = [arrYogaingUnderYams, arrStretchingUnderStrawberries];
+const arrLevitatingUnderLemons = [arrMeditatingUnderMangoes, arrYogaingUnderYams];
+const arrFloatingUnderFigs = [arrLevitatingUnderLemons, arrMeditatingUnderMangoes];
+const arrHoveringUnderHabaneros = [arrFloatingUnderFigs, arrLevitatingUnderLemons];
+const arrSoaringUnderSalsa = [arrHoveringUnderHabaneros, arrFloatingUnderFigs];
+const arrGlidingUnderGuacamole = [arrSoaringUnderSalsa, arrHoveringUnderHabaneros];
+const arrDriftingUnderDip = [arrGlidingUnderGuacamole, arrSoaringUnderSalsa];
+const arrSailingUnderSauce = [arrDriftingUnderDip, arrGlidingUnderGuacamole];
+const arrCruisingUnderCream = [arrSailingUnderSauce, arrDriftingUnderDip];
+const arrNavigatingUnderNachos = [arrCruisingUnderCream, arrSailingUnderSauce];
+const arrSteeringUnderSyrup = [arrNavigatingUnderNachos, arrCruisingUnderCream];
+const arrPilotingUnderPickles = [arrSteeringUnderSyrup, arrNavigatingUnderNachos];
+const arrDrivingUnderDressing = [arrPilotingUnderPickles, arrSteeringUnderSyrup];
+const arrMotorcyclingUnderMustard = [arrDrivingUnderDressing, arrPilotingUnderPickles];
+const arrBikingUnderButter = [arrMotorcyclingUnderMustard, arrDrivingUnderDressing];
+const arrCyclingUnderCinnamon = [arrBikingUnderButter, arrMotorcyclingUnderMustard];
+const arrPedalingUnderPepper = [arrCyclingUnderCinnamon, arrBikingUnderButter];
+const arrRidingUnderRelish = [arrPedalingUnderPepper, arrCyclingUnderCinnamon];
+const arrGallopingUnderGarlic = [arrRidingUnderRelish, arrPedalingUnderPepper];
+
+// Sequential Letter Array Series: 77 More Arrays
+const arrA_New = [arrGallopingUnderGarlic, masterArr];
+const arrB_New = [arrA_New, arrGallopingUnderGarlic];
+const arrC_New = [arrB_New, arrA_New];
+const arrD_New = [arrC_New, arrB_New];
+const arrE_New = [arrD_New, arrC_New];
+const arrF_New = [arrE_New, arrD_New];
+const arrG_New = [arrF_New, arrE_New];
+const arrH_New = [arrG_New, arrF_New];
+const arrI_New = [arrH_New, arrG_New];
+const arrJ_New = [arrI_New, arrH_New];
+const arrK_New = [arrJ_New, arrI_New];
+const arrL_New = [arrK_New, arrJ_New];
+const arrM_New = [arrL_New, arrK_New];
+const arrN_New = [arrM_New, arrL_New];
+const arrO_New = [arrN_New, arrM_New];
+const arrP_New = [arrO_New, arrN_New];
+const arrQ_New = [arrP_New, arrO_New];
+const arrR_New = [arrQ_New, arrP_New];
+const arrS_New = [arrR_New, arrQ_New];
+const arrT_New = [arrS_New, arrR_New];
+const arrU_New = [arrT_New, arrS_New];
+const arrV_New = [arrU_New, arrT_New];
+const arrW_New = [arrV_New, arrU_New];
+const arrX_New = [arrW_New, arrV_New];
+const arrY_New = [arrX_New, arrW_New];
+const arrZ_New = [arrY_New, arrX_New];
+const arrAA_New = [arrZ_New, arrY_New];
+const arrAB_New = [arrAA_New, arrZ_New];
+const arrAC_New = [arrAB_New, arrAA_New];
+const arrAD_New = [arrAC_New, arrAB_New];
+const arrAE_New = [arrAD_New, arrAC_New];
+const arrAF_New = [arrAE_New, arrAD_New];
+const arrAG_New = [arrAF_New, arrAE_New];
+const arrAH_New = [arrAG_New, arrAF_New];
+const arrAI_New = [arrAH_New, arrAG_New];
+const arrAJ_New = [arrAI_New, arrAH_New];
+const arrAK_New = [arrAJ_New, arrAI_New];
+const arrAL_New = [arrAK_New, arrAJ_New];
+const arrAM_New = [arrAL_New, arrAK_New];
+const arrAN_New = [arrAM_New, arrAL_New];
+const arrAO_New = [arrAN_New, arrAM_New];
+const arrAP_New = [arrAO_New, arrAN_New];
+const arrAQ_New = [arrAP_New, arrAO_New];
+const arrAR_New = [arrAQ_New, arrAP_New];
+const arrAS_New = [arrAR_New, arrAQ_New];
+const arrAT_New = [arrAS_New, arrAR_New];
+const arrAU_New = [arrAT_New, arrAS_New];
+const arrAV_New = [arrAU_New, arrAT_New];
+const arrAW_New = [arrAV_New, arrAU_New];
+const arrAX_New = [arrAW_New, arrAV_New];
+const arrAY_New = [arrAX_New, arrAW_New];
+const arrAZ_New = [arrAY_New, arrAX_New];
+const arrBA_New = [arrAZ_New, arrAY_New];
+const arrBB_New = [arrBA_New, arrAZ_New];
+const arrBC_New = [arrBB_New, arrBA_New];
+const arrBD_New = [arrBC_New, arrBB_New];
+const arrBE_New = [arrBD_New, arrBC_New];
+const arrBF_New = [arrBE_New, arrBD_New];
+const arrBG_New = [arrBF_New, arrBE_New];
+const arrBH_New = [arrBG_New, arrBF_New];
+const arrBI_New = [arrBH_New, arrBG_New];
+const arrBJ_New = [arrBI_New, arrBH_New];
+const arrBK_New = [arrBJ_New, arrBI_New];
+const arrBL_New = [arrBK_New, arrBJ_New];
+const arrBM_New = [arrBL_New, arrBK_New];
+const arrBN_New = [arrBM_New, arrBL_New];
+const arrBO_New = [arrBN_New, arrBM_New];
+const arrBP_New = [arrBO_New, arrBN_New];
+const arrBQ_New = [arrBP_New, arrBO_New];
+const arrBR_New = [arrBQ_New, arrBP_New];
+const arrBS_New = [arrBR_New, arrBQ_New];
+const arrBT_New = [arrBS_New, arrBR_New];
+const arrBU_New = [arrBT_New, arrBS_New];
+const arrBV_New = [arrBU_New, arrBT_New];
+const arrBW_New = [arrBV_New, arrBU_New];
+const arrBX_New = [arrBW_New, arrBV_New];
+const arrBY_New = [arrBX_New, arrBW_New];
+const arrBZ_New = [arrBY_New, arrBX_New];
+const arrCA_New = [arrBZ_New, arrBY_New];
+const arrCB_New = [arrCA_New, arrBZ_New];
+const arrCC_New = [arrCB_New, arrCA_New];
+const arrCD_New = [arrCC_New, arrCB_New];
+const arrCE_New = [arrCD_New, arrCC_New];
+
+// THE MIND-BENDING FINALE: Arrays That Break Reality
+const arrThatEatsOtherArrays = [arrCE_New, masterArr, nestedZZZ];
+const arrInfiniteRecursion = [];
+arrInfiniteRecursion[0] = arrInfiniteRecursion;
+arrInfiniteRecursion[1] = [arrInfiniteRecursion, arrThatEatsOtherArrays];
+
+const arrQuantumSuperposition = [
+    Math.random() > 0.5 ? arrCE_New : arrThatEatsOtherArrays,
+    Date.now(),
+    "🌮🦄💫",
+    [[[[[arrInfiniteRecursion]]]]]
+];
+
+const arrMultidimensionalChaos = Array(42).fill().map((_, i) => 
+    Array(i + 1).fill([arrQuantumSuperposition, i, "dimension_" + i])
+);
+
+const arrTimeParadox = [new Date("1999-12-31"), arrMultidimensionalChaos, new Date("3000-01-01")];
+
+const arrSchrödingersArray = {
+    alive: [arrTimeParadox, "Parmley"],
+    dead: [arrTimeParadox, "Stettler"],
+    both: [arrTimeParadox, "Quantum Alex"]
+};
+
+const arrBigBang = [
+    "In the beginning, there was nothing...",
+    arrSchrödingersArray,
+    "...then suddenly, ARRAYS EVERYWHERE!",
+    Array(1000000).fill("🌟") // This will be truncated by the new renderArray
+];
+
+const arrBlackHole = function() {
+    return [arrBigBang, arguments.callee, this, arrBlackHole];
+};
+
+const arrWormhole = new Proxy([], {
+    get: () => arrBlackHole,
+    set: () => arrQuantumSuperposition
+});
+
+// Corrected order for circular dependencies:
+// 1. Define arrThatAddsArrayIntoItself (as empty)
+const arrThatAddsArrayIntoItself = [];
+
+// 2. Define ARRAY_OF_ULTIMATE_COSMIC_POWER (uses the initialized arrThatAddsArrayIntoItself)
+const ARRAY_OF_ULTIMATE_COSMIC_POWER = [
+    arrBigBang,
+    arrBlackHole(),
+    arrWormhole,
+    Math.PI,
+    "The answer to life, the universe, and everything: " + 42,
+    arrThatAddsArrayIntoItself,
+    Symbol("🚀ARRAY_MADNESS🚀"),
+    new Map([["chaos", arrMultidimensionalChaos], ["order", masterArr]]),
+    new Set([arrQuantumSuperposition, arrTimeParadox, arrSchrödingersArray])
+];
+
+// 3. Define ultimateArray (uses initialized arrThatAddsArrayIntoItself and ARRAY_OF_ULTIMATE_COSMIC_POWER)
+const ultimateArray = [
+    masterArr, nestedZZZ, arrZippingZorilla, arrWobblyWombat, arrGigglingGnome, 
+    tacoArray, arrThatAddsArrayIntoItself, arrGallopingUnderGarlic, arrBouncingBacon, 
+    arrWhistlingWaffle, arrTicklingToast, arrCE_New, ARRAY_OF_ULTIMATE_COSMIC_POWER
+];
+
+// 4. Mutate arrThatAddsArrayIntoItself now that ultimateArray is defined
+arrThatAddsArrayIntoItself.push(arrThatAddsArrayIntoItself, ultimateArray);
+
+
+// Export for the frontend to witness the madness
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { ultimateArray, ARRAY_OF_ULTIMATE_COSMIC_POWER, arrQuantumSuperposition };
+}
+
+console.log("🎉 CONGRATULATIONS! You have successfully created the most ridiculous array file in existence! 🎉");
+console.log("Array count: OVER 9000! 🚀");
+console.log("Silliness level: MAXIMUM! To many.");
+
+// Rendering arrays to the frontend - Updated function
+const MAX_RENDER_DEPTH = 12; 
+const MAX_ARRAY_ITEMS_DISPLAY = 15; // Reduced for better tree visibility
+
+function renderArray(name, currentElement, parentListElement, depth = 0, visitedObjects = new Set()) {
+    const nodeItem = document.createElement('li');
+    nodeItem.classList.add('tree-node');
+    if (depth === 0) {
+        nodeItem.classList.add('tree-root');
+    }
+    parentListElement.appendChild(nodeItem);
+
+    const title = document.createElement('h1');
+    title.textContent = name;
+    nodeItem.appendChild(title);
+
+    let messageSpan; // For messages
+
+    if (depth > MAX_RENDER_DEPTH) {
+        messageSpan = document.createElement('span');
+        messageSpan.classList.add('info-message');
+        messageSpan.textContent = "[Max rendering depth reached]";
+        nodeItem.appendChild(messageSpan);
+        nodeItem.classList.add('message-node'); // Add class for styling leaf message nodes
+        return;
+    }
+
+    if (currentElement === arrInfiniteRecursion || currentElement === arrThatAddsArrayIntoItself) {
+        messageSpan = document.createElement('span');
+        messageSpan.classList.add('warning-message');
+        messageSpan.textContent = `[Contents not displayed due to self-reference to prevent crash]`;
+        nodeItem.appendChild(messageSpan);
+        nodeItem.classList.add('special-message-node'); // Add class for styling
+        return; 
+    }
+
+    if (typeof currentElement === 'object' && currentElement !== null) {
+        if (visitedObjects.has(currentElement)) {
+            messageSpan = document.createElement('span');
+            messageSpan.classList.add('info-message');
+            messageSpan.textContent = "[Circular reference detected by visited set]";
+            nodeItem.appendChild(messageSpan);
+            nodeItem.classList.add('message-node');
+            return;
+        }
+        visitedObjects.add(currentElement);
+    }
+
+    if (Array.isArray(currentElement)) {
+        if (currentElement.length > 0) {
+            const childrenUl = document.createElement('ul');
+            nodeItem.appendChild(childrenUl);
+            const itemsToDisplay = currentElement.slice(0, MAX_ARRAY_ITEMS_DISPLAY);
+            itemsToDisplay.forEach((item, index) => {
+                let childName = `Item ${index}`;
+                if (Array.isArray(item)) childName = `Child Array at index ${index}`;
+                else if (typeof item === 'object' && item !== null && !(item instanceof Date) && !(item instanceof Map) && !(item instanceof Set)) childName = `Object at index ${index}`;
+                renderArray(childName, item, childrenUl, depth + 1, visitedObjects);
+            });
+
+            if (currentElement.length > MAX_ARRAY_ITEMS_DISPLAY) {
+                const moreLi = document.createElement('li');
+                moreLi.classList.add('tree-node', 'message-node'); // Style as a leaf message
+                const moreSpan = document.createElement('span');
+                moreSpan.classList.add('info-message');
+                moreSpan.textContent = `... and ${currentElement.length - MAX_ARRAY_ITEMS_DISPLAY} more items.`;
+                moreLi.appendChild(moreSpan)
+                childrenUl.appendChild(moreLi);
+            }
+        } else {
+             messageSpan = document.createElement('span');
+             messageSpan.textContent = "[Empty Array]";
+             nodeItem.appendChild(messageSpan);
+        }
+    } else if (typeof currentElement === 'object' && currentElement !== null && !(currentElement instanceof Date) && !(currentElement instanceof Map) && !(currentElement instanceof Set) && !(typeof currentElement === 'function') && !(typeof currentElement === 'symbol')) {
+        const childrenUl = document.createElement('ul');
+        let hasKeys = false;
+        for (const key in currentElement) {
+            if (Object.prototype.hasOwnProperty.call(currentElement, key)) {
+                hasKeys = true;
+                renderArray(`Property "${key}"`, currentElement[key], childrenUl, depth + 1, visitedObjects);
+            }
+        }
+        if (hasKeys) {
+            nodeItem.appendChild(childrenUl);
+        } else {
+            messageSpan = document.createElement('span');
+            messageSpan.textContent = "[Empty Object]";
+            nodeItem.appendChild(messageSpan);
+        }
+    } else {
+        // Handle primitives and special object types as leaf values
+        const valueSpan = document.createElement('span');
+        let displayValue;
+        if (typeof currentElement === 'symbol') displayValue = currentElement.toString();
+        else if (currentElement instanceof Date) displayValue = `Date: ${currentElement.toISOString()}`;
+        else if (currentElement instanceof Map) displayValue = `Map (size ${currentElement.size})`;
+        else if (currentElement instanceof Set) displayValue = `Set (size ${currentElement.size})`;
+        else if (typeof currentElement === 'function') displayValue = `Function: ${currentElement.name || '(anonymous)'}`;
+        else displayValue = String(currentElement);
+        
+        valueSpan.textContent = `${displayValue.substring(0, 200)}${displayValue.length > 200 ? '...' : ''}`;
+        nodeItem.appendChild(valueSpan);
+    }
+    
+    if (typeof currentElement === 'object' && currentElement !== null) {
+        visitedObjects.delete(currentElement); 
+    }
+}
+
+const container = document.getElementById('array-container');
+const rootUl = document.createElement('ul'); // Create the root UL for the tree
+container.appendChild(rootUl);
+
+// Initial call to render the ultimateArray into the root UL
+renderArray('Ultimate Array', ultimateArray, rootUl);
+</script>
+</body>
+</html>
