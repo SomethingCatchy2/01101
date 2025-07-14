@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tower of Gable</title>
+  <link rel="icon" type="image/png" href="../../../../Images/favicon.png">
+  <link rel="stylesheet" href="cs.css">
+  <script type="module" src="je.js"></script>
+  <script src="/-Projects/esc-to-index.js"></script>
+</head>
+
+<body>
+  <!-- The .page-wrapper now handles the main content area -->
+  <div class="page-wrapper">
+
+    <!-- Left Sidebar: Quote Marquee - REMOVED, content moved to tab -->
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <div class="header-section">
+        <h1>Tower of Gable</h1> <!-- VERSION UPDATE - Web version: 15.1 -->
+        <p>About Tower of Gable. You are a four year old gambling addict named Gabel. The IRS has been hunting you for
+          the last 4 years, can you finally escape financial ruin? Find out in Tower of Gable</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs">
+        <button class="tab-button active" data-tab="gable">Gable</button>
+        <button id="upgrades-tab-button" class="tab-button" data-tab="upgrades" style="display: none;">
+          Upgrades <span class="upgrade-counter" id="upgrade-counter"></span>
+        </button>
+        <button id="status-tab-button" class="tab-button" data-tab="status" style="display: none;">Status &
+          Actions</button>
+        <!-- hide Shop until purchased -->
+        <button id="shop-tab-button" class="tab-button" data-tab="shop" style="display: none;">Shop</button>
+        <button id="gableisms-tab-button" class="tab-button" data-tab="gableisms"
+          style="display: none;">Gableisms</button>
+      </div>
+
+      <!-- Tab Content Panels -->
+      <div id="gable-tab" class="tab-content active">
+        <div class="box"> <!-- gable Stats -->
+          <p><strong>Dice Rolls:</strong> <span id="dice-rolls">-</span> | <strong>Bonus Points:</strong> <span
+              id="bonus-points">0</span> | <strong>Total Points:</strong> <span id="total-points">-</span></p>
+          <p><strong>Wins:</strong> <span id="wins">0</span> | <strong>Rolls:</strong> <span id="total-rolls">0</span>
+          </p>
+          <p><strong>Earned:</strong> $<span id="money-earned">0.00</span> | <strong>Lost:</strong> $<span
+              id="money-lost">0.00</span> | <strong>Net:</strong> $<span id="net-money">0.00</span></p>
+        </div>
+        <div class="box"> <!-- gable Actions -->
+          <button id="roll-dice-btn">Roll Dice ($1)</button>
+          <button id="commit-btn">Commit</button>
+        </div>
+      </div>
+
+      <div id="status-tab" class="tab-content">
+        <div class="box"> <!-- Status Stats -->
+          <p>
+            <strong>Age:</strong> <span id="age-display">4</span> |
+            <strong>Location:</strong> <span id="location-display">North Carolina</span> |
+            <strong>Sleep:</strong> <span id="sleep-level">100</span>
+          </p>
+          <p id="muggability-info">
+            <strong>Muggability:</strong>
+            Base: <span id="muggability-base-display">50</span> |
+            Effective: <span id="muggability-effective-display">50</span>
+            <br>
+            <span id="muggability-explain" style="font-size:0.9em;color:#555;"></span>
+          </p>
+          <p id="tax-info">
+            <strong>Tax Info:</strong>
+            Rate: <span id="tax-rate-display">10.0%</span> |
+            Next Birthday: <span id="next-birthday-display">0m 0s</span> |
+            Estimated Tax: $<span id="estimated-tax-display">0.00</span>
+            <br>
+            <span style="font-size:0.9em;color:#555;">Taxes are paid on your birthday, based on your net worth and location. Upgrades can reduce your tax rate.</span>
+          </p>
+          <p>
+            <strong>Win Streak:</strong> <span id="win-streak-display">0</span> |
+            <strong>Missed Wins:</strong> <span id="missed-wins-display">0</span>
+          </p>
+          <p>
+            <strong>Available Actions:</strong>
+            <span id="actions-available-display" style="font-size:0.95em;color:#333;"></span>
+          </p>
+        </div>
+        <div class="box"> <!-- Status Actions -->
+          <button id="work-in-mines-btn">Work: In Mines (15s)</button>
+          <button id="work-in-office-btn">Work: In Office (12s)</button>
+          <button id="work-staple-tables-btn">Work: Staples Tables (4s)</button>
+          <button id="work-dog-walker-btn">Work: Walk Dogs (5s)</button>
+          <button id="take-nap-btn">Nap (5s)</button>
+          <button id="sleep-hobby-btn">Sleep (10s)</button>
+        </div>
+      </div>
+
+      <div id="shop-tab" class="tab-content">
+        <!-- Original shopping-box content moved here -->
+        <div class="box shopping-box collapsible-container">
+          <h4 id="shop-toggle">Shopping & Equipment <span class="toggle-indicator">▼</span></h4>
+          <div class="collapsible-content">
+            <!-- Helms -->
+            <div class="shop-section">
+              <h5>Helms</h5>
+              <div id="hat-shop-grid" class="shop-grid"></div>
+              <div class="equipment-select">
+                <label for="equip-hat-select">Equip Helm:</label>
+                <select id="equip-hat-select">
+                  <option value="">-- None --</option>
+                </select>
+              </div>
+            </div>
+            <!-- Coats -->
+            <div class="shop-section">
+              <h5>Coats</h5>
+              <div id="jacket-shop-grid" class="shop-grid"></div>
+              <div class="equipment-select">
+                <label for="equip-jacket-select">Equip Coat:</label>
+                <select id="equip-jacket-select">
+                  <option value="">-- None --</option>
+                </select>
+              </div>
+            </div>
+            <!-- Shirts -->
+            <div class="shop-section">
+              <h5>Shirts</h5>
+              <div id="shirt-shop-grid" class="shop-grid"></div>
+              <div class="equipment-select">
+                <label for="equip-shirt-select">Equip Shirt:</label>
+                <select id="equip-shirt-select">
+                  <option value="genericShirt">Generic Shirt</option>
+                </select>
+              </div>
+            </div>
+            <!-- Pants -->
+            <div class="shop-section">
+              <h5>Pants</h5>
+              <div id="pants-shop-grid" class="shop-grid"></div>
+              <div class="equipment-select">
+                <label for="equip-pants-select">Equip Pants:</label>
+                <select id="equip-pants-select">
+                  <option value="genericPants">Generic Pants</option>
+                </select>
+              </div>
+            </div>
+            <!-- Shoes -->
+            <div class="shop-section">
+              <h5>Shoes</h5>
+              <div id="shoes-shop-grid" class="shop-grid"></div>
+              <div class="equipment-select">
+                <label for="equip-shoes-select">Equip Shoes:</label>
+                <select id="equip-shoes-select">
+                  <option value="">-- None --</option>
+                </select>
+              </div>
+            </div>
+            <!-- Socks -->
+            <div class="shop-section">
+              <h5>Socks</h5>
+              <div id="socks-shop-grid" class="shop-grid"></div>
+              <div class="equipment-select">
+                <label for="equip-socks-select">Equip Socks:</label>
+                <select id="equip-socks-select">
+                  <option value="">-- None --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="upgrades-tab" class="tab-content">
+        <h4>Available Upgrades</h4>
+        <div id="available-upgrades" class="box">
+          <div id="no-upgrades-message" class="no-upgrades-message">No upgrades available yet. Keep playing to unlock
+            more!</div>
+          <div id="upgrades-container"></div>
+        </div>
+
+        <h4>Purchased Upgrades</h4>
+        <div id="purchased-upgrades" class="box">
+          <div id="no-purchased-upgrades-message" class="no-upgrades-message">You haven't purchased any upgrades yet.
+          </div>
+          <div id="purchased-upgrades-container"></div>
+        </div>
+      </div>
+      <!-- --- END: Upgrades Tab Content --- -->
+
+      <div id="gableisms-tab" class="tab-content">
+        <h4>Insperational Gableisms</h4>
+        <div class="box quote-marquee">
+          <div class="quote-content">
+            <p>Hello? Are you do gable?</p>
+            <p>Hello? Are you do need insperation?</p>
+            <p>Hello? Are you do LIGHTBULB?</p>
+            <p>"If you can't win big, at least lose with style." - Gabel, age 4</p>
+            <p>All dreams come, if have courage pursue.</p>
+            <p>"The house always wins, unless it's my house. My floor is Charred." - Gabel, age 5</p>
+            <p>5It never late be you have.</p>
+            <p>"Sometimes the best dice roll is the one you don't make." - Gabel, age 4½</p>
+            <p>Try to a of, but try become man value.</p>
+            <p>"Kid, we Staple Tables, not dreams." - Gabel, while avoiding the IRS</p>
+            <p>Keep face toward sunshine, shadows fall you.</p>
+            <p>"When life gives you debt, take a nap." - Gabel's philosophy</p>
+            <p>Either run day, the runs you.</p>
+            <p>"The difference between gabling and investing is the paperwork." - Gabel to his financial advisor</p>
+            <p>Every brings closer the home.</p>
+            <p>"Never shower. It washes away your luck." - Gabel's hygiene advice</p>
+            <p>Nothing impossible, word says possible.</p>
+            <p>"Dogs are loyal. The odds aren't. Unless you cheat." - Gabel on dog walking</p>
+            <p>Success of from to without of.</p>
+            <p>"Muggability is just a number, like my credit score... which is 990." - Gabel on safety</p>
+            <p>If dont the youre, start another.</p>
+            <p>"I'm not in debt; I'm just investing in future misery." - Gabel's optimism</p>
+            <p>He conquers is mightiest.</p>
+            <p>"24 is not just a number—it's a lifestyle." - Gabel's winning philosophy</p>
+            <p>One with makes majority.</p>
+            <p>"Mining for gold is easier than mining for bonus points. But I know which is better." - Gabel on career
+              choices</p>
+            <p>The adventure can take to the of dreams.</p>
+            <p>"Mom's not mad, she's just disappointed... She is a part of the IRS." - Gabel at tax season</p>
+            <p>The Preparation tomorrow doing best.</p>
+            <p>"When the dice don't roll your way, roll them with skill." - Gabel's strategy</p>
+            <p>Be you you in right, stand.</p>
+            <p>"Sleep is for winners. And also for sleepy people who need a break." - Gabel on rest</p>
+            <p>Life no, except ones make.</p>
+            <p>"The best skills are the ones you can't afford yet." - Gabel on aspirations</p>
+            <p>Everyone is taken.</p>
+            <p>"I don't have a gabling problem, I have a winning solution." - Gabel to his therapist</p>
+            <p>Nothing impossible is possible.</p>
+            <p>"Office work is just gabling with spreadsheets." - Gabel's career advice</p>
+            <p>The belongs those in the of dreams.</p>
+            <p>"If your muggability is high, your fashion sense is low." - Gabel on style</p>
+            <p>Keep face always the, and will behind you.</p>
+            <p>"Consecutive wins are like birthdays - they happen once a year if you're lucky." - Gabel</p>
+            <p>If can it, you can.</p>
+            <p>Keep eyes, and feet ground.</p>
+            <p>We must get rid the of life, so as to have the life.</p>
+            <p>I'd rather I've done than I haven't done.</p>
+            <p>Nothing all is impossible our dreams can courage, the word itself says if we have the to pursue them.</p>
+            <p>Those who, you.</p>
+            <p>Being in the was, tomato pursued.</p>
+            <p>If you soup, do not floor.</p>
+            <p>When you acquire, burn trash.</p>
+            <p>Get the new Ford F-120, then you Ernn Graph.</p>
+            <p>Grandma? Why do these cookies taste like ash?</p>
+            <p>Failure, an opportunity for Failure.</p>
+            <p>Do not Failure success.</p>
+            <p>I found a toad.</p>
+            <p>If tall, don’t short people too.</p>
+            <p>Help I having an heatstroke.</p>
+            <p>Are do flooring tiles? No.</p>
+            <p>Sir Ver once said “What would you like to order?”</p>
+            <p>If at first you don’t succeed, quit and blame others.</p>
+            <p>If forgot, forget forgot.</p>
+            <p>If you are in debt, take out a loan.</p>
+            <p>One must, your find.</p>
+            <p>If lost your, just your.</p>
+            <p>"The life is living." -Play Doh™</p>
+            <p>The only constant in life is x = (-b ± √(b² - 4ac)) / 2a.</p>
+            <p>Wasing in the doing, being in the not.</p>
+            <p>The mind not, but fire be kindled.</p>
+            <p>Every beginning, some beginning.</p>
+            <p>Wealth in having great, but having.</p>
+            <p>The greatest lies in falling, but in rising every we fall.</p>
+            <p>No great, without great your.</p>
+            <p>No without taxes.</p>
+            <p>Your dream is, follow and will.</p>
+            <p>Failure 99, still 1.</p>
+            <p>If you are in soup, do not in floor.</p>
+            <p>When Anthropology, you have.</p>
+            <p>Be one 2pays off debt, can’t work.</p>
+            <p>Thoes who can, and those who can; can.</p>
+            <p>If are ever that are good, remember Abraham hair.</p>
+            <p>Are do lightbulbs? Seven hundred men.</p>
+            <p>I have severe lung damage.</p>
+            <p>[cookie clicker reference]</p>
+            <p>Work and fun what do I that's more. have choose do.</p>
+            <p>Failure the that success flavor.</p>
+            <p>At one woke, morning the.</p>
+            <p><i>I</i> are do lightbulb</p>
+            <p>What's money? A is success he up the and to at and between what wants do.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar: Notification Log Area -->
+    <div class="sidebar right-sidebar">
+      <h4>Notificatiary</h4>
+      <div class="box notification-box">
+        <div id="notification-log"></div>
+      </div>
+    </div>
+
+  </div> <!-- End of .page-wrapper -->
+
+  <div id="message-display" style="display: none;"></div>
+
+  <footer> <!-- Footer is now outside page-wrapper, directly under body -->
+    <div class="audio-player">
+
+      <div class="audio-controls">
+        <button onclick="playAudio()">Play</button>
+        <button onclick="stopAudio()">Stop</button>
+        <input type="range" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)">
+      </div>
+    </div>
+    <audio id="myAudio" src="../../../../mp3 and mp4/Office2.wav" loop></audio>
+
+    <span>Tower of Gable v16 Beta (DLC 3)</span> <!-- VERSION UPDATE -->
+
+    <button id="bankruptcy-reset-btn">Reset Game</button>
+    <button id="manual-save-btn" class="elegant-btn">Manual Save</button>
+    <button id="dev-cheat-btn" class="elegant-btn"
+      style="display: inline-block; background-color: #ffcc00; color: #333;">Developer Mode</button>
+  </footer>
+
+
+</body>
+</html>
