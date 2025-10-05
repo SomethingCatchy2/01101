@@ -1,10 +1,10 @@
 // esc-to-index.js
 // Type the tower of gable shorthand to find the second hidden page
-(function() {
+(function () {
   let keyBuffer = "";
   const targetSequence = "tog";
 
-  window.addEventListener('keydown', function(e) {
+  window.addEventListener('keydown', function (e) {
     const key = e.key.toLowerCase();
     keyBuffer += key;
 
@@ -18,5 +18,5 @@
     } else if (!targetSequence.startsWith(keyBuffer)) {
       keyBuffer = ""; // Clear the buffer if the sequence is broken
     }
-  }, {capture:true});
+  }, { capture: true });
 })();

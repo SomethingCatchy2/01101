@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Pa!</title>
+    <link rel="stylesheet" href="/-Projects/new_index_helpers/style.css" />
+    <script src="/-Projects/esc-to-index.js"></script>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+</head>
+
+<body>
+    <h1>Welcome to a shopping list for to use!</h1>
+    <pre>You can input stuff and it will be saved to your browser's local stoage. <br>You also can check/uncheck stuff. <i>Adding/Removing Lists coming soon.</i>
+    </pre>
+
+    <!-- Add new item input -->
+    <div class="add-item-section">
+        <input type="text" class="item-input" id="mainItemInput" placeholder="Enter an item...">
+
+        <button onclick="addItemToSelectedList()" id="addButton">Add to</button>
+        <select id="listSelector" onchange="updateButtonText()">
+            <option value="dinnerList">Supper</option>
+            <option value="lunchList">L'nch</option>
+            <option value="breakfastList">Breekin'</option>
+            <option value="itemsList">Items</option>
+        </select>
+
+    </div>
+
+    <!-- Clear All button -->
+    <div>
+        <button onclick="clearSavedStates()">
+            Clear All
+        </button>
+    </div>
+
+    <pre>Supper</pre>
+    <hr>
+    <ol id="dinnerList">
+
+    </ol>
+
+    <pre>L'nch</pre>
+    <hr>
+    <ol id="lunchList">
+
+    </ol>
+
+    <pre>Breekin'</pre>
+    <hr>
+    <ol id="breakfastList">
+
+    </ol>
+
+    <!-- Individual items -->
+
+    <pre>Items</pre>
+    <hr>
+    <ol id="itemsList">
+
+    </ol>
+
+
+
+
+    <!-- An AI inclusion to have the states of the check boxes be saved to the local storage. This allows for to acctually
+     use this for a shopping list. Planned we are to add the ability to add things needed that also be savin. And
+     maybe like something else idk. Like presets of things or something. and also the logic behind the adding and removing items. -->
+    <script>
+        // Functions for the single input system
+        function updateButtonText() {
+            const select = document.getElementById('listSelector');
+            const button = document.getElementById('addButton');
+            const listNames = {
+                'dinnerList': 'Supper',
+                'lunchList': 'L\'nch',
+                'breakfastList': 'Breekin\'',
+                'itemsList': 'Items'
+            };
+            button.textContent = `Add to ${listNames[select.value]}`;
+
+            // Save the selected list to localStorage
+            localStorage.setItem('selectedList', select.value);
+        }
+
+        function addItemToSelectedList() {
+            const input = document.getElementById('mainItemInput');
+            const select = document.getElementById('listSelector');
+            const listId = select.value;
+
+            // Use the existing ShoppingListManager to add the item
+            if (input.value.trim() !== '') {
+                shoppingManager.addItemToList(listId, input.value.trim());
+                input.value = ''; // Clear input after adding
+            } else {
+                alert('Please enter an item name!');
+            }
+        }
+
+        // Handle Enter key for the main input
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('mainItemInput');
+            const select = document.getElementById('listSelector');
+
+            // Load saved list selection
+            const savedList = localStorage.getItem('selectedList');
+            if (savedList) {
+                select.value = savedList;
+            }
+
+            input.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    addItemToSelectedList();
+                }
+            });
+            // Set initial button text
+            updateButtonText();
+        });
+
+        // Modular Shopping List Manager
+        class ShoppingListManager {
+            constructor() {
+                this.lists = ['dinnerList', 'lunchList', 'breakfastList', 'itemsList'];
+                this.storageKeys = {
+                    checkboxes: 'shoppingListCheckboxStates',
+                    customItems: 'shoppingListCustomItems'
+                };
+            }
+
+            // Initialize the entire system
+            init() {
+                this.loadAllCustomItems();
+                this.loadCheckboxStates();
+                this.initializeAllCheckboxes();
+                this.setupInputHandlers();
+            }
+
+            // Add item to any list (modular function)
+            addItemToList(listId, itemText = null) {
+                // If itemText is not provided, get it from the input field
+                if (!itemText) {
+                    const input = document.querySelector(`input[data-list="${listId}"]`);
+                    itemText = input.value.trim();
+                }
+
+                if (itemText === '') {
+                    alert('Please enter an item name!');
+                    return;
+                }
+
+                // Create new list item with checkbox and delete button
+                const newListItem = this.createListItem(itemText, listId);
+
+                // Add to the specified list
+                const targetList = document.getElementById(listId);
+                targetList.appendChild(newListItem);
+
+                // Save and cleanup
+                this.saveCustomItems();
+                this.saveCheckboxStates();
+            }
+
+            // Create a standardized list item
+            createListItem(itemText, listId) {
+                const newListItem = document.createElement('li');
+                const newCheckbox = document.createElement('input');
+                newCheckbox.type = 'checkbox';
+
+                newListItem.appendChild(newCheckbox);
+                newListItem.appendChild(document.createTextNode(itemText));
+
+                // Add delete button for custom items
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = ' (remove item)';
+                deleteBtn.style.marginLeft = '10px';
+                deleteBtn.style.background = 'none';
+                deleteBtn.style.border = 'none';
+                deleteBtn.style.cursor = 'pointer';
+                deleteBtn.style.fontSize = '12px';
+                deleteBtn.onclick = () => this.removeCustomItem(newListItem, listId);
+                newListItem.appendChild(deleteBtn);
+
+                // Add event listener to checkbox
+                newCheckbox.addEventListener('change', () => this.saveCheckboxStates());
+
+                return newListItem;
+            }
+
+            // Remove custom item from any list
+            removeCustomItem(listItem, listId) {
+                listItem.remove();
+                this.saveCustomItems();
+                this.saveCheckboxStates();
+            }
+
+            // Save all custom items from all lists
+            saveCustomItems() {
+                const allCustomItems = {};
+
+                this.lists.forEach(listId => {
+                    const customItems = [];
+                    const list = document.getElementById(listId);
+                    const listItems = list.querySelectorAll('li');
+
+                    listItems.forEach(li => {
+                        const deleteBtn = li.querySelector('button');
+                        if (deleteBtn) { // Only save items with delete buttons (custom items)
+                            const text = li.childNodes[1].textContent;
+                            customItems.push(text);
+                        }
+                    });
+
+                    allCustomItems[listId] = customItems;
+                });
+
+                localStorage.setItem(this.storageKeys.customItems, JSON.stringify(allCustomItems));
+            }
+
+            // Load custom items for all lists
+            loadAllCustomItems() {
+                const savedItems = localStorage.getItem(this.storageKeys.customItems);
+                if (savedItems) {
+                    const allCustomItems = JSON.parse(savedItems);
+
+                    this.lists.forEach(listId => {
+                        if (allCustomItems[listId]) {
+                            this.loadCustomItemsForList(listId, allCustomItems[listId]);
+                        }
+                    });
+                }
+            }
+
+            // Load custom items for a specific list
+            loadCustomItemsForList(listId, customItems) {
+                const list = document.getElementById(listId);
+
+                // Clear existing custom items
+                const existingCustomItems = list.querySelectorAll('li button');
+                existingCustomItems.forEach(btn => {
+                    btn.parentElement.remove();
+                });
+
+                // Add saved custom items
+                customItems.forEach(itemText => {
+                    const newListItem = this.createListItem(itemText, listId);
+                    list.appendChild(newListItem);
+                });
+            }
+
+            // Save checkbox states for all lists
+            saveCheckboxStates() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                const checkboxStates = {};
+
+                checkboxes.forEach((checkbox, index) => {
+                    const listItem = checkbox.parentElement;
+                    const itemText = listItem.textContent.trim();
+                    const listId = listItem.parentElement.id;
+                    const key = `${listId}_${index}_${itemText.substring(0, 20)}`;
+                    checkboxStates[key] = checkbox.checked;
+                });
+
+                localStorage.setItem(this.storageKeys.checkboxes, JSON.stringify(checkboxStates));
+            }
+
+            // Load checkbox states for all lists
+            loadCheckboxStates() {
+                const savedStates = localStorage.getItem(this.storageKeys.checkboxes);
+                if (savedStates) {
+                    const checkboxStates = JSON.parse(savedStates);
+                    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox, index) => {
+                        const listItem = checkbox.parentElement;
+                        const itemText = listItem.textContent.trim();
+                        const listId = listItem.parentElement.id;
+                        const key = `${listId}_${index}_${itemText.substring(0, 20)}`;
+
+                        if (checkboxStates.hasOwnProperty(key)) {
+                            checkbox.checked = checkboxStates[key];
+                        }
+                    });
+                }
+            }
+
+            // Initialize all checkboxes with event listeners
+            initializeAllCheckboxes() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', () => this.saveCheckboxStates());
+                });
+            }
+
+            // Setup input handlers for Enter key
+            setupInputHandlers() {
+                const inputs = document.querySelectorAll('.item-input');
+                inputs.forEach(input => {
+                    input.addEventListener('keypress', (event) => {
+                        if (event.key === 'Enter') {
+                            const listId = input.getAttribute('data-list');
+                            this.addItemToList(listId);
+                        }
+                    });
+                });
+            }
+
+            // Clear all saved states
+            clearAllSavedStates() {
+                localStorage.removeItem(this.storageKeys.checkboxes);
+                localStorage.removeItem(this.storageKeys.customItems);
+                localStorage.removeItem('selectedList');
+
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+
+                // Remove all custom items
+                this.lists.forEach(listId => {
+                    const list = document.getElementById(listId);
+                    const customItems = list.querySelectorAll('li button');
+                    customItems.forEach(btn => {
+                        btn.parentElement.remove();
+                    });
+                });
+            }
+
+            // Add a new list section (for future expansion)
+            addNewListSection(listId, listTitle, placeholder) {
+                const body = document.body;
+
+                // Create title
+                const title = document.createElement('pre');
+                title.textContent = listTitle;
+
+                // Create hr
+                const hr = document.createElement('hr');
+
+                // Create input section
+                const inputSection = document.createElement('div');
+                inputSection.className = 'add-item-section';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'item-input';
+                input.placeholder = placeholder;
+                input.setAttribute('data-list', listId);
+
+                const button = document.createElement('button');
+                button.textContent = `Add to ${listTitle}`;
+                button.onclick = () => this.addItemToList(listId);
+
+                inputSection.appendChild(input);
+                inputSection.appendChild(button);
+
+                // Create list
+                const ul = document.createElement('ul');
+                ul.id = listId;
+
+                // Insert before script tag
+                const script = document.querySelector('script');
+                body.insertBefore(title, script);
+                body.insertBefore(hr, script);
+                body.insertBefore(inputSection, script);
+                body.insertBefore(ul, script);
+
+                // Add to lists array and reinitialize
+                this.lists.push(listId);
+                this.setupInputHandlers();
+            }
+        }
+
+        // Global instance
+        let shoppingManager;
+
+        // Global functions for backward compatibility and easy access
+        function addItemToList(listId) {
+            shoppingManager.addItemToList(listId);
+        }
+
+        function clearSavedStates() {
+            shoppingManager.clearAllSavedStates();
+        }
+
+        // Add new list programmatically (for future use)
+        function addNewList(listId, listTitle, placeholder) {
+            shoppingManager.addNewListSection(listId, listTitle, placeholder);
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            shoppingManager = new ShoppingListManager();
+            shoppingManager.init();
+        });
+    </script>
+
+
+</body>
+
+</html>

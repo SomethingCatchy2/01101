@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Scrite 4</title>
-        <link rel="stylesheet" href="../new_index_helpers/style.css">
-        <script src="/-Projects/esc-to-index.js"></script>
-        <link rel="icon" type="image/png" href="../../Images/favicon.png">
-    </head>
-    
-    <body>
-        <h1>Welcome to a shopping list for Sat, Oct, 4th, 20 20s of 5!</h1>
-        
-        <!-- Optional: Add a clear button -->
-        <div style="margin-top: 20px; text-align: center;">
-            <button onclick="clearSavedStates()" >
-                Clear All Checkboxes
-            </button>
-        </div>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrite 4</title>
+    <link rel="stylesheet" href="../new_index_helpers/style.css">
+    <script src="/-Projects/esc-to-index.js"></script>
+    <link rel="icon" type="image/png" href="../../Images/favicon.png">
+</head>
+
+<body>
+    <h1>Welcome to a shopping list for Sat, Oct, 4th, 20 20s of 5! (You have found the fourth secrite)</h1>
+
+    <!-- Optional: Add a clear button -->
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="clearSavedStates()">
+            Clear All Checkboxes
+        </button>
+    </div>
 
     <per>Dinner Mealz</per>
     <ul>
@@ -32,25 +32,26 @@
     </ul>
 
     <pre>L'nch</pre>
-        <ul>
-            <li><input type="checkbox">Boritoes</li>
-            <li><input type="checkbox">CHeese and Bread</li>
-            <li><input type="checkbox">Sandiches</li>
-            <li><input type="checkbox">Pasta Ronies</li>
-            <li><input type="checkbox"><i>Smak and Chez????</i></li>
-            <li><input type="checkbox">Left over/pre cut vegies for simple and fast.</li>
-        </ul>
+    <ul>
+        <li><input type="checkbox">Boritoes</li>
+        <li><input type="checkbox">CHeese and Bread</li>
+        <li><input type="checkbox">Sandiches</li>
+        <li><input type="checkbox">Pasta Ronies</li>
+        <li><input type="checkbox"><i>Smak and Chez????</i></li>
+        <li><input type="checkbox">Left over/pre cut vegies for simple and fast.</li>
+    </ul>
 
     <pre>Breekin'</pre>
-        <ul>
-            <li><input type="checkbox">PORGE/Gernernernerner (We only have 2 servings and I know how to make it now so errm we need more)</li>
-            <li><input type="checkbox">basica ahh yogies (greck)</li>
-            <li><input type="checkbox">slice of bread</li>
-            <li><input type="checkbox">frut</li>
-            <li><input type="checkbox"><i>kefar</i></li>
-            <li><input type="checkbox" checked>our egos (after all, we are the mostest most humbled, are we?)</li>
-        </ul>
-        
+    <ul>
+        <li><input type="checkbox">PORGE/Gernernernerner (We only have 2 servings and I know how to make it now so errm
+            we need more)</li>
+        <li><input type="checkbox">basica ahh yogies (greck)</li>
+        <li><input type="checkbox">slice of bread</li>
+        <li><input type="checkbox">frut</li>
+        <li><input type="checkbox"><i>kefar</i></li>
+        <li><input type="checkbox" checked>our egos (after all, we are the mostest most humbled, are we?)</li>
+    </ul>
+
     <per>Itemz Needed for them Mealz</per>
     <ul>
         <li><input type="checkbox">The usual.</li>
@@ -61,8 +62,9 @@
         <li><input type="checkbox"></li>
         <li><input type="checkbox"></li>
         <li><input type="checkbox"></li>
-        <li><input type="checkbox">(make time at home pariadie as paradie of the loev at home song from that one hynm)</li>
-        
+        <li><input type="checkbox">(make time at home pariadie as paradie of the loev at home song from that one hynm)
+        </li>
+
     </ul>
 
     <!-- An AI inclusion to have the states of the check boxes be saved to the local storage. This allows for to acctually
@@ -73,14 +75,14 @@
         function saveCheckboxStates() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const checkboxStates = {};
-            
+
             checkboxes.forEach((checkbox, index) => {
                 // Use the checkbox's parent li text as a unique identifier
                 const listItem = checkbox.parentElement;
                 const itemText = listItem.textContent.trim();
                 checkboxStates[`checkbox_${index}_${itemText.substring(0, 20)}`] = checkbox.checked;
             });
-            
+
             localStorage.setItem('shoppingListStates', JSON.stringify(checkboxStates));
         }
 
@@ -90,12 +92,12 @@
             if (savedStates) {
                 const checkboxStates = JSON.parse(savedStates);
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-                
+
                 checkboxes.forEach((checkbox, index) => {
                     const listItem = checkbox.parentElement;
                     const itemText = listItem.textContent.trim();
                     const key = `checkbox_${index}_${itemText.substring(0, 20)}`;
-                    
+
                     if (checkboxStates.hasOwnProperty(key)) {
                         checkbox.checked = checkboxStates[key];
                     }
@@ -112,7 +114,7 @@
         }
 
         // Initialize when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadCheckboxStates();
             initializeCheckboxes();
         });
