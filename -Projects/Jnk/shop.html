@@ -57,6 +57,75 @@
         
     </ul>
 
+    <!-- An AI inclusion to have the states of the check boxes be saved to the local storage. This allows for to acctually
+     use this for a shopping list. Planned we are to add the ability to add things needed that also be savin. And
+     maybe like something else idk. Like presets of things or something. -->
+    <script>
+        // Function to save checkbox states to localStorage
+        function saveCheckboxStates() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkboxStates = {};
+            
+            checkboxes.forEach((checkbox, index) => {
+                // Use the checkbox's parent li text as a unique identifier
+                const listItem = checkbox.parentElement;
+                const itemText = listItem.textContent.trim();
+                checkboxStates[`checkbox_${index}_${itemText.substring(0, 20)}`] = checkbox.checked;
+            });
+            
+            localStorage.setItem('shoppingListStates', JSON.stringify(checkboxStates));
+        }
+
+        // Function to load checkbox states from localStorage
+        function loadCheckboxStates() {
+            const savedStates = localStorage.getItem('shoppingListStates');
+            if (savedStates) {
+                const checkboxStates = JSON.parse(savedStates);
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                
+                checkboxes.forEach((checkbox, index) => {
+                    const listItem = checkbox.parentElement;
+                    const itemText = listItem.textContent.trim();
+                    const key = `checkbox_${index}_${itemText.substring(0, 20)}`;
+                    
+                    if (checkboxStates.hasOwnProperty(key)) {
+                        checkbox.checked = checkboxStates[key];
+                    }
+                });
+            }
+        }
+
+        // Function to add event listeners to all checkboxes
+        function initializeCheckboxes() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', saveCheckboxStates);
+            });
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCheckboxStates();
+            initializeCheckboxes();
+        });
+
+        // Optional: Add a button to clear all saved states
+        function clearSavedStates() {
+            localStorage.removeItem('shoppingListStates');
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+    </script>
+
+    <!-- Optional: Add a clear button -->
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="clearSavedStates()" >
+            Clear All Checkboxes
+        </button>
+    </div>
+
 </body>
 
 </html>
