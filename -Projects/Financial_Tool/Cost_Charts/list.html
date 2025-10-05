@@ -12,8 +12,8 @@
 </head>
 
 <body>
-    <h1>Welcome to a shopping list for to use!</h1>
-    <pre>You can input stuff and it will be saved to your browser's local stoage. <br>You also can check/uncheck stuff. <i>Adding/Removing Lists coming soon.</i>
+    <h1>Welcome to a list maker for to use!</h1>
+    <pre>You can input stuff and it will be saved to your browser's local stoage. <br>You also can check/uncheck stuff. <i>Save files coming soon!</i>
     </pre>
 
     <!-- Add new item input -->
@@ -22,6 +22,7 @@
 
         <button onclick="addItemToSelectedList()" id="addButton">Add to</button>
         <select id="listSelector" onchange="updateButtonText()">
+            <option value="newList">New List</option>
             <option value="dinnerList">Supper</option>
             <option value="lunchList">L'nch</option>
             <option value="breakfastList">Breekin'</option>
@@ -37,31 +38,7 @@
         </button>
     </div>
 
-    <pre>Supper</pre>
-    <hr>
-    <ol id="dinnerList">
-
-    </ol>
-
-    <pre>L'nch</pre>
-    <hr>
-    <ol id="lunchList">
-
-    </ol>
-
-    <pre>Breekin'</pre>
-    <hr>
-    <ol id="breakfastList">
-
-    </ol>
-
-    <!-- Individual items -->
-
-    <pre>Items</pre>
-    <hr>
-    <ol id="itemsList">
-
-    </ol>
+ <br><hr>
 
 
 
@@ -74,13 +51,16 @@
         function updateButtonText() {
             const select = document.getElementById('listSelector');
             const button = document.getElementById('addButton');
-            const listNames = {
-                'dinnerList': 'Supper',
-                'lunchList': 'L\'nch',
-                'breakfastList': 'Breekin\'',
-                'itemsList': 'Items'
-            };
-            button.textContent = `Add to ${listNames[select.value]}`;
+            const input = document.getElementById('mainItemInput');
+
+            if (select.value === 'newList') {
+                button.textContent = 'Create List';
+                if (input) input.placeholder = 'Enter new list name...';
+            } else {
+                const selectedText = select.options[select.selectedIndex]?.text || 'List';
+                button.textContent = `Add to ${selectedText}`;
+                if (input) input.placeholder = 'Enter an item...';
+            }
 
             // Save the selected list to localStorage
             localStorage.setItem('selectedList', select.value);
@@ -89,15 +69,35 @@
         function addItemToSelectedList() {
             const input = document.getElementById('mainItemInput');
             const select = document.getElementById('listSelector');
-            const listId = select.value;
+            const selected = select.value;
+            const text = input.value.trim();
 
-            // Use the existing ShoppingListManager to add the item
-            if (input.value.trim() !== '') {
-                shoppingManager.addItemToList(listId, input.value.trim());
-                input.value = ''; // Clear input after adding
-            } else {
-                alert('Please enter an item name!');
+            if (!text) {
+                alert('Please enter text.');
+                return;
             }
+
+            if (selected === 'newList') {
+                // Create a new list named by the input text
+                const newId = shoppingManager.createNewList(text);
+                if (newId) {
+                    // Switch selection to the new list
+                    const opt = document.createElement('option');
+                    opt.value = newId;
+                    opt.textContent = text;
+                    // insert after the New List option
+                    select.insertBefore(opt, select.options[1] || null);
+                    select.value = newId;
+                    localStorage.setItem('selectedList', newId);
+                    updateButtonText();
+                }
+                input.value = '';
+                return;
+            }
+
+            // Add item to existing list
+            shoppingManager.addItemToList(selected, text);
+            input.value = '';
         }
 
         // Handle Enter key for the main input
@@ -123,19 +123,142 @@
         // Modular Shopping List Manager
         class ShoppingListManager {
             constructor() {
-                this.lists = ['dinnerList', 'lunchList', 'breakfastList', 'itemsList'];
+                this.defaultConfig = [
+                    // { id: 'dinnerList', name: 'Supper' },
+                    // { id: 'lunchList', name: "L'nch" },
+                    // { id: 'breakfastList', name: "Breekin'" },
+                    // { id: 'itemsList', name: 'Items' }
+                ];
+                this.listConfig = [];
+                this.lists = [];
                 this.storageKeys = {
                     checkboxes: 'shoppingListCheckboxStates',
-                    customItems: 'shoppingListCustomItems'
+                    customItems: 'shoppingListCustomItems',
+                    listsConfig: 'shoppingListConfigs'
                 };
             }
 
             // Initialize the entire system
             init() {
+                // Load list config and reflect in UI
+                this.loadListConfig();
+                this.populateListSelector();
+                this.renderMissingListSections();
+
+                // Then load data and wire events
                 this.loadAllCustomItems();
                 this.loadCheckboxStates();
                 this.initializeAllCheckboxes();
                 this.setupInputHandlers();
+                this.attachDeleteListButtons();
+            }
+
+            // ---------- List config persistence ----------
+            loadListConfig() {
+                const saved = localStorage.getItem(this.storageKeys.listsConfig);
+                if (!saved) {
+                    // Seed from defaults and current DOM headings if present
+                    const seeded = this.defaultConfig.map(({ id, name }) => {
+                        const titleEl = this._findHeadingForList(id);
+                        const domName = titleEl ? titleEl.textContent.trim() : name;
+                        return { id, name: domName || name };
+                    });
+                    this.listConfig = seeded;
+                    this.lists = seeded.map(x => x.id);
+                    this.saveListConfig();
+                    return;
+                }
+
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        // Ensure defaults exist (use saved name if present)
+                        const merged = [];
+                        const seen = new Set();
+                        this.defaultConfig.forEach(def => {
+                            const found = parsed.find(p => p && p.id === def.id && p.name);
+                            const name = found ? found.name : def.name;
+                            merged.push({ id: def.id, name });
+                            seen.add(def.id);
+                        });
+                        // Append any additional lists from saved config
+                        parsed.forEach(p => {
+                            if (p && p.id && p.name && !seen.has(p.id)) {
+                                merged.push({ id: p.id, name: p.name });
+                                seen.add(p.id);
+                            }
+                        });
+                        this.listConfig = merged;
+                        this.lists = merged.map(x => x.id);
+                        this.saveListConfig();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Invalid listsConfig in localStorage, resetting to defaults.', e);
+                }
+                // Fallback to defaults
+                this.listConfig = [...this.defaultConfig];
+                this.lists = this.listConfig.map(x => x.id);
+                this.saveListConfig();
+            }
+
+            saveListConfig() {
+                const toSave = this.listConfig
+                    .filter(x => x && x.id && x.name)
+                    .map(x => ({ id: x.id, name: x.name }));
+                localStorage.setItem(this.storageKeys.listsConfig, JSON.stringify(toSave));
+            }
+
+            populateListSelector() {
+                const select = document.getElementById('listSelector');
+                if (!select) return;
+                const previous = select.value;
+                const savedSelection = localStorage.getItem('selectedList');
+
+                // Rebuild options: New List first, then all lists in config
+                select.innerHTML = '';
+                const newOpt = document.createElement('option');
+                newOpt.value = 'newList';
+                newOpt.textContent = 'New List';
+                select.appendChild(newOpt);
+                this.listConfig.forEach(({ id, name }) => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = name;
+                    select.appendChild(opt);
+                });
+
+                // pick selection in priority: saved -> previous -> first non-newList
+                const candidates = [savedSelection, previous, this.listConfig[0]?.id];
+                let chosen = 'newList';
+                for (const c of candidates) {
+                    if (c && c !== 'newList' && this.lists.includes(c)) { chosen = c; break; }
+                }
+                select.value = chosen;
+                localStorage.setItem('selectedList', chosen);
+                if (typeof updateButtonText === 'function') updateButtonText();
+            }
+
+            renderMissingListSections() {
+                // Ensure each list in config has DOM nodes; defaults already exist
+                this.listConfig.forEach(({ id, name }) => {
+                    const listEl = document.getElementById(id);
+                    if (!listEl) {
+                        this.addNewListSection(id, name);
+                    } else {
+                        // Update heading text from config (keep your current CSS)
+                        const pre = this._findHeadingForList(id);
+                        if (pre) pre.textContent = name;
+                    }
+                });
+            }
+
+            _findHeadingForList(listId) {
+                const listEl = document.getElementById(listId);
+                if (!listEl) return null;
+                const hrEl = listEl.previousElementSibling;
+                const preEl = hrEl && hrEl.previousElementSibling;
+                return (preEl && preEl.tagName === 'PRE') ? preEl : null;
             }
 
             // Add item to any list (modular function)
@@ -321,15 +444,106 @@
                 // Remove all custom items
                 this.lists.forEach(listId => {
                     const list = document.getElementById(listId);
-                    const customItems = list.querySelectorAll('li button');
-                    customItems.forEach(btn => {
-                        btn.parentElement.remove();
-                    });
+                    if (list) {
+                        const customItems = list.querySelectorAll('li button');
+                        customItems.forEach(btn => {
+                            btn.parentElement.remove();
+                        });
+                    }
                 });
             }
 
+            // -------- List deletion UI and logic --------
+            attachDeleteListButtons() {
+                this.lists.forEach(id => this.ensureDeleteButtonOnHeading(id));
+            }
+
+            ensureDeleteButtonOnHeading(listId) {
+                const listEl = document.getElementById(listId);
+                if (!listEl) return;
+                // Structure is: <pre>Title</pre><hr><ol id=listId>
+                const hrEl = listEl.previousElementSibling;
+                const preEl = hrEl && hrEl.previousElementSibling && hrEl.previousElementSibling.tagName === 'PRE'
+                    ? hrEl.previousElementSibling
+                    : (hrEl && hrEl.previousElementSibling);
+                const heading = (preEl && preEl.tagName === 'PRE') ? preEl : null;
+                if (!heading) return;
+
+                // Avoid duplicate button
+                if (heading.querySelector('button[data-role="delete-list"]')) return;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.setAttribute('data-role', 'delete-list');
+                btn.textContent = ' (delete list)';
+                btn.style.marginLeft = '10px';
+                btn.style.background = 'none';
+                btn.style.border = 'none';
+                btn.style.cursor = 'pointer';
+                btn.style.fontSize = '12px';
+                btn.addEventListener('click', () => this.deleteList(listId));
+                heading.appendChild(btn);
+            }
+
+            deleteList(listId) {
+                if (!listId) return;
+                const listEl = document.getElementById(listId);
+                if (!listEl) return;
+
+                const hrEl = listEl.previousElementSibling;
+                const preEl = hrEl && hrEl.previousElementSibling;
+
+                const listName = (preEl && preEl.tagName === 'PRE') ? preEl.textContent.trim() : listId;
+                const ok = window.confirm(`Delete the list "${listName}" and all its items?`);
+                if (!ok) return;
+
+                // Remove DOM
+                listEl.remove();
+                if (hrEl && hrEl.tagName === 'HR') hrEl.remove();
+                if (preEl && preEl.tagName === 'PRE') preEl.remove();
+
+                // Update internal list registry
+                this.lists = this.lists.filter(id => id !== listId);
+                this.listConfig = this.listConfig.filter(x => x.id !== listId);
+                this.saveListConfig();
+
+                // Update dropdown selector
+                const select = document.getElementById('listSelector');
+                if (select) {
+                    const opt = select.querySelector(`option[value="${listId}"]`);
+                    if (opt) opt.remove();
+
+                    // If the deleted list was selected, pick the first remaining option
+                    if (select.value === listId) {
+                        const first = select.options[0]?.value || '';
+                        if (first) {
+                            select.value = first;
+                            localStorage.setItem('selectedList', first);
+                        } else {
+                            localStorage.removeItem('selectedList');
+                        }
+                        if (typeof updateButtonText === 'function') updateButtonText();
+                    }
+                }
+
+                // Remove custom items for this list from storage
+                try {
+                    const raw = localStorage.getItem(this.storageKeys.customItems);
+                    if (raw) {
+                        const obj = JSON.parse(raw);
+                        if (obj && typeof obj === 'object') {
+                            delete obj[listId];
+                            localStorage.setItem(this.storageKeys.customItems, JSON.stringify(obj));
+                        }
+                    }
+                } catch {}
+
+                // Recompute checkbox states from remaining DOM
+                this.saveCheckboxStates();
+            }
+
             // Add a new list section (for future expansion)
-            addNewListSection(listId, listTitle, placeholder) {
+            addNewListSection(listId, listTitle) {
                 const body = document.body;
 
                 // Create title
@@ -339,37 +553,65 @@
                 // Create hr
                 const hr = document.createElement('hr');
 
-                // Create input section
-                const inputSection = document.createElement('div');
-                inputSection.className = 'add-item-section';
+                // Create list container
+                const ol = document.createElement('ol');
+                ol.id = listId;
 
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'item-input';
-                input.placeholder = placeholder;
-                input.setAttribute('data-list', listId);
+                // Prefer inserting before the last script that is actually inside <body>
+                const bodyScripts = document.body ? document.body.getElementsByTagName('script') : [];
+                const anchor = bodyScripts.length ? bodyScripts[bodyScripts.length - 1] : null;
 
-                const button = document.createElement('button');
-                button.textContent = `Add to ${listTitle}`;
-                button.onclick = () => this.addItemToList(listId);
+                if (anchor && anchor.parentNode === body) {
+                    body.insertBefore(title, anchor);
+                    body.insertBefore(hr, anchor);
+                    body.insertBefore(ol, anchor);
+                } else {
+                    // Fallback: append to end of body
+                    body.appendChild(title);
+                    body.appendChild(hr);
+                    body.appendChild(ol);
+                }
 
-                inputSection.appendChild(input);
-                inputSection.appendChild(button);
+                // Add to lists and attach delete button
+                if (!this.lists.includes(listId)) this.lists.push(listId);
+                this.ensureDeleteButtonOnHeading(listId);
+            }
 
-                // Create list
-                const ul = document.createElement('ul');
-                ul.id = listId;
+            generateListIdFromName(name) {
+                const base = (name || 'list')
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '') || 'list';
 
-                // Insert before script tag
-                const script = document.querySelector('script');
-                body.insertBefore(title, script);
-                body.insertBefore(hr, script);
-                body.insertBefore(inputSection, script);
-                body.insertBefore(ul, script);
+                let id = `${base}List`;
+                let c = 2;
+                while (this.lists.includes(id)) {
+                    id = `${base}List${c++}`;
+                }
+                return id;
+            }
 
-                // Add to lists array and reinitialize
-                this.lists.push(listId);
-                this.setupInputHandlers();
+            createNewList(name) {
+                const trimmed = (name || '').trim();
+                if (!trimmed) return null;
+                const id = this.generateListIdFromName(trimmed);
+                this.addNewListSection(id, trimmed);
+
+                // Update list config and persist
+                this.listConfig.push({ id, name: trimmed });
+                this.lists = this.listConfig.map(x => x.id);
+                this.saveListConfig();
+
+                // Persist an empty item set for the new list to localStorage
+                try {
+                    const raw = localStorage.getItem(this.storageKeys.customItems);
+                    const obj = raw ? JSON.parse(raw) : {};
+                    obj[id] = obj[id] || [];
+                    localStorage.setItem(this.storageKeys.customItems, JSON.stringify(obj));
+                } catch {}
+
+                return id;
             }
         }
 
