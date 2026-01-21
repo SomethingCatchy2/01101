@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | Peruvian Bean</title>
-    <link rel="shortcut icon" href="../favicon.png">
-    <script src="/-Projects/esc-to-index.js"></script>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
@@ -19,9 +18,9 @@
       </div>
       <div id="unity-warning"> </div>
       <div id="unity-footer">
-
+        <div id="unity-logo-title-footer"></div>
         <div id="unity-fullscreen-button"></div>
-
+        <div id="unity-build-title">Peruvian Bean</div>
       </div>
     </div>
     <script>
@@ -52,18 +51,24 @@
         updateBannerVisibility();
       }
 
-      var buildUrl = "./Build"; // If this doesn't work, try "./Build" or just "/Build"
+      var buildUrl = "Build";
       var loaderUrl = buildUrl + "/Paru.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Paru.data",
-        frameworkUrl: buildUrl + "/Paru.framework.js",
-        codeUrl: buildUrl + "/Paru.wasm",
+        dataUrl: buildUrl + "/Paru.data.br",
+        frameworkUrl: buildUrl + "/Paru.framework.js.br",
+        codeUrl: buildUrl + "/Paru.wasm.br",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Peruvian Bean",
         productVersion: "1.0",
         showBanner: unityShowBanner,
+        // errorHandler: function(err, url, line) {
+        //    alert("error " + err + " occurred at line " + line);
+        //    // Return 'true' if you handled this error and don't want Unity
+        //    // to process it further, 'false' otherwise.
+        //    return true;
+        // },
       };
 
       // By default, Unity keeps WebGL canvas render target size matched with
@@ -122,9 +127,7 @@
             };
 
       document.body.appendChild(script);
-      </script>
-      <pre style="font-family: 'Times New Roman', Times, serif;"> <a href="../../index.html" style="background-color: darkolivegreen; color: white;">Index</a> 
-        Use ZXC for Jump, Collect, Etc, recpectively. Use Arrow Keys for Movement.
-      Note that Paru requires you to be running the site on a web server. (just run: <code><u>python3 -m http.server 8080</u></code> in the root dir of the project.)</pre>
+
+    </script>
   </body>
 </html>
