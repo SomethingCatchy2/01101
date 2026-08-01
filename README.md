@@ -1,6 +1,6 @@
 # 01101
 
-A simple project made with raw HTML, JS, and some CSS.
+A simple project made with HTML, JS, and some CSS.
 Lots of pages to explore, so have a peek.
 See site here: **Towerofgable.com**
 
