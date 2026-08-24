@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Gable</title>
+    <link rel="stylesheet" href="../new_index_helpers/style.css">
+    <!-- <script src="../esc-to-index.js"></script> -->
+    <a href="../../index.html" style="background-color: darkolivegreen; color: white;">Index</a>
+    <style>
+        button {
+            margin: 1px;
+            cursor: pointer;
+            color: black;
+        }
+        p {
+            font-family: 'Times New Roman', Times, serif;
+        }
+    </style>
+</head>
+
+<body>
+    <hr>
+    
+    <p>Current Roll: <span id="firstDice">x</span>, <span id="secondDice">y</span>, <span id="thirdDice">z</span>, <span id="forthDice">α</span></p>
+    <p>Total: <span id="total">β</span></p>
+
+    <button onclick="rollDice()" id="roll">Roll the dice</button> <!-- gable button -->
+
+
+    <script>
+        function rollDice() {
+            // Source for the random - https://stackoverflow.com/a/1527834 - Posted by Darin Dimitrov - Retrieved 2026-08-23, License - CC BY-SA 2.5
+            
+            
+            let diceRollOne = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            document.getElementById("firstDice").innerHTML = diceRollOne.toString();
+            let diceRollTwo = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            document.getElementById("secondDice").innerHTML = diceRollTwo.toString();
+            let diceRollThree = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            document.getElementById("thirdDice").innerHTML = diceRollThree.toString();
+            let diceRollFour = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            document.getElementById("forthDice").innerHTML = diceRollFour.toString();
+            
+            let totalBeforeBonus = diceRollOne + diceRollTwo + diceRollThree + diceRollFour;
+            console.log(diceRollOne, diceRollTwo, diceRollThree, diceRollFour, "|", totalBeforeBonus);
+            document.getElementById("total").innerHTML = totalBeforeBonus.toString();
+        }
+    </script>
+
+</body>
+
+</html>
