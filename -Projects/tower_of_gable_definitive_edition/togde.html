@@ -24,12 +24,16 @@
     <hr>
     
     <p>Current Roll: <span id="firstDice">x</span>, <span id="secondDice">y</span>, <span id="thirdDice">z</span>, <span id="forthDice">α</span></p>
-    <p>Total: <span id="total">β</span></p>
+    <p>Total: <span id="total">β</span> | Balance: $<span id="balance">γ</span></p>
 
     <button onclick="rollDice()" id="roll">Roll the dice</button> <!-- gable button -->
 
 
     <script>
+        let totalBeforeBonus = 0;
+        let total = 0 ;
+        let bonusPoints = 0;
+        let money = 0;
         function rollDice() {
             // Source for the random - https://stackoverflow.com/a/1527834 - Posted by Darin Dimitrov - Retrieved 2026-08-23, License - CC BY-SA 2.5
             
@@ -42,11 +46,21 @@
             document.getElementById("thirdDice").innerHTML = diceRollThree.toString();
             let diceRollFour = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
             document.getElementById("forthDice").innerHTML = diceRollFour.toString();
-            let money = 0;
             
-            let totalBeforeBonus = diceRollOne + diceRollTwo + diceRollThree + diceRollFour;
+            
+            totalBeforeBonus = diceRollOne + diceRollTwo + diceRollThree + diceRollFour;
+            bonusPoints = 0;
+            total = totalBeforeBonus + bonusPoints;
+            
+            if (total == 24){
+                money += 8793;
+            } else {
+                money -= 5;
+            }
+
             console.log(diceRollOne, diceRollTwo, diceRollThree, diceRollFour, "|", totalBeforeBonus);
             document.getElementById("total").innerHTML = totalBeforeBonus.toString();
+            document.getElementById("balance").innerHTML = money.toString();
         }
     </script>
 
