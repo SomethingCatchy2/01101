@@ -30,36 +30,46 @@
 
 
     <script>
+        // points and bonus points vars
         let totalBeforeBonus = 0;
         let total = 0 ;
         let bonusPoints = 0;
+        // money.
         let money = 0;
+        // dice roll vars
+        let diceRollOne = 0;
+        let diceRollTwo = 0;
+        let diceRollThree = 0;
+        let diceRollFour = 0;
         function rollDice() {
             // Source for the random - https://stackoverflow.com/a/1527834 - Posted by Darin Dimitrov - Retrieved 2026-08-23, License - CC BY-SA 2.5
             
             
-            let diceRollOne = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            diceRollOne = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
             document.getElementById("firstDice").innerHTML = diceRollOne.toString();
-            let diceRollTwo = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            diceRollTwo = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
             document.getElementById("secondDice").innerHTML = diceRollTwo.toString();
-            let diceRollThree = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            diceRollThree = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
             document.getElementById("thirdDice").innerHTML = diceRollThree.toString();
-            let diceRollFour = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+            diceRollFour = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
             document.getElementById("forthDice").innerHTML = diceRollFour.toString();
             
-            
+            // Add all the points
             totalBeforeBonus = diceRollOne + diceRollTwo + diceRollThree + diceRollFour;
+            // TODO put bonus point logic here. Probably use another function so this one doesn't get to anyying to look at
             bonusPoints = 0;
+            // place holder bonus points calculation
             total = totalBeforeBonus + bonusPoints;
             
+            // very scientific money calculations.
             if (total == 24){
                 money += 8793;
             } else {
                 money -= 5;
             }
-
-            console.log(diceRollOne, diceRollTwo, diceRollThree, diceRollFour, "|", totalBeforeBonus);
-            document.getElementById("total").innerHTML = totalBeforeBonus.toString();
+            // log and update stuff
+            console.log(diceRollOne, diceRollTwo, diceRollThree, diceRollFour, "|", total);
+            document.getElementById("total").innerHTML = total.toString();
             document.getElementById("balance").innerHTML = money.toString();
         }
     </script>
